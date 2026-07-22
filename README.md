@@ -111,6 +111,19 @@ pip install bleak>=0.21.0
 
 ---
 
+## 📱 Android App
+
+Prefer a phone? There's now a **native Android app** in [`android/`](android/) — built
+with Kotlin + Jetpack Compose — that speaks the same BLE protocol as the Python tools.
+
+It includes device auto-discovery, an interactive **colour wheel**, hue/saturation/brightness
+sliders, savable **presets**, on-device **effects** (Rainbow, Breathe, Strobe, Fire, Candle,
+Ocean…) with speed control, per-light nicknames, and one-tap power — all offline, no cloud.
+
+See [`android/README.md`](android/README.md) for build & install instructions.
+
+---
+
 ## 🎯 Usage
 
 ### Interactive Menu (Recommended)
