@@ -1,6 +1,6 @@
 # GitHub release plan
 
-Prepared 2026-09-27. Scope: publish the Android-first KS Light project through GitHub. Google Play, AAB, iOS and Stream Deck Marketplace are excluded. This document is a plan; it does not create a remote branch, PR, tag, signing key or release.
+Prepared 2026-09-27. Scope: publish the Android-first KS Light project through GitHub. Google Play, AAB, iOS and Stream Deck Marketplace are excluded. Source delivery is in PR #1 and a draft prerelease exists. The source and Stream Deck assets are uploaded; public APK signing and publication remain pending.
 
 ## Release shape
 
@@ -36,7 +36,7 @@ Existing workflows already cover the required areas:
 
 - [ ] Let checks run on the final PR commit. Investigate failures; do not repeatedly rerun already-passing suites for documentation changes.
 - [ ] Treat disposable CI signing as assembly validation only. Those APKs must never become public update assets.
-- [ ] Check the README image paths and captions on GitHub, plus the release links and Android instructions.
+- [x] Verified the remote README and all seven image files against local bytes; visually reviewed the icon and six screenshots.
 - [ ] Review and merge only after required checks pass. A future release workflow can be added when the permanent signing setup is decided; it is not needed to plan this release.
 
 ## 3. Decide and preserve the Android signing identity
@@ -60,10 +60,10 @@ Do not treat signing-key ownership as solved by putting a key in GitHub secrets.
 
 ## 5. Assemble a draft GitHub prerelease
 
-After the PR is merged and the signing/device gates are satisfied:
+A draft with source and Stream Deck assets is prepared before publication. Update it to the reviewed source commit after the PR is merged; add the public APK only after signing gates are satisfied.
 
 - [ ] Verify the proposed tag is unused; tag the exact reviewed source commit.
-- [ ] Create a **draft prerelease** using [RELEASE_NOTES_DRAFT.md](../../release/RELEASE_NOTES_DRAFT.md).
+- [x] Created draft prerelease `v1.2.1-rc.1`; it is not published. Source ZIP, Stream Deck 0.6.1, checksums and a receipt are uploaded and downloaded hashes were verified.
 - [ ] Attach the signed Android APK, Stream Deck 0.6.1 installer, reviewed source ZIP, SHA-256 checksums and a build receipt with source commit, versions, certificate fingerprint and verification results.
 - [ ] Keep configured ESP32 firmware, Wi-Fi credentials, hub tokens, key files, SDK caches and personal phone captures out of assets. Ship experimental DIY source/examples only.
 - [ ] Verify asset hashes after download and inspect the draft page. Publishing the reviewed draft is the final external step, not part of this planning request.

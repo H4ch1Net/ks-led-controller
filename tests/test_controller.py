@@ -1,5 +1,6 @@
 import asyncio
 import json
+import ssl
 from pathlib import Path
 import tempfile
 import sys
@@ -58,9 +59,14 @@ class ControllerTests(unittest.IsolatedAsyncioTestCase):
         app.router.add_get("/operations/slow", poll)
         server = TestServer(app)
         await server.start_server()
+        # Windows certificate-store loading can exceed the old 200 ms deadline.
+        # Keep TLS setup outside the deadline so this tests an accepted command
+        # timing out while polling, rather than timing out before submission.
+        context = ssl.create_default_context()
         try:
             with self.assertRaisesRegex(ControllerError, "not retried"):
-                await execute(str(server.make_url("")).rstrip("/"), TOKEN, self.action, timeout=0.2)
+                await execute(str(server.make_url("")).rstrip("/"), TOKEN, self.action,
+                              timeout=1, context=context)
             self.assertEqual(len(calls), 1)
         finally: await server.close()
 
