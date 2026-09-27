@@ -13,10 +13,13 @@ Distribution is GitHub-only APK sideloading; Google Play and AAB work are exclud
 - Optional Android hub pairing in Keystore, individual/group/scene control, per-member results, calibration/preset editing and hub library management.
 - Authenticated hub API, scoped controller credentials, bounded queues, calibration, durable last-sent snapshots, event polling, simulator, MQTT/Home Assistant and Windows/systemd service packaging.
 - Stream Deck 0.5.0 keys, shared setup, action/brightness dials, continuous dimming and optional shared live last-sent status; Windows keyboard launchers.
-- Raspberry Pi GPIO/rotary/dimming/status LEDs; ESP32 buttons/rotary/dimming/status LEDs and bounded USB setup with NVS persistence.
+- **Experimental:** Raspberry Pi GPIO/rotary/dimming/status LEDs; ESP32 buttons/rotary/dimming/status LEDs and bounded USB setup with NVS persistence.
 - Pinned dependencies/toolchain, strict Gradle verification, deterministic source packaging and CI definitions including disposable-key release assembly.
 
 ## Latest evidence
+- User accepted Android 1.2.1 usability, including the latest presets/effect/theme changes. This is not blanket hardware acceptance.
+- DIY sanity check: 24 focused GPIO and ESP32 contract/setup checks passed. No Pi/ESP32 hardware was connected or flashed; both adapters are explicitly experimental.
+- Stream Deck is available: user confirmed it is plugged in, the software is running, and Windows sees an Elgato USB device. KS Light is not in the installed plugin directory; physical installation/key acceptance remains pending while desktop use is deferred.
 - 1.2.1/build 5 installed over the existing phone app. Saved-colors entry and naming dialog, appearance selection/restart persistence and grouped effects inspected without lamp commands. Original Lime theme restored after the check.
 - 1.2.1: focused preferences, native effects, main-screen and phone-effect tests pass; analyzer is clean. Persistence, failed saves, corrupt-data protection, animation/color packet mapping and compact large-text layout are covered.
 - Redesign: 42 focused UI tests passed across targeted runs, including large-text layout, fresh startup, preview/cancel, calibrated commands, device/default persistence, library editing and effect controls. Flutter analysis is clean. Optimized APK assembly passed strict dependency verification.
@@ -27,6 +30,8 @@ Distribution is GitHub-only APK sideloading; Google Play and AAB work are exclud
 - Prior focused Android/native/Node feature checks remain recorded in the development candidate/source history. Do not imply a new broad Android or Windows regression run.
 
 ## Remaining checklist
+- [x] User usability acceptance for Android 1.2.1.
+- [x] Raspberry Pi/ESP32 host sanity review and experimental labeling; physical acceptance intentionally deferred.
 - [x] Phone: optimized APK upgrade/startup, saved light/default retention and redesigned screen inspection.
 - [ ] Phone: complete calibration/scenes/pairing retention, new widgets, Quick Settings and Device Controls, lifecycle/offline behavior.
 - [ ] Hardware: multiple lights/partial failures, Stream Deck/keyboard, Pi/ESP32 wiring and USB configuration. See DEFERRED_HARDWARE_CHECKS.md.

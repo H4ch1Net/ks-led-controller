@@ -20,3 +20,7 @@ To review/update the inventory, compare `git ls-files --cached --others --exclud
 Source reproducibility is separate from application build reproducibility. This ZIP contains no current APK, Stream Deck installer, configured ESP32 binary or release signing key. Rebuild those candidates from a chosen source identity using `docs/v2/RELEASE_CHECKLIST.md`, record their hashes and validation, and complete hardware/signing gates before distribution.
 
 `android-toolchain.json` records the reviewed Gradle wrapper/distribution hashes and official-repository provenance for platform-specific dependency artifacts. `python -m ks_light.build_toolchain` checks these local pins before Gradle executes. Gradle's own verification metadata covers the resolved plugin/library artifacts. Review both files when intentionally changing toolchain versions.
+
+## GitHub handoff
+
+See [the release plan](../docs/v2/GITHUB_RELEASE_PLAN.md), [draft PR body](PR_DRAFT.md), and [draft release notes](RELEASE_NOTES_DRAFT.md). These are prepared text, not evidence of a published PR or release.

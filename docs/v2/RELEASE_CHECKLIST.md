@@ -1,5 +1,7 @@
 # Release preparation
 
+For the current GitHub-only release sequence, signing decision, assets and publication gates, use [GITHUB_RELEASE_PLAN.md](GITHUB_RELEASE_PLAN.md). Earlier dated results below are historical; current candidate and user acceptance are in [CURRENT_STATUS.md](CURRENT_STATUS.md).
+
 Current outputs are development builds. Nothing has been published. Tooling is pinned in CI. Private APK sideloading is the selected first distribution route. Source archives matched byte-for-byte across Windows and WSL Linux; signed binary reproducibility and hosted CI remain unestablished. Google Play/AAB are excluded; GitHub is the only distribution channel.
 
 ## Android

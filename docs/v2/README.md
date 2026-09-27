@@ -1,9 +1,12 @@
-# KS Light 2.0 planning pack
-Date: 2026-09-21
-Status: approved direction from conversation; detailed contracts are draft until implemented and tested.
+# KS Light documentation
 
-Start with PRODUCT.md, then ARCHITECTURE.md and ROADMAP.md.
-These documents are maintained in docs/v2 in the working repository. This exported pack is a snapshot.
+Start with [Current status](CURRENT_STATUS.md), the [GitHub release plan](GITHUB_RELEASE_PLAN.md), and the [Android guide](../../apps/android/README.md). The original planning documents below preserve architecture and delivery history; ROADMAP.md is not the current acceptance checklist.
+
+- [Screenshots and capture method](../images/README.md)
+- [Experimental Raspberry Pi / ESP32 evidence](EXPERIMENTAL_HARDWARE.md)
+- [Stream Deck 0.5.0](STREAM_DECK.md)
+- [Home Assistant](HOME_ASSISTANT.md)
+- [Deferred device checks](DEFERRED_HARDWARE_CHECKS.md)
 
 - PRODUCT.md: scope, user experience, feature priorities, deferred work.
 - ARCHITECTURE.md: runtime boundaries, ownership, persistence, platform decisions.

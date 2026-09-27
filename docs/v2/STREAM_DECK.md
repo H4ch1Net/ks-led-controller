@@ -1,9 +1,15 @@
-# Native Stream Deck plugin: first key-action release
+# Stream Deck plugin 0.5.0
 
-## Implemented
+## Current status
+
+Version 0.5.0 includes action keys, shared connection settings, action/brightness dials, continuous dimming and optional last-sent key status. The installer has been packaged and checked with a simulator; physical installation/key acceptance remains pending. On 2026-09-27 the user reported the Stream Deck plugged in, the app was running, and an Elgato USB device was present. KS Light was not in the installed plugin directory. Existing profiles were not changed.
+
+See the [GitHub release plan](GITHUB_RELEASE_PLAN.md) for the short device acceptance sequence. The versioned sections below preserve implementation history; the capabilities in this current summary supersede first-release limitations.
+
+## Action keys
 The Windows plugin provides **KS Light > Run light action**, a property inspector and per-key completion feedback. It uses the shared Python controller from CONTROLLER_ACTIONS.md, so it does not open a second Bluetooth connection. Configure separate keys for explicit On, Off, static colors or native effects.
 
-Keys show the action name, Sending, then Sent or Simulated. Failures show Failed and the Stream Deck alert. Sent means a completed hub operation, not physical readback. Simulated explicitly identifies no physical delivery. The first release does not continuously monitor lamp state or show changes from other controllers. Repeated presses on a busy key are ignored; separate keys still use the hub's bounded queue. Settings changes and disappearance/reappearance prevent stale completion from overwriting the new key display. Delivery is never automatically retried.
+Keys show the action name, Sending, then Sent or Simulated. Failures show Failed and the Stream Deck alert. Sent means a completed hub operation, not physical readback. Simulated explicitly identifies no physical delivery. Version 0.5.0 offers optional last-sent status through the hub; this is not physical lamp readback. Repeated presses on a busy key are ignored; separate keys still use the hub's bounded queue. Settings changes and disappearance/reappearance prevent stale completion from overwriting the new key display. Delivery is never automatically retried.
 
 ## Install and configure
 Requires Windows 10+, Stream Deck 7.1+, the KS Light checkout with its Python virtual environment, and a running configured hub. The plugin bundles its JavaScript dependencies; Node does not need installing separately for normal Stream Deck operation. It is a local development build, not a Marketplace release.
@@ -15,7 +21,7 @@ Requires Windows 10+, Stream Deck 7.1+, the KS Light checkout with its Python vi
 
 The inspector stores only these paths and the action name. Credentials remain in the separately protected token file referenced by the controller configuration. Process arguments are passed without a command shell; child stderr is drained without exposing its contents in Stream Deck. The client has a bounded timeout, and the plugin stops waiting after 125 seconds. Timeout/cancellation cannot retract a command already accepted by the hub.
 
-Multi-actions and encoder/dial actions are not advertised in this release. Per-key Python/config setup is functional but will benefit from a shared connection setup screen. OS credential vault integration remains planned. No Stream Deck profiles, keyboard bindings, services or firewall rules were modified during development.
+Action and brightness dials plus shared connection setup are implemented; see the versioned sections below. Multi-actions are not advertised. Credentials remain in the protected controller token file. No Stream Deck profiles, keyboard bindings, services or firewall rules were modified during development.
 
 ## Build and verify
 From `apps/streamdeck`:
@@ -71,4 +77,4 @@ On a Run light action key, enable **Show hub's last-sent state** and save. The k
 
 Visible opted-in keys with identical Python/repository/config paths share one read-only Python process and HTTP session. The reader uses hub event long polling, refreshes at most once per second during bursts, reloads changed connection/token/CA files, and backs off on errors. No polling process runs for unselected keys; the last disappearing key releases its reader. A silent/crashed reader reports offline and may restart; only GET requests are repeated. Light commands are never replayed by status recovery. Sending feedback takes priority over status updates, and changed/disappeared keys reject stale feedback. Dials keep their preview/delivery feedback.
 
-Validation: 21 focused Node checks covering the runner, inspector and shared status reader passed; two Python status checks include a simulator command made outside the reader and verify the reader submits no commands. The plugin bundle builds. This source is newer than the exported 0.4.0 installer; desktop/physical acceptance and repackaging remain deferred.
+Validation: 21 focused Node checks covering the runner, inspector and shared status reader passed; two Python status checks include a simulator command made outside the reader and verify the reader submits no commands. The plugin bundle builds. The 0.5.0 installer was subsequently packaged and checked; desktop/physical acceptance remains deferred.

@@ -1,4 +1,6 @@
-# ESP32 four-button controller
+# ESP32 four-button controller — Experimental
+
+> **Experimental DIY integration.** Host-side sanity checks pass, but physical wiring, board-specific behavior and live lamp delivery have not been verified. Treat this as a development example, not a hardware-tested product. [Evidence and limits](../../docs/v2/EXPERIMENTAL_HARDWARE.md).
 
 Arduino-framework firmware for a **classic ESP32 DevKit** (`esp32dev`). Four normally-open buttons request On, Off, reading color and Purple breathing through the KS Light hub. The hub remains the Bluetooth owner. This is not firmware for an Arduino Uno, ESP8266, ESP32-C3 or ESP32-S3.
 

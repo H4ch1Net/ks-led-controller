@@ -1,4 +1,6 @@
-# Raspberry Pi button controller
+# Raspberry Pi button controller — Experimental
+
+> **Experimental DIY integration.** Host-side sanity checks pass, but physical wiring, board-specific behavior and live lamp delivery have not been verified. Treat this as a development example, not a hardware-tested product. [Evidence and limits](EXPERIMENTAL_HARDWARE.md).
 
 Implemented 2026-09-26. Momentary GPIO buttons run named actions from the existing controller configuration. The hub owns Bluetooth; this adapter opens no BLE connections. Power, saved RGB/brightness actions and native effects use the same API as Stream Deck and keyboard actions.
 

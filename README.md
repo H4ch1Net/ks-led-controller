@@ -1,412 +1,102 @@
-<div align="center">
+# KS Light
 
-# 💡 KS Smart LED Controller
+Local control for compatible KS Bluetooth lights, with an Android app and an optional hub for integrations. No cloud account is required for direct Bluetooth control.
 
-**Open-source Bluetooth controller for KS LED lights**
+**Current candidate: Android 1.2.1 (build 5).** The app is being distributed privately by APK sideloading while the first GitHub release is prepared. This README does not imply that a public APK is already available. **GitHub only; no Google Play release.**
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](https://github.com/hbldh/bleak)
+[Current status](docs/v2/CURRENT_STATUS.md) · [Release plan](docs/v2/GITHUB_RELEASE_PLAN.md) · [Documentation](docs/v2/README.md) · [MIT license](LICENSE)
 
-*A cross-platform alternative to the discontinued KeepSmile and problematic KS Smart Light apps*
+## The Android app
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Supported Devices](#-supported-devices) • [Documentation](#-documentation)
+- Add multiple lights, rename them and choose a default.
+- Control power, brightness and color, with per-light color balance.
+- Save named color/brightness presets and organize rooms and scenes.
+- Choose an animation, then its color or palette. Built-in KS03 effects run on the lamp; custom phone effects offer more choices.
+- Add home-screen widgets, a Quick Settings tile and Android Device Controls.
+- Choose Lime, Ocean, Violet, Rose or Amber under Settings → Appearance.
+- Connect to an optional hub for shared controls and Home Assistant.
 
-</div>
+### Screenshots
 
----
-
-## 📖 About
-
-### Version 2 development
-
-The [v2 planning pack](docs/v2/README.md) defines Android, KS Hub, the local API,
-effects, Home Assistant, Stream Deck and DIY controllers. These features are
-planned; see the [working status](docs/v2/ROADMAP.md) for implemented changes and
-the [development handoff](docs/v2/DEVELOPMENT.md) for tests.
-
-This project was born out of necessity. The **KeepSmile app was removed from the Google Play Store**, and the **KS Smart Light app has numerous bugs and security concerns**. Rather than dealing with unreliable or unavailable software, this open-source controller provides a stable, privacy-respecting alternative for controlling KS LED devices via Bluetooth Low Energy (BLE).
-
-**All commands were reverse-engineered** from the official Android APK to ensure complete compatibility with KS devices.
-
-### Why This Exists
-
-- 🚫 **KeepSmile app**: Removed from Play Store, unavailable for new users
-- ⚠️ **KS Smart Light app**: Known security issues, frequent crashes, poor UX
-- 🔓 **Privacy**: No data collection, no internet connection required
-- 🎯 **Reliability**: Works offline, no cloud dependency
-- 🛠️ **Control**: Full access to all device features
-
----
-
-## ✨ Features
+These images are rendered directly from the app's Flutter screens using synthetic demo data. They show the current interface, not physical lamp state. [Capture details](docs/images/README.md).
 
 <table>
 <tr>
-<td width="50%">
-
-### 🎨 Interactive Menu
-- Beautiful terminal UI with color previews
-- 10+ built-in color presets
-- Custom RGB color picker (16.7M colors)
-- Real-time color preview in terminal
-- Intuitive keyboard navigation
-
-</td>
-<td width="50%">
-
-### ⚡ Smart Controls
-- One-touch ON/OFF control
-- Brightness adjustment (0-100%)
-- Save unlimited custom presets
-- Device nickname management
-- Multi-device support
-
-</td>
+<td><img src="docs/images/controls.png" width="250" alt="Light controls with power, brightness and saved colors"></td>
+<td><img src="docs/images/colors.png" width="250" alt="Named color presets and the color picker"></td>
+<td><img src="docs/images/effects.png" width="250" alt="Effect animation and color selected separately"></td>
 </tr>
+<tr><td>Light controls</td><td>Saved colors</td><td>Built-in effects</td></tr>
 <tr>
-<td width="50%">
-
-### 🔍 Auto-Discovery
-- Automatic BLE device scanning
-- Smart device filtering (KS only)
-- Connection status feedback
-- Quick device switching
-
-</td>
-<td width="50%">
-
-### 🤖 Automation Ready
-- Command-line interface for scripts
-- Cron job compatible
-- Shell integration friendly
-- Perfect for home automation
-
-</td>
+<td><img src="docs/images/lights.png" width="250" alt="Saved lights and add-device action"></td>
+<td><img src="docs/images/scenes.png" width="250" alt="Rooms and named lighting scenes"></td>
+<td><img src="docs/images/appearance.png" width="250" alt="Five appearance themes in settings"></td>
 </tr>
+<tr><td>Your lights</td><td>Rooms &amp; scenes</td><td>Appearance</td></tr>
 </table>
 
----
+## Getting started
 
-## 🚀 Installation
+### Android: control a light directly
 
-### Requirements
+Android 7.0 or later and a compatible Bluetooth light are required. A PC, Raspberry Pi or hub is **optional**.
 
-- **Python 3.10+**
-- **Bluetooth adapter** with BLE support
-- **Operating System**: Linux, macOS, or Windows 10/11
+1. Obtain the APK from a maintainer-provided private candidate, or from this repository's [GitHub Releases](https://github.com/H4ch1Net/ks-led-controller/releases) when a release is published. Avoid APK mirrors.
+2. Install the APK and grant Bluetooth access when requested. Older Android versions may also require location access for scanning.
+3. Choose **Add devices** / **Scan for lights**, then select your light. Use the star to make it the default.
+4. Choose a color and brightness, then **Apply color**. Use **Saved colors → Save current** to name a preset. Tapping a saved color previews it; Apply sends it.
+5. Open **Effects** for animation and color choices, or **Settings → Appearance** to change the app theme.
 
-### Quick Install
+Updates must use the same signing certificate to install over an existing app. Current private builds use a development certificate. The permanent public signing identity and migration instructions must be established before the first public APK; see the [release plan](docs/v2/GITHUB_RELEASE_PLAN.md). Do not uninstall an existing setup just to bypass a signature mismatch.
 
-```bash
-# Clone the repository
+### Integrations: add the hub when you need it
+
+The hub is a small service on a Bluetooth-capable computer that owns the connection to your lights. Android, Home Assistant and external controllers send it requests. Use direct Android Bluetooth for standalone phone control; use the hub when several integrations need the same lamp. Do not run both Bluetooth owners against one light simultaneously.
+
+| Component | What it provides | Status |
+| --- | --- | --- |
+| [Android](apps/android/README.md) | Direct BLE, presets, scenes, effects, widgets and themes | Private APK; user usability accepted, remaining device checks documented |
+| [Hub/API](docs/v2/HUB_API.md) | Authenticated light, group and scene control | Implemented; selected real lamp paths verified |
+| [Home Assistant](docs/v2/HOME_ASSISTANT.md) | MQTT discovery and controls through the hub | Implemented; selected commands physically confirmed |
+| [Stream Deck](docs/v2/STREAM_DECK.md) | Keys, dials, shared setup and optional last-sent status | Plugin 0.5.0 packaged; physical installation/acceptance pending |
+| [Keyboard actions](docs/v2/CONTROLLER_ACTIONS.md) | Named actions for macro keys and launchers | Implemented; assign bindings in your keyboard software |
+| [Raspberry Pi GPIO](docs/v2/RASPBERRY_PI_BUTTONS.md) | Buttons, rotary controls and status LEDs | **Experimental** — host checks pass; no physical board verification |
+| [ESP32](apps/esp32/README.md) | Arduino-framework buttons/rotary controls through HTTPS | **Experimental** — classic ESP32 DevKit only; no board flashed or wiring verified |
+
+The Raspberry Pi GPIO adapter and ESP32 firmware are optional DIY controller examples. Their experimental status does not imply support for every Pi model, Arduino board, encoder or wiring arrangement.
+
+## Compatibility and limitations
+
+- **KS03~** is the physically exercised lamp family. Selected power, color and native breathing flows have been confirmed on one lamp; that does not certify every product sold under the same name.
+- Profiles also exist for other KS prefixes, including **KS03-**, **KS04-**, **KS01-** and **KS02-**. These are inherited protocol definitions, not a hardware compatibility guarantee. See [protocol evidence](docs/v2/PROTOCOL_AND_TESTING.md).
+- The tilde in `KS03~` matters: it is different from `KS03-`.
+- Built-in KS03 breathing uses seven fixed firmware colors. Arbitrary-color breathing runs from the phone and may be less smooth; phone effects stop when the app leaves the foreground.
+- Status generally means the last successfully sent command, not verified physical state. Commands with uncertain delivery are not automatically replayed.
+- Multiple-light failure handling is implemented; physical synchronization and color matching are not guaranteed.
+- iOS is deferred. There is no Google Play or Stream Deck Marketplace release in this plan.
+
+## Python CLI and development
+
+Python 3.10+ is required for the CLI/hub. Use a Bluetooth adapter and an OS supported by Bleak for real lights. Windows and Linux have local development evidence; other platforms and adapters need their own checks.
+
+```sh
 git clone https://github.com/H4ch1Net/ks-led-controller.git
 cd ks-led-controller
-
-# Install dependencies
-pip install --require-hashes -r requirements.lock
-
-# Run the interactive menu
-python3 led_menu.py
+python -m venv .venv
+# Activate .venv using your shell, then:
+python -m pip install --require-hashes -r requirements.lock
+python led_control.py list --json
+python led_control.py scan --json
 ```
 
-### Manual Install
+For the interactive terminal menu, run `python led_menu.py`. See the [CLI guide](docs/v2/CLI_GUIDE.md), [hub service setup](docs/v2/SERVICE_DEPLOYMENT.md), [Android build instructions](apps/android/README.md), and [source packaging guide](release/README.md).
 
-```bash
-pip install bleak==3.0.2
-```
+During release preparation the candidate work is on `ks-light-v2-foundation` locally. The default GitHub branch may still show the earlier CLI-only version until the source PR is merged. The [release plan](docs/v2/GITHUB_RELEASE_PLAN.md) tracks that handoff.
 
----
+## Contributing and reporting problems
 
-## 🎯 Usage
+Include your app/plugin version, Android/OS version, lamp prefix, the steps that failed, and whether you used direct Bluetooth or the hub. Remove device addresses, tokens, Wi-Fi credentials and personal screenshots from public reports. For a new lamp, distinguish a successful protocol write from an observed physical response.
 
-### Interactive Menu (Recommended)
+See the [current checklist](docs/v2/CURRENT_STATUS.md) before starting work. Keep physical acceptance separate from unit tests and simulator results.
 
-```bash
-python3 led_menu.py
-```
-
-**Features:**
-- 🎨 Color presets (Warm White, Cool White, RGB colors)
-- 🌈 Custom RGB color creator
-- 💡 Brightness control (25%, 50%, 75%, 100%, custom)
-- 💾 Preset management (add, delete, reset)
-- 🏷️ Device nicknames
-- 🔄 Easy device switching
-
-See the [updated CLI guide](docs/v2/CLI_GUIDE.md) for discovery, RGB and color-preserving brightness commands.
-
-### Command Line Interface
-
-Perfect for automation and scripting:
-
-```bash
-# Turn on
-python3 led_control.py on KS03~ --address AA:BB:CC:DD:EE:FF
-
-# Turn off
-python3 led_control.py off KS03~ --address AA:BB:CC:DD:EE:FF
-
-# Auto-scan and control
-python3 led_control.py on KS03~
-
-# Control all KS03 devices
-python3 led_control.py on --all-ks03
-
-# Verbose mode (show BLE details)
-python3 led_control.py on KS03~ -v
-```
-
----
-
-## 📱 Supported Devices
-
-| Model | Service UUID | Write UUID | RGB Support | Notes |
-|-------|-------------|------------|-------------|-------|
-| **KS03~** | `AFD0` | `AFD1` | ✅ Full RGB + Brightness | Floor lamp variant* |
-| **KS03-** | `FFF0` | `FFF3` | ✅ Full RGB | Ceiling light variant* |
-| **KS04-** | `FFF0` | `FFF3` | ✅ Full RGB | Ceiling light* |
-| **KS01-** | `AE00` | `AE01` | ✅ Full RGB | Ceiling light* |
-| **KS02-** | `AE00` | `AE01` | ✅ Full RGB | Ceiling light* |
-
-<sub>* Device type labels (floor/ceiling) were derived from the decompiled APK code and may not accurately reflect all product variants. Your specific device model may differ. The important distinction is the command format used, which is automatically detected by the prefix (KS03~ uses extended format with brightness, others use standard format).</sub>
-
-### Important: Model Prefix Matters!
-
-⚠️ **KS03~ (tilde) and KS03- (hyphen) are DIFFERENT models** with different protocols:
-
-- **KS03~**: Extended format with brightness control (`5A0001RRGGBB00BB00A5`)
-- **KS03-**: Standard format (`7E070503RRGGBB00EF`)
-
-Make sure to use the correct prefix for your device!
-
----
-
-## 📚 Documentation
-
-### Command Formats
-
-<details>
-<summary><b>ON/OFF Commands</b></summary>
-
-```
-ON:  5BF001B5
-OFF: 5B0F01B5
-```
-</details>
-
-<details>
-<summary><b>RGB Color Commands - Floor Lamps (KS03~)</b></summary>
-
-**Format:** `5A0001RRGGBB00BB00A5`
-
-- `5A00` - Start marker
-- `01` - RGB mode (02 = white mode)
-- `RRGGBB` - RGB color values (hex)
-- `00` - Cold white placeholder
-- `BB` - Brightness (00-FF)
-- `00A5` - End marker
-
-**Examples:**
-```
-Red (full brightness):    5A0001FF000000FF00A5
-Blue (50% brightness):    5A00010000FF007F00A5
-Green (full brightness):  5A000100FF0000FF00A5
-```
-</details>
-
-<details>
-<summary><b>RGB Color Commands - Ceiling Lights (KS03-, KS04-, etc.)</b></summary>
-
-**Format:** `7E070503RRGGBB00EF`
-
-**Examples:**
-```
-Red:    7E070503FF000000EF
-Blue:   7E0705030000FF00EF
-Green:  7E07050300FF0000EF
-```
-</details>
-
-<details>
-<summary><b>Brightness Control (Floor Lamps Only)</b></summary>
-
-**Format:** `5A000200000000BB00A5`
-
-- `5A00` - Start marker
-- `02` - White mode
-- `000000` - RGB placeholder
-- `BB` - Brightness (00-FF)
-- `00A5` - End marker
-
-**Examples:**
-```
-25% brightness:   5A0002000000004000A5
-50% brightness:   5A0002000000008000A5
-100% brightness:  5A000200000000FF00A5
-```
-</details>
-
-### Automation Examples
-
-<details>
-<summary><b>Cron Jobs (Scheduled Control)</b></summary>
-
-```bash
-# Add to crontab (crontab -e)
-
-# Turn on at 7:00 AM
-0 7 * * * python3 /path/to/led_control.py on KS03~ --address XX:XX:XX:XX:XX:XX
-
-# Turn off at 11:00 PM
-0 23 * * * python3 /path/to/led_control.py off KS03~ --address XX:XX:XX:XX:XX:XX
-
-# Set warm white at sunset (6 PM)
-0 18 * * * python3 /path/to/led_control.py on KS03~ --address XX:XX:XX:XX:XX:XX
-```
-</details>
-
-<details>
-<summary><b>Shell Script Wrapper</b></summary>
-
-```bash
-#!/bin/bash
-# led.sh - Simple wrapper script
-
-DEVICE="KS03~"
-ADDRESS="AA:BB:CC:DD:EE:FF"
-
-case "$1" in
-  on)
-    python3 led_control.py on "$DEVICE" --address "$ADDRESS"
-    ;;
-  off)
-    python3 led_control.py off "$DEVICE" --address "$ADDRESS"
-    ;;
-  *)
-    echo "Usage: $0 {on|off}"
-    exit 1
-    ;;
-esac
-```
-
-Usage: `./led.sh on` or `./led.sh off`
-</details>
-
-<details>
-<summary><b>Home Automation Integration</b></summary>
-
-**Home Assistant:**
-```yaml
-# configuration.yaml
-shell_command:
-  living_room_light_on: "python3 /path/to/led_control.py on KS03~ --address XX:XX:XX:XX:XX:XX"
-  living_room_light_off: "python3 /path/to/led_control.py off KS03~ --address XX:XX:XX:XX:XX:XX"
-```
-
-**Node-RED:**
-Use the `exec` node to call `led_control.py` with parameters.
-</details>
-
----
-
-## 🛠️ Troubleshooting
-
-### LEDs Don't Respond
-
-- ✅ Verify correct model prefix (KS03~ vs KS03-)
-- ✅ Check Bluetooth is enabled
-- ✅ Ensure device is powered on
-- ✅ Move closer to the device (BLE range ~10m)
-- ✅ Disconnect from other apps first
-
-### Connection Errors
-
-```bash
-# Linux: Restart Bluetooth service
-sudo systemctl restart bluetooth
-
-# All platforms: Try verbose mode
-python3 led_control.py on KS03~ -v
-```
-
-### Permission Denied (Linux)
-
-```bash
-# Add user to bluetooth group
-sudo usermod -a -G bluetooth $USER
-
-# Log out and back in for changes to take effect
-```
-
-### Multiple Devices
-
-The interactive menu auto-detects all KS devices. Select the one you want to control from the list.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Whether it's:
-
-- 🐛 Bug reports
-- 💡 Feature suggestions
-- 📝 Documentation improvements
-- 🔧 Code contributions
-- 🆕 Support for new device models
-
-Please open an issue or pull request on GitHub.
-
----
-
-## ⚠️ Disclaimer
-
-This project is:
-- **Not affiliated** with KeepSmile, KS Smart Light, or any official manufacturer
-- **Reverse-engineered** from publicly available Android APK
-- **For educational and personal use**
-- **Provided as-is** without warranty
-
-Use at your own risk. Always ensure you have the legal right to control devices you're connecting to.
-
----
-
-## 📄 License
-
-This project is released under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **Bleak** - Excellent cross-platform BLE library
-- **KS Light Users** - For documenting issues with official apps
-- **Open Source Community** - For making projects like this possible
-
----
-
-<div align="center">
-
-**Made with ❤️ for frustrated KS LED owners everywhere**
-
-If this project helped you, consider giving it a ⭐ on GitHub!
-
-</div>
-
-### Local hub API preview
-An authenticated local API and simulator are available via `python -m ks_light.hub`. See [Hub API setup and supported routes](docs/v2/HUB_API.md). MQTT/Home Assistant and optional trusted TLS service deployment are also available.
-
-### Home Assistant bridge
-The optional MQTT 5 bridge shares the local hub queue and publishes Home Assistant discovery. See [setup and validation](docs/v2/HOME_ASSISTANT.md).
-
-### Continuous hub operation
-See [service deployment](docs/v2/SERVICE_DEPLOYMENT.md) for configuration checks, runtime locking, rotating logs, and deployment helpers.
-
-### Raspberry Pi buttons
-Map physical GPIO buttons to named hub actions using `python -m ks_light.gpio_controller`. Supports debounce, no-backlog dispatch and hardware-free dry-run simulation. See [setup and validation](docs/v2/RASPBERRY_PI_BUTTONS.md). Physical Pi acceptance remains pending.
-
-### ESP32/Arduino buttons
-[Four-button ESP32 firmware](apps/esp32/README.md) controls the hub through verified HTTPS. Includes a no-network dry-run build, pinned PlatformIO configuration and host tests. Physical board acceptance remains pending.
-
-### Groups and scenes through the hub
-Define a shared room or scene once and run it from Android Hub control, Stream Deck, keyboard launchers or Pi buttons. See [configuration, API and failure behavior](docs/v2/HUB_LIBRARY.md). Multi-light physical acceptance remains pending.
+Licensed under [MIT](LICENSE). This is an independent project, not an official KS, KeepSmile or Elgato product.

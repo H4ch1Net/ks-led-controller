@@ -1,4 +1,6 @@
-# ESP32/Arduino controller
+# ESP32/Arduino controller — Experimental
+
+> **Experimental DIY integration.** Host-side sanity checks pass, but physical wiring, board-specific behavior and live lamp delivery have not been verified. Treat this as a development example, not a hardware-tested product. [Evidence and limits](EXPERIMENTAL_HARDWARE.md).
 
 Implemented 2026-09-26 in `apps/esp32`. A classic ESP32 DevKit uses four momentary GPIO buttons for On, Off, reading color and Purple breathing. It connects to the existing hub over authenticated, certificate-verified HTTPS. BLE remains owned by the hub.
 

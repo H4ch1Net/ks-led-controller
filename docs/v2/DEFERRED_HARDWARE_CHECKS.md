@@ -2,6 +2,7 @@
 Updated 2026-09-27. All features below are implemented. Use the private 1.2.1/build 5 APK and Stream Deck 0.5.0 package; rebuilding is unnecessary unless source changes. The optimized APK upgrade, saved light/default retention, startup and redesigned screens were checked on the phone; desktop UI remains deferred while the PC is in use.
 
 ## Android - one combined session
+- [x] User accepted 1.2.1 usability, including saved colors, effect selection and appearance.
 - [x] Upgrade without uninstalling, optimized-build startup and saved light/default retention; visually inspect the redesigned screens.
 - [ ] Complete calibration/presets, rooms/scenes and optional hub pairing retention checks and permission prompts.
 - [ ] Add/rescan/deduplicate devices; change/clear default, restart and remove a referenced light. Confirm group/widget membership cleanup without affecting other lights.
@@ -17,13 +18,14 @@ Updated 2026-09-27. All features below are implemented. Use the private 1.2.1/bu
 - [ ] Persistent Windows/Linux/Pi hub startup/restart/shutdown and trusted wireless Android connection. Confirm a single BLE owner, scoped credentials/revocation and no replay after reconnect.
 
 ## Stream Deck and keyboard
+User reports the device plugged in; Elgato USB presence and running Stream Deck software observed on 2026-09-27. KS Light plugin installation is pending; existing profiles are unchanged.
 - [ ] Install 0.5.0; settings layout, simulator feedback, two shared keys and a legacy per-key configuration, global connection changes and opt-out.
 - [ ] Real key On/Off/color/native effect, busy/repeated presses and offline failures; verify actual lamp response separately from command completion.
 - [ ] Dials: action preview/press and brightness preview/press, touch-strip layout, continuous dimming coalescing, busy input, configuration changes, failure pause and deliberate recovery. Preview begins at 50%, not a lamp reading.
 - [ ] Optional live display: external hub changes, mixed groups/scenes, offline/recovery, profile switches and reader cleanup. Display remains last-sent evidence.
 - [ ] Assign keyboard launchers in macro software without overwriting existing bindings; verify target and action.
 
-## Raspberry Pi and ESP32
+## Raspberry Pi and ESP32 — Experimental
 - [ ] Chosen hardware/backend: dry-run wiring, startup-held buttons, one action per press, busy/offline feedback, status LEDs with suitable resistors/polarity and no replay after reconnect.
 - [ ] Rotary direction/detents, bounce/fast turns, preview-only rotation in selector mode, motion while busy, dimming coalescing and explicit recovery after errors/button actions.
 - [ ] Pi shutdown/SIGTERM GPIO cleanup and physical lamp output.
