@@ -9,10 +9,11 @@ Draft text for the first GitHub prerelease. Do not publish until the signing, ho
 - Choose an effect animation and color separately. Built-in breathing supports the firmware's fixed colors; custom phone breathing supports arbitrary shades.
 - Organize rooms/scenes and use widgets, Quick Settings and Device Controls.
 - Choose among five appearance themes.
+- Recognize the app by its KS Light bulb icon, including adaptive and themed launcher support.
 
 ## Integrations
 
-Optional hub/API and Home Assistant MQTT support, plus Stream Deck 0.5.0 keys/dials and keyboard launchers. Raspberry Pi GPIO and classic ESP32 examples are **Experimental**: host-side checks pass, but physical boards/wiring have not been verified.
+Optional hub/API and Home Assistant MQTT support, plus Stream Deck 0.6.1 keys/dials and keyboard launchers. Raspberry Pi GPIO and classic ESP32 examples are **Experimental**: host-side checks pass, but physical boards/wiring have not been verified.
 
 ## Installation and limits
 
@@ -24,4 +25,4 @@ KS03~ has physical evidence on one lamp. Other inherited profiles are not a prom
 
 ## Assets to attach
 
-Signed APK; Stream Deck 0.5.0 installer; reviewed source ZIP; SHA-256 checksums; build receipt containing exact source commit, versions and signing fingerprint. Do not upload configured ESP32 images, tokens or keys. Fill in actual asset names and checksums after building; do not leave placeholders in a published release.
+Signed APK; Stream Deck 0.6.1 installer; reviewed source ZIP; SHA-256 checksums; build receipt containing exact source commit, versions and signing fingerprint. Do not upload configured ESP32 images, tokens or keys. Fill in actual asset names and checksums after building; do not leave placeholders in a published release.

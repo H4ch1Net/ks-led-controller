@@ -7,7 +7,7 @@ Prepared 2026-09-27. Scope: publish the Android-first KS Light project through G
 - Repository: `H4ch1Net/ks-led-controller`.
 - Source branch: the existing local `ks-light-v2-foundation`; target: `main`.
 - Proposed first public candidate tag: `v1.2.1-rc.1` (verify availability before creating). Keep it a prerelease while the remaining hardware checks are open.
-- Android candidate: 1.2.1/build 5; Stream Deck package: 0.6.1.
+- Android source candidate: 1.2.1/build 6 (launcher artwork update after accepted build 5); Stream Deck package: 0.6.1.
 - Android usability is accepted by the user. Raspberry Pi GPIO and ESP32 integrations are explicitly **Experimental** and do not block an Android prerelease.
 - Local source history includes the foundation, redesign and preset/theme work. Release assets must name the exact final source commit and their own component versions.
 
@@ -16,8 +16,8 @@ Prepared 2026-09-27. Scope: publish the Android-first KS Light project through G
 - [x] Rewrite README around Android, optional hub and implemented capabilities.
 - [x] Include public-safe screenshots rendered from the real Flutter widgets with synthetic data.
 - [x] Add explicit experimental labels and a bounded DIY sanity report.
-- [ ] Recheck GitHub write access once an authenticated path is available. The last observed connector write returned HTTP 403; local Git had no authenticated login. Those are historical observations, not a fresh permissions test.
-- [ ] Fetch remote refs, compare the default branch with the local base, and resolve any new conflicts without overwriting remote work.
+- [x] Rechecked 2026-09-27: connector branch writes still return HTTP 403, but Git push authentication works with the existing H4ch1Net credential selected explicitly.
+- [x] Fetched remote refs: local history contains the remote base with no divergent remote commits.
 - [ ] Push the existing branch, then open one draft source PR using [PR_DRAFT.md](../../release/PR_DRAFT.md). Do not push directly to main or force-push over someone else's work.
 
 The README's candidate notice must remain until a release exists. Remove the local-only branch warning after the source PR lands. Keep compatibility claims tied to physical evidence, and keep private addresses/configuration outside the PR.
@@ -53,9 +53,9 @@ Do not treat signing-key ownership as solved by putting a key in GitHub secrets.
 ## 4. Focused device acceptance
 
 - [x] Android usability accepted for 1.2.1.
-- [ ] Finish the short lamp/phone pass: preset apply, custom breathing, shortcuts and reconnect behavior. Fix failures only; prior successful paths need not be retested wholesale.
-- [x] Stream Deck: install the development plugin in a separate KS Light profile; verify a physical simulator press followed by deliberate BLE lamp actions. The connected 15-key model has no dials. Version 0.6.0 adds typed controls and shared setup; installer is packaged separately.
-- [x] Record Stream Deck evidence separately: user confirmed prior Reading/Off/Purple physical operation, but Reading looked white. New 0.6.0 control acceptance is tracked in DEFERRED_HARDWARE_CHECKS.md.
+- [x] User confirmed app testing is all good on 2026-09-27. No broad repeat phone pass is required.
+- [x] Stream Deck: install the development plugin in a separate KS Light profile; verify a physical simulator press followed by deliberate BLE lamp actions. The connected 15-key model has no dials. Version 0.6.1 adds typed controls, shared setup and color response; installer is packaged separately.
+- [x] User accepted Stream Deck 0.6.1 Power/Color/Effect, repeat delivery speed and final compensated color. Details are in DEFERRED_HARDWARE_CHECKS.md.
 - [ ] Multiple lights, Pi/ESP32 boards and always-on deployments remain deferred hardware coverage; list that honestly rather than blocking the Android prerelease on unavailable equipment.
 
 ## 5. Assemble a draft GitHub prerelease

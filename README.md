@@ -1,8 +1,10 @@
 # KS Light
 
+<img src="docs/images/app-icon.png" width="80" height="80" alt="KS Light bulb icon">
+
 Local control for compatible KS Bluetooth lights, with an Android app and an optional hub for integrations. No cloud account is required for direct Bluetooth control.
 
-**Current candidate: Android 1.2.1 (build 5).** The app is being distributed privately by APK sideloading while the first GitHub release is prepared. This README does not imply that a public APK is already available. **GitHub only; no Google Play release.**
+**Android 1.2.1 is available as a private APK candidate.** Public downloads will be on [GitHub Releases](https://github.com/H4ch1Net/ks-led-controller/releases) once published. No Google Play release is planned.
 
 [Current status](docs/v2/CURRENT_STATUS.md) · [Release plan](docs/v2/GITHUB_RELEASE_PLAN.md) · [Documentation](docs/v2/README.md) · [MIT license](LICENSE)
 
@@ -18,7 +20,7 @@ Local control for compatible KS Bluetooth lights, with an Android app and an opt
 
 ### Screenshots
 
-These images are rendered directly from the app's Flutter screens using synthetic demo data. They show the current interface, not physical lamp state. [Capture details](docs/images/README.md).
+App screens with demo lights and scenes. [How the screenshots are captured](docs/images/README.md).
 
 <table>
 <tr>
@@ -55,13 +57,13 @@ The hub is a small service on a Bluetooth-capable computer that owns the connect
 
 | Component | What it provides | Status |
 | --- | --- | --- |
-| [Android](apps/android/README.md) | Direct BLE, presets, scenes, effects, widgets and themes | Private APK; user usability accepted, remaining device checks documented |
+| [Android](apps/android/README.md) | Direct BLE, presets, scenes, effects, widgets and themes | Private APK; app testing accepted by the user |
 | [Hub/API](docs/v2/HUB_API.md) | Authenticated light, group and scene control | Implemented; selected real lamp paths verified |
 | [Home Assistant](docs/v2/HOME_ASSISTANT.md) | MQTT discovery and controls through the hub | Implemented; selected commands physically confirmed |
 | [Stream Deck](docs/v2/STREAM_DECK.md) | Power, color picker, effects, brightness and scenes; shared setup; advanced keys/dials | 0.6.1 installed; physical Power/Color/Effect and faster repeat delivery accepted; color compensation adjustable |
 | [Keyboard actions](docs/v2/CONTROLLER_ACTIONS.md) | Named actions for macro keys and launchers | Implemented; assign bindings in your keyboard software |
-| [Raspberry Pi GPIO](docs/v2/RASPBERRY_PI_BUTTONS.md) | Buttons, rotary controls and status LEDs | **Experimental** — host checks pass; no physical board verification |
-| [ESP32](apps/esp32/README.md) | Arduino-framework buttons/rotary controls through HTTPS | **Experimental** — classic ESP32 DevKit only; no board flashed or wiring verified |
+| [Raspberry Pi GPIO](docs/v2/RASPBERRY_PI_BUTTONS.md) | Buttons, rotary controls and status LEDs | **Experimental**; host checks pass, hardware unverified |
+| [ESP32](apps/esp32/README.md) | Arduino-framework buttons/rotary controls through HTTPS | **Experimental**; classic ESP32 DevKit, hardware unverified |
 
 The Raspberry Pi GPIO adapter and ESP32 firmware are optional DIY controller examples. Their experimental status does not imply support for every Pi model, Arduino board, encoder or wiring arrangement.
 

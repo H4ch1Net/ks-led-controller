@@ -5,6 +5,7 @@ Updated 2026-09-27. This is the resume point; ROADMAP.md and earlier test notes 
 Distribution is GitHub-only APK sideloading; Google Play and AAB work are excluded. The current candidate is `outputs/ks-light-presets-2026-09-27/ks-light-1.2.1-build5.apk`: optimized release-mode APK signed explicitly with the existing development certificate for upgrade compatibility. It is a private candidate, not a published GitHub release. Install over the existing app; do not uninstall. Earlier outputs and Stream Deck packages remain unchanged.
 
 ## Implemented
+- Build 6 replaces the Flutter template launcher with the KS Light bulb: five legacy densities, adaptive layers and Android themed-icon support. App behavior is unchanged from user-accepted build 5.
 - Android 1.2.1 adds named color/brightness presets with visible save/recall, animation-first native effects, arbitrary-color phone breathing and five persistent appearance themes. Preview/preset/theme changes do not transmit lamp commands.
 - Android 1.2.0 visual redesign: charcoal/lime theme, Lights/Scenes/Hub navigation, compact device and scene cards, clear power state, brightness above the color pad, persistent Apply action and visual effect tiles. Advanced fields and settings live in menus or expandable sections. Fresh installs open the real catalog; Demo is opt-in. See ANDROID_DESIGN.md.
 - Android direct BLE discovery, persistent multi-device catalog/default/names/removal, visual color selection, calibration/presets and native effects.
@@ -33,12 +34,13 @@ Distribution is GitHub-only APK sideloading; Google Play and AAB work are exclud
 - [x] User usability acceptance for Android 1.2.1.
 - [x] Raspberry Pi/ESP32 host sanity review and experimental labeling; physical acceptance intentionally deferred.
 - [x] Phone: optimized APK upgrade/startup, saved light/default retention and redesigned screen inspection.
-- [ ] Phone: complete calibration/scenes/pairing retention, new widgets, Quick Settings and Device Controls, lifecycle/offline behavior.
-- [ ] Hardware: multiple lights/partial failures, Stream Deck/keyboard, Pi/ESP32 wiring and USB configuration. See DEFERRED_HARDWARE_CHECKS.md.
-- [ ] Hosted CI: push the prepared `ks-light-v2-foundation` branch and open a draft PR against `main`, then follow failed jobs only. GitHub connector writes currently return HTTP 403 (Resource not accessible by integration); local Git has no authenticated login. Restore one authorized write path before retrying. Local WSL Python/source results do not cover hosted Linux Android/release assembly.
+- [x] User confirmed app testing is all good and authorized GitHub delivery. Detailed optional coverage is not a request to repeat accepted tests.
+- [x] Standard Stream Deck power/color/effect, repeat delivery speed and compensated color accepted by the user.
+- [ ] Optional hardware: multiple lights/partial failures, keyboard/dials, Pi/ESP32 wiring and USB configuration. See DEFERRED_HARDWARE_CHECKS.md.
+- [ ] Hosted CI: push the prepared `ks-light-v2-foundation` branch and open a draft PR against `main`, then follow failed jobs only. GitHub connector writes return HTTP 403, but local Git push authentication is available with credential.username=H4ch1Net. Local WSL Python/source results do not cover hosted Linux Android/release assembly.
 - [ ] Real deployment: persistent Windows/Linux/Pi service and trusted wireless hub acceptance when that hardware/setup is available.
 
-Public GitHub release publication, permanent release-key ownership and signed binary reproducibility remain deferred beyond the private candidate. Google Play/AAB are excluded. iOS remains deferred. Feature implementation is complete for this candidate; acceptance is not complete.
+Public GitHub release publication, permanent release-key ownership and signed binary reproducibility remain deferred beyond the private candidate. Google Play/AAB are excluded. iOS remains deferred. Feature implementation and user app acceptance are complete for this candidate; optional hardware coverage remains deferred.
 
 ## Constraints and known limitations
 No desktop UI while the PC is in use; the phone was available for the redesign review. One BLE owner per lamp. No command replay after uncertain delivery. Power/color/live status describe requested or last successful commands, not reliable physical readback. Native breathing was physically accepted as smoother; selected hub/MQTT/Android paths and catalog/widget flows were accepted previously, not every new feature.

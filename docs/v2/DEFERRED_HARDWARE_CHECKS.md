@@ -1,7 +1,8 @@
 # Deferred acceptance checklist
 Updated 2026-09-27. All features below are implemented. Use the private 1.2.1/build 5 APK and Stream Deck 0.6.1 package; rebuilding is unnecessary unless source changes. The optimized APK upgrade, saved light/default retention, startup and redesigned screens were checked on the phone; desktop UI remains deferred while the PC is in use.
 
-## Android - one combined session
+## Android - optional extended coverage
+User confirmed on 2026-09-27 that app testing is all good and requested GitHub delivery. App acceptance is complete. Unchecked scenarios below are optional extended coverage, not blockers or instructions to repeat accepted tests. They are not individually marked verified without specific evidence.
 - [x] User accepted 1.2.1 usability, including saved colors, effect selection and appearance.
 - [x] Upgrade without uninstalling, optimized-build startup and saved light/default retention; visually inspect the redesigned screens.
 - [ ] Complete calibration/presets, rooms/scenes and optional hub pairing retention checks and permission prompts.
