@@ -1,8 +1,9 @@
 # Deferred acceptance checklist
-Updated 2026-09-27. All features below are implemented. Use the private 1.1.0/build 3 APK and Stream Deck 0.5.0 package; rebuilding is unnecessary unless source changes. Phone testing awaits reconnection; desktop UI remains deferred while the PC is in use.
+Updated 2026-09-27. All features below are implemented. Use the private 1.2.0/build 4 APK and Stream Deck 0.5.0 package; rebuilding is unnecessary unless source changes. The optimized APK upgrade, saved light/default retention, startup and redesigned screens were checked on the phone; desktop UI remains deferred while the PC is in use.
 
 ## Android - one combined session
-- [ ] Upgrade the current app without uninstalling. Confirm saved lights/names/default, calibration/presets, rooms/scenes and optional hub pairing survive. Check optimized-build startup and permission prompts.
+- [x] Upgrade without uninstalling, optimized-build startup and saved light/default retention; visually inspect the redesigned screens.
+- [ ] Complete calibration/presets, rooms/scenes and optional hub pairing retention checks and permission prompts.
 - [ ] Add/rescan/deduplicate devices; change/clear default, restart and remove a referenced light. Confirm group/widget membership cleanup without affecting other lights.
 - [ ] Color/brightness/native effects: explicit preview/apply, calibration once, cancel without writes, reconnect and Bluetooth-off feedback. Avoid running Android direct BLE and hub BLE ownership on the same lamp.
 - [ ] Library editing: narrow-screen/keyboard layout, detached color previews, cancel/save, per-light values, backup/document-provider/clipboard import, oversized input rejection and replacement-device matching. Cancel must preserve original data.
@@ -29,4 +30,4 @@ Updated 2026-09-27. All features below are implemented. Use the private 1.1.0/bu
 - [ ] ESP32 trusted HTTPS, Wi-Fi loss/recovery, USB setup/save/reboot/NVS persistence, busy rejection, forgotten connection staying disabled, scoped credentials and oversized/partial serial input. No board has been flashed.
 
 ## Previously observed - do not repeat without a related change
-User confirmed direct power/color, native purple breathing smoother than software effects, hub/MQTT commands and Android hub blue delivery. On 2026-09-26 the Samsung catalog/default persistence and widget migration/chooser/pinning/Off fanout/service cleanup/temporary-widget deletion passed. These observations do not establish new scene/favorite widget behavior, optimized APK upgrade or multi-light/DIY hardware acceptance.
+User confirmed direct power/color, native purple breathing smoother than software effects, hub/MQTT commands and Android hub blue delivery. On 2026-09-26 the Samsung catalog/default persistence and widget migration/chooser/pinning/Off fanout/service cleanup/temporary-widget deletion passed. These observations do not establish new scene/favorite widget behavior or multi-light/DIY hardware acceptance.

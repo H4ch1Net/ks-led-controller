@@ -74,6 +74,12 @@ void main() {
     await tester.ensureVisible(find.byKey(Key(key)));
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle();
+    await tester.tap(
+      find.text(
+        key.startsWith('edit-scene') ? 'Edit scene' : 'Edit collection',
+      ),
+    );
+    await tester.pumpAndSettle();
   }
 
   testWidgets(

@@ -41,7 +41,7 @@ void main() {
       () => Future<void>.delayed(const Duration(milliseconds: 100)),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('New room / group'));
+    await tester.tap(find.byTooltip('New room / group'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), 'Living room');
     await tester.tap(find.text('Desk'));
@@ -52,10 +52,7 @@ void main() {
     expect(saved, contains('Living room'));
     await tester.tap(find.text('All on'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('1/2 commands delivered. Physical state is unconfirmed.'),
-      findsOneWidget,
-    );
+    expect(find.text('1/2 commands sent'), findsOneWidget);
     expect(find.textContaining('offline'), findsOneWidget);
     expect(backend.calls, ['a', 'b']);
   });
@@ -93,7 +90,8 @@ void main() {
       () => Future<void>.delayed(const Duration(milliseconds: 100)),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Save scene'));
+    await tester.ensureVisible(find.byTooltip('Save scene'));
+    await tester.tap(find.byTooltip('Save scene'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), 'Evening');
     await tester.tap(find.text('Desk'));
@@ -110,31 +108,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Evening'), findsOneWidget);
     await tester.ensureVisible(find.text('Activate'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Activate'));
     await tester.pumpAndSettle();
-    expect(backend.packets['a']!.last, [
-      0x5a,
-      0,
-      1,
-      255,
-      0,
-      0,
-      0,
-      39,
-      0,
-      0xa5,
-    ]);
-    expect(backend.packets['b']!.last, [
-      0x5a,
-      0,
-      1,
-      0,
-      0,
-      255,
-      0,
-      78,
-      0,
-      0xa5,
-    ]);
+    expect(backend.packets['a']!.last, [0x5a, 0, 1, 255, 0, 0, 0, 39, 0, 0xa5]);
+    expect(backend.packets['b']!.last, [0x5a, 0, 1, 0, 0, 255, 0, 78, 0, 0xa5]);
   });
 }

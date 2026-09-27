@@ -50,9 +50,7 @@ class _CalibrationDialogState extends State<CalibrationDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Presets are starting points, not measured calibration. Save keeps the active balance and your named presets for this light. Then Apply color to test.',
-            ),
+            const Text('Adjust the balance, save, then apply a color.'),
             const SizedBox(height: 12),
             DropdownButton<String>(
               isExpanded: true,
@@ -126,9 +124,7 @@ class _CalibrationDialogState extends State<CalibrationDialog> {
                 icon: const Icon(Icons.delete_outline),
                 label: const Text('Remove selected preset'),
               ),
-            const Text(
-              'Cancel discards changes. Removing a preset keeps the current balance.',
-            ),
+            const Text('Presets are saved for this light.'),
           ],
         ),
       ),

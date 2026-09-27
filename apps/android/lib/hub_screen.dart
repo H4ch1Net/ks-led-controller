@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_style.dart';
+
 import 'color_picker.dart';
 import 'hub_client.dart';
 import 'hub_group_controls.dart';
@@ -15,14 +17,13 @@ class HubScreen extends StatefulWidget {
 }
 
 class _HubScreenState extends State<HubScreen> {
-  final address = TextEditingController(text: 'http://127.0.0.1:8765');
+  final address = TextEditingController();
   final token = TextEditingController();
   HubClient? client;
   List<Map<String, dynamic>> lights = [];
   List<Map<String, dynamic>> groups = [], scenes = [], memberResults = [];
   String? selected;
-  String status =
-      'Connect to your hub. This screen sends no direct Bluetooth commands.';
+  String status = '';
   String mode = '';
   bool busy = false, validColor = true, previewingGroup = false;
   bool rememberHub = false;
@@ -132,12 +133,12 @@ class _HubScreenState extends State<HubScreen> {
       if (!mounted) return;
       setState(() {
         if (saved == null) {
-          status = 'No saved hub. Enter an address and token to connect.';
+          status = 'No saved hub.';
         } else {
           address.text = saved['address']!;
           token.text = saved['token']!;
           rememberHub = true;
-          status = 'Saved hub loaded. Tap Connect when ready.';
+          status = 'Saved hub loaded.';
         }
       });
     } catch (_) {
@@ -210,9 +211,7 @@ class _HubScreenState extends State<HubScreen> {
       await run(() async {
         await refresh();
         if (mounted) {
-          setState(
-            () => status = 'Hub color balance saved. Apply a color when you want to use it.',
-          );
+          setState(() => status = 'Color balance saved.');
         }
       });
     }
@@ -232,9 +231,7 @@ class _HubScreenState extends State<HubScreen> {
       await run(() async {
         await refresh();
         if (mounted) {
-          setState(
-            () => status = 'Hub rooms and scenes saved. No lamp commands sent.',
-          );
+          setState(() => status = 'Rooms & scenes saved.');
         }
       });
     }
@@ -282,7 +279,7 @@ class _HubScreenState extends State<HubScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (busy && !previewingGroup) const LinearProgressIndicator(),
-              Text(status, key: const Key('hub-status')),
+              StatusNotice(status, key: const Key('hub-status'), busy: busy),
             ],
           ),
         ),
@@ -291,32 +288,52 @@ class _HubScreenState extends State<HubScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           if (client == null) ...[
-            const Text(
-              'Use HTTPS for a network hub. USB testing uses localhost. You can optionally remember this hub securely on your phone.',
+            const SizedBox(height: 20),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(Icons.hub_outlined, size: 44, color: accent),
             ),
+            const SizedBox(height: 20),
+            Text(
+              'Connect your home',
+              style: Theme.of(context).textTheme.headlineLarge,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'One hub. All your lights.',
+              style: TextStyle(color: Colors.white54),
+            ),
+            const SizedBox(height: 28),
             TextField(
               controller: address,
               enabled: !busy,
-              decoration: const InputDecoration(labelText: 'Hub address'),
+              decoration: const InputDecoration(
+                labelText: 'Hub address',
+                hintText: 'https://your-hub:8443',
+                prefixIcon: Icon(Icons.link),
+              ),
               autocorrect: false,
             ),
+            const SizedBox(height: 14),
             TextField(
               controller: token,
               enabled: !busy,
               obscureText: true,
               enableSuggestions: false,
               autocorrect: false,
-              decoration: const InputDecoration(labelText: 'Access token'),
+              decoration: const InputDecoration(
+                labelText: 'Access token',
+                prefixIcon: Icon(Icons.key_outlined),
+              ),
             ),
+            const SizedBox(height: 20),
             FilledButton(
               onPressed: busy ? null : connect,
               child: const Text('Connect to hub'),
             ),
             CheckboxListTile(
               title: const Text('Remember this hub'),
-              subtitle: const Text(
-                'Saved after connecting, protected by Android Keystore.',
-              ),
+              subtitle: const Text('Saved securely on this phone.'),
               value: rememberHub,
               onChanged: busy
                   ? null
@@ -331,9 +348,9 @@ class _HubScreenState extends State<HubScreen> {
               child: const Text('Forget saved hub'),
             ),
           ] else ...[
-            Text(mode),
-            const Text(
-              'State below is last sent, not lamp readback. Phone calibration and scenes are separate; configured hub color balance applies to static colors.',
+            StatePill(
+              mode.startsWith('Simulation') ? 'Demo hub' : 'Connected hub',
+              icon: Icons.hub_outlined,
             ),
             Row(
               children: [
@@ -378,12 +395,14 @@ class _HubScreenState extends State<HubScreen> {
             if (client!.canEditLibrary)
               TextButton(
                 onPressed: busy ? null : editHubLibrary,
-                child: const Text('Manage hub rooms & scenes'),
+                child: const Text('Edit rooms & scenes'),
               ),
             if (memberResults.isNotEmpty)
               ExpansionTile(
                 key: ValueKey(memberResults),
-                initiallyExpanded: true,
+                initiallyExpanded: memberResults.any(
+                  (member) => member['status'] != 'succeeded',
+                ),
                 title: const Text('Last group or scene result'),
                 children: memberResults.map((member) {
                   final target = lights.where(
@@ -543,7 +562,7 @@ class _HubScreenState extends State<HubScreen> {
                 ],
               ),
               if (caps['brightness'] == true) ...[
-                Text('Next brightness: ${brightness.round()}%'),
+                Text('Brightness: ${brightness.round()}%'),
                 Slider(
                   value: brightness,
                   min: 1,
@@ -560,7 +579,7 @@ class _HubScreenState extends State<HubScreen> {
                           'power': true,
                           'brightness': brightness.round(),
                         }),
-                  child: const Text('Apply brightness & turn on'),
+                  child: const Text('Apply brightness'),
                 ),
               ],
               if (caps['rgb'] == true) ...[
@@ -580,7 +599,7 @@ class _HubScreenState extends State<HubScreen> {
                               ? brightness.round()
                               : 100,
                         }),
-                  child: const Text('Apply color & turn on'),
+                  child: const Text('Apply color'),
                 ),
               ],
               if (caps['native_effects'] == true)

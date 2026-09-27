@@ -31,6 +31,8 @@ void main() {
         ),
       ),
     );
+    await tester.tap(find.text('Fine adjustments'));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('hex-color')), '#EF42FF');
     await tester.pumpAndSettle();
     expect(rgb, [239, 66, 255]);
@@ -38,8 +40,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(valid, false);
     expect(rgb, [239, 66, 255]);
-    await tester.ensureVisible(find.text('Pink'));
-    await tester.tap(find.text('Pink'));
+    await tester.ensureVisible(find.byTooltip('Pink'));
+    await tester.tap(find.byTooltip('Pink'));
     await tester.pumpAndSettle();
     expect(valid, true);
     expect(

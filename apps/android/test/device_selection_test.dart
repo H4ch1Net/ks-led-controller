@@ -71,19 +71,37 @@ void main() {
       () => Future<void>.delayed(const Duration(milliseconds: 100)),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Remove device').first);
+    if (find.byTooltip('Light settings').evaluate().isEmpty) {
+      await tester.tap(find.text('Desk'));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.byTooltip('Light settings'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove device'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(find.text('Desk'), findsOneWidget);
     fail = true;
-    await tester.tap(find.byTooltip('Remove device').first);
+    if (find.byTooltip('Light settings').evaluate().isEmpty) {
+      await tester.tap(find.text('Desk'));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.byTooltip('Light settings'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove device'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Remove'));
     await tester.pumpAndSettle();
     expect(find.text('Desk'), findsOneWidget);
     fail = false;
-    await tester.tap(find.byTooltip('Remove device').first);
+    if (find.byTooltip('Light settings').evaluate().isEmpty) {
+      await tester.tap(find.text('Desk'));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.byTooltip('Light settings'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove device'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Remove'));
     await tester.pumpAndSettle();
@@ -141,12 +159,11 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Shelf'), findsOneWidget);
-      expect(
-        find.text('Default light ready. No command sent.'),
-        findsOneWidget,
-      );
+      expect(find.text('Default'), findsOneWidget);
       expect(backend.sent, isEmpty);
-      await tester.tap(find.text('Default device • tap to clear'));
+      await tester.tap(find.byTooltip('Light settings'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Clear default device'));
       await tester.pumpAndSettle();
       expect(HomeLibrary.fromJson(jsonDecode(stored)).defaultLightId, isNull);
     },

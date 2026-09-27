@@ -31,9 +31,7 @@ class _SceneColorEditorState extends State<SceneColorEditor> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Choose settings for this scene. The light will not change until you activate the saved scene.',
-            ),
+            const Text('Preview only · lights stay unchanged'),
             LightColorPicker(
               rgb: rgb,
               onChanged: (value) => setState(() => rgb = value),

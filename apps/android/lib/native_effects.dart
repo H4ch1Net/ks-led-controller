@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'light_backend.dart';
 import 'protocol.dart';
 import 'native_preferences.dart';
+import 'app_style.dart';
 
 const nativeEffects = <int, String>{
   0x82: 'Seven-color fade',
@@ -289,7 +290,7 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
   Widget build(BuildContext context) => PopScope(
     canPop: !busy,
     child: Scaffold(
-      appBar: AppBar(title: const Text('On-light effects')),
+      appBar: AppBar(title: const Text('Effects')),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -299,11 +300,11 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
             children: [
               FilledButton(
                 onPressed: busy || !ready ? null : () => execute('apply'),
-                child: const Text('Apply on-light effect'),
+                child: const Text('Apply effect'),
               ),
               OutlinedButton(
                 onPressed: busy || !ready ? null : () => execute('off'),
-                child: const Text('Stop and turn off'),
+                child: const Text('Turn off'),
               ),
             ],
           ),
@@ -318,26 +319,113 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            Text(status),
+            if (!status.startsWith('Choose') &&
+                !status.startsWith('Saved choices loaded'))
+              StatusNotice(status, busy: busy),
             const SizedBox(height: 20),
-            DropdownButtonFormField<int>(
-              key: ValueKey(effect),
-              initialValue: effect,
-              decoration: const InputDecoration(labelText: 'Built-in effect'),
-              items: [
-                for (final e in nativeEffects.entries)
-                  DropdownMenuItem(value: e.key, child: Text(e.value)),
-              ],
-              onChanged: busy || !ready
-                  ? null
-                  : (v) {
-                      setState(() => effect = v!);
-                      releaseChange();
-                    },
+            const StatePill(
+              'Runs on your light',
+              icon: Icons.auto_awesome_outlined,
+            ),
+            const SizedBox(height: 16),
+            LayoutBuilder(
+              builder: (context, constraints) => Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final e in nativeEffects.entries)
+                    SizedBox(
+                      width: MediaQuery.textScalerOf(context).scale(1) > 1.8
+                          ? constraints.maxWidth
+                          : MediaQuery.textScalerOf(context).scale(1) > 1.2
+                          ? (constraints.maxWidth - 8) / 2
+                          : (constraints.maxWidth - 16) / 3,
+                      child: Semantics(
+                        selected: effect == e.key,
+                        child: Material(
+                          color: effect == e.key
+                              ? const Color(0xff34432a)
+                              : panel,
+                          borderRadius: BorderRadius.circular(18),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(18),
+                            onTap: busy || !ready
+                                ? null
+                                : () {
+                                    setState(() => effect = e.key);
+                                    releaseChange();
+                                  },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 14,
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: e.key < 0x84
+                                            ? [
+                                                const Color(0xffffbe85),
+                                                const Color(0xffbba1ff),
+                                              ]
+                                            : [
+                                                Colors.white,
+                                                <int, Color>{
+                                                  0x84: Colors.redAccent,
+                                                  0x85: Colors.greenAccent,
+                                                  0x86: Colors.blueAccent,
+                                                  0x87: Colors.yellow,
+                                                  0x88: Colors.cyanAccent,
+                                                  0x89: Colors.purpleAccent,
+                                                  0x8a: Colors.white,
+                                                }[e.key]!,
+                                              ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  SizedBox(
+                                    height:
+                                        36 *
+                                        MediaQuery.textScalerOf(context)
+                                            .scale(1),
+                                    child: Center(
+                                      child: Text(
+                                        e.value,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 6),
+                                    child: Icon(
+                                      Icons.check,
+                                      size: 14,
+                                      color: effect == e.key
+                                          ? accent
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
             Text('Speed: ${speed.round()}%'),
             Slider(
+              key: const Key('native-speed'),
               value: speed,
               min: 0,
               max: 100,
@@ -358,9 +446,7 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
                   : (v) => setState(() => brightness = v),
               onChangeEnd: (_) => releaseChange(),
             ),
-            const Text(
-              'After Apply, changes send when you release a slider or select an effect.',
-            ),
+            const Text('Once active, adjustments apply on release.'),
             if (library.presets.isNotEmpty)
               Wrap(
                 spacing: 8,
@@ -390,9 +476,20 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
               onPressed: busy || !ready || !canSave ? null : savePreset,
               child: const Text('Save preset'),
             ),
-            TextButton(
-              onPressed: busy || !ready ? null : () => execute('read'),
-              child: const Text('Read light state'),
+            ExpansionTile(
+              title: const Text('Advanced'),
+              children: [
+                TextButton(
+                  onPressed: busy || !ready ? null : () => execute('read'),
+                  child: const Text('Read light state'),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'Built-in effects keep running when the app closes. Color balance applies to static colors only.',
+                  ),
+                ),
+              ],
             ),
             if (widget.customBuilder != null)
               TextButton(
@@ -418,9 +515,7 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
                 child: const Text('Custom effects from phone'),
               ),
             const SizedBox(height: 12),
-            const Text(
-              'Runs on the light and continues when you leave or close the app. Stop and turn off ends the output. Applying a static color replaces the effect. Built-in palettes do not use your custom color calibration. Commands are based on the original app; visual quality depends on the light.',
-            ),
+            const Text('Apply a static color to return to steady light.'),
           ],
         ),
       ),

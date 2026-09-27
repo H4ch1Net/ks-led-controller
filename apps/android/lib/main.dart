@@ -14,6 +14,7 @@ import 'effects_screen.dart';
 import 'native_effects.dart';
 import 'hub_screen.dart';
 import 'diagnostics_screen.dart';
+import 'app_style.dart';
 
 void main() => runApp(const KsLightApp());
 
@@ -24,13 +25,8 @@ class KsLightApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'KS Light',
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xff8da6ff),
-        brightness: Brightness.dark,
-      ),
-      useMaterial3: true,
-    ),
+    debugShowCheckedModeBanner: false,
+    theme: lightAppTheme(),
     home: LightScreen(testBackend: backend, settingsStore: settingsStore),
   );
 }
@@ -66,7 +62,8 @@ class _LightScreenState extends State<LightScreen> {
   @override
   void initState() {
     super.initState();
-    backend = widget.testBackend ?? DemoBackend();
+    demo = widget.testBackend != null;
+    backend = widget.testBackend ?? BluetoothBackend();
     store = widget.settingsStore ?? SettingsStore();
     loadSettings();
   }
@@ -89,7 +86,7 @@ class _LightScreenState extends State<LightScreen> {
         builder: (context) => AlertDialog(
           title: const Text('Quick controls ready'),
           content: Text(
-            'New widgets and the tile can control ${displayName(light)} directly over Bluetooth. Existing widgets keep their own device; tap a widget name to change it. The tile toggles last-sent power, not verified lamp state. Stop active effects before using shortcuts. On Android 11+, you can also choose KS Light in the system Device controls panel and add this light.',
+            'Add a shortcut for ${displayName(light)}. Stop active effects before using it.',
           ),
           actions: [
             TextButton(
@@ -270,9 +267,7 @@ class _LightScreenState extends State<LightScreen> {
                         hintText: light.name,
                       ),
                     ),
-                    const Text(
-                      'Leave blank to use the Bluetooth name. Saved on this phone.',
-                    ),
+                    const Text('Leave blank to use the original name.'),
                   ],
                 ),
               ),
@@ -500,303 +495,497 @@ class _LightScreenState extends State<LightScreen> {
     brightness = previous[3];
     message = 'Choose a color, then tap Apply.';
   });
+  void changeMode(bool value) {
+    setState(() {
+      demo = value;
+      backend = value ? DemoBackend() : BluetoothBackend();
+      lights = [];
+      selected = null;
+      remembered.clear();
+      powerStates.clear();
+      message = '';
+      defaultLightId = null;
+    });
+    loadDevices();
+  }
+
+  void appSettings() => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (sheetContext) => SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ListTile(
+              title: Text(
+                'Settings',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+              ),
+            ),
+            SwitchListTile(
+              title: const Text('Demo mode'),
+              subtitle: const Text('Explore without changing real lights'),
+              value: demo,
+              onChanged: busy || widget.testBackend != null
+                  ? null
+                  : (value) {
+                      Navigator.pop(sheetContext);
+                      changeMode(value);
+                    },
+            ),
+            ListTile(
+              leading: const Icon(Icons.help_outline),
+              title: const Text('Connection help'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => DiagnosticsScreen(
+                      demo: demo,
+                      savedLights: lights.length,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                'Status reflects the last command sent. Changes from other controllers may not appear.',
+                style: TextStyle(color: Color(0xffadb8ae), fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget lightOptions() => PopupMenuButton<String>(
+    tooltip: 'Light settings',
+    enabled: !busy && settingsReady,
+    onSelected: (action) {
+      switch (action) {
+        case 'rename':
+          editSettings();
+        case 'balance':
+          editSettings(calibration: true);
+        case 'default':
+          setDefaultDevice(selected!);
+        case 'shortcuts':
+          configureShortcuts();
+        case 'remove':
+          removeDevice(selected!);
+      }
+    },
+    itemBuilder: (_) => [
+      const PopupMenuItem(value: 'rename', child: Text('Rename')),
+      if (selected?.profile['color_type'] != null)
+        const PopupMenuItem(value: 'balance', child: Text('Color balance')),
+      PopupMenuItem(
+        value: 'default',
+        child: Text(
+          defaultLightId == selected?.id
+              ? 'Clear default device'
+              : 'Set as default device',
+        ),
+      ),
+      if (!demo && selected?.profile['prefix'] == 'KS03~')
+        const PopupMenuItem(
+          value: 'shortcuts',
+          child: Text('Widget & Quick Settings'),
+        ),
+      const PopupMenuDivider(),
+      const PopupMenuItem(value: 'remove', child: Text('Remove device')),
+    ],
+  );
+
+  Widget deviceCard(Light light) => Card(
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: busy ? null : () => select(light),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 54,
+              height: 62,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: .1),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.lightbulb_outline,
+                size: 30,
+                color: accent,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayName(light),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    defaultLightId == light.id
+                        ? 'Default light'
+                        : 'Bluetooth light',
+                    style: const TextStyle(
+                      color: Color(0xffaab7ac),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              tooltip: defaultLightId == light.id
+                  ? 'Clear default device'
+                  : 'Set as default device',
+              icon: Icon(
+                defaultLightId == light.id
+                    ? Icons.star_rounded
+                    : Icons.star_outline_rounded,
+              ),
+              color: defaultLightId == light.id ? accent : null,
+              onPressed: busy ? null : () => setDefaultDevice(light),
+            ),
+            const Icon(Icons.chevron_right, size: 20),
+          ],
+        ),
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final colorType = selected?.profile['color_type'];
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('KS Light • Prototype'),
-        actions: [
-          IconButton(
-            tooltip: 'Connection help',
-            icon: const Icon(Icons.help_outline),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    DiagnosticsScreen(demo: demo, savedLights: lights.length),
-              ),
-            ),
-          ),
-          IconButton(
-            tooltip: 'Hub control',
-            icon: const Icon(Icons.hub_outlined),
-            onPressed: busy
-                ? null
-                : () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const HubScreen()),
-                  ),
-          ),
-          IconButton(
-            tooltip: 'Rooms & scenes',
-            icon: const Icon(Icons.dashboard_customize_outlined),
-            onPressed: busy || !settingsReady ? null : openLibrary,
-          ),
-        ],
-      ),
-      bottomNavigationBar: colorType == null
-          ? null
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, rgb[0], rgb[1], rgb[2]),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            '${colorHex(rgb)} • ${colorPending ? 'Not applied' : 'Color sent'}',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: busy || !settingsReady || !colorValid
-                            ? null
-                            : () => send(null),
-                        icon: const Icon(Icons.check),
-                        label: Text(
-                          busy ? 'Sending…' : 'Apply color & turn on',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-      body: SafeArea(
-        top: false,
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            if (selected == null) ...[
-              SwitchListTile(
-                title: const Text('Demo mode'),
-                subtitle: Text(
-                  demo
-                      ? 'Virtual light • no Bluetooth'
-                      : 'Nearby Bluetooth lights',
-                ),
-                value: demo,
-                onChanged: busy || widget.testBackend != null
-                    ? null
-                    : (value) {
-                        setState(() {
-                          demo = value;
-                          backend = value ? DemoBackend() : BluetoothBackend();
-                          lights = [];
-                          selected = null;
-                          remembered.clear();
-                          powerStates.clear();
-                          message = value
-                              ? 'Demo mode enabled.'
-                              : 'Scan to request Bluetooth access.';
-                          defaultLightId = null;
-                        });
-                        loadDevices();
-                      },
-              ),
-              FilledButton.icon(
-                onPressed: busy ? null : scan,
-                icon: const Icon(Icons.search),
-                label: Text(
-                  busy
-                      ? 'Working…'
-                      : lights.isEmpty
-                      ? 'Scan for lights'
-                      : 'Add devices',
-                ),
-              ),
-              const SizedBox(height: 12),
-              Semantics(liveRegion: true, child: Text(message)),
-              if (lights.isNotEmpty)
-                const Text('Saved devices • tap a star to choose your default'),
-              for (final light in lights)
-                ListTile(
-                  leading: const Icon(Icons.lightbulb_outline),
-                  title: Text(displayName(light)),
-                  subtitle: Text(light.id),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        tooltip: defaultLightId == light.id
-                            ? 'Clear default device'
-                            : 'Set as default device',
-                        icon: Icon(
-                          defaultLightId == light.id
-                              ? Icons.star
-                              : Icons.star_border,
-                        ),
-                        onPressed: busy ? null : () => setDefaultDevice(light),
-                      ),
-                      IconButton(
-                        tooltip: 'Remove device',
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: busy ? null : () => removeDevice(light),
-                      ),
-                    ],
-                  ),
-                  selected: selected?.id == light.id,
-                  onTap: busy ? null : () => select(light),
-                ),
-            ] else
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
+    final preview = Color.fromARGB(255, rgb[0], rgb[1], rgb[2]);
+    final power = selected == null ? null : powerStates[selected!.id];
+    final showMessage =
+        busy ||
+        [
+          'could not',
+          'failed',
+          'unavailable',
+          'no ks lights',
+          'offline',
+        ].any(message.toLowerCase().contains);
+    return PopScope(
+      canPop: selected == null && !busy,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && !busy && selected != null) {
+          setState(() => selected = null);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: selected == null
+              ? null
+              : IconButton(
+                  tooltip: 'Change light',
                   onPressed: busy
                       ? null
                       : () => setState(() => selected = null),
                   icon: const Icon(Icons.arrow_back),
-                  label: Text(
-                    demo ? 'Change light • Demo mode' : 'Change light',
-                  ),
                 ),
-              ),
-            if (selected != null) ...[
-              Semantics(liveRegion: true, child: Text(message)),
-              TextButton.icon(
-                onPressed: busy ? null : () => setDefaultDevice(selected!),
-                icon: Icon(
-                  defaultLightId == selected!.id
-                      ? Icons.star
-                      : Icons.star_border,
-                ),
-                label: Text(
-                  defaultLightId == selected!.id
-                      ? 'Default device • tap to clear'
-                      : 'Set as default device',
-                ),
-              ),
-              Text(
-                displayName(selected!),
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              Row(
-                children: [
-                  TextButton.icon(
-                    onPressed: busy || !settingsReady
-                        ? null
-                        : () => editSettings(),
-                    icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Rename'),
-                  ),
-                  if (colorType != null)
-                    TextButton.icon(
-                      onPressed: busy || !settingsReady
-                          ? null
-                          : () => editSettings(calibration: true),
-                      icon: const Icon(Icons.tune),
-                      label: const Text('Color balance'),
-                    ),
-                ],
-              ),
-              if (colorType != null)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: busy || !settingsReady ? null : openEffects,
-                    icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Effects'),
-                  ),
-                ),
-              Text(
-                powerStates[selected!.id] == null
-                    ? 'Power: unknown'
-                    : 'Last sent: ${powerStates[selected!.id]! ? 'On' : 'Off'}',
-              ),
-              const Text('Changes from another controller are not tracked.'),
-              if (!demo && selected!.profile['prefix'] == 'KS03~')
-                TextButton.icon(
-                  onPressed: busy ? null : configureShortcuts,
-                  icon: const Icon(Icons.widgets_outlined),
-                  label: const Text('Widget & Quick Settings'),
-                ),
-              const SizedBox(height: 8),
-              SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(
-                    value: true,
-                    label: Text('On'),
-                    icon: Icon(Icons.power_settings_new),
-                  ),
-                  ButtonSegment(
-                    value: false,
-                    label: Text('Off'),
-                    icon: Icon(Icons.power_off),
-                  ),
-                ],
-                emptySelectionAllowed: true,
-                selected: {
-                  if (powerStates[selected!.id] != null)
-                    powerStates[selected!.id]!,
-                },
-                onSelectionChanged: busy
-                    ? null
-                    : (values) => send(
-                        values.isEmpty
-                            ? powerStates[selected!.id]!
-                            : values.single,
-                      ),
-              ),
-              if (!settingsReady)
-                const Text(
-                  'Saved settings unavailable. Color controls require saved settings to load; restart to retry.',
-                ),
-              if (colorType != null) ...[
-                const SizedBox(height: 16),
-                LightColorPicker(
-                  key: ValueKey(selected!.id),
-                  rgb: rgb,
-                  enabled: !busy,
-                  onValidityChanged: (valid) =>
-                      setState(() => colorValid = valid),
-                  onChanged: (value) => setState(() {
-                    rgb = value;
-                    colorPending = true;
-                  }),
-                ),
-                Text(
-                  'Active balance: R${(config(selected!).gains[0] * 100).round()}%  G${(config(selected!).gains[1] * 100).round()}%  B${(config(selected!).gains[2] * 100).round()}%',
-                ),
-                const Text(
-                  'Screen colors are an approximate reference for the light.',
-                ),
-                if (colorType == 'floor') ...[
-                  Text('Brightness: ${(brightness * 100 / 255).round()}%'),
-                  Slider(
-                    value: brightness.toDouble(),
-                    min: 0,
-                    max: 255,
-                    divisions: 255,
-                    onChanged: busy
-                        ? null
-                        : (v) => setState(() {
-                            brightness = v.round();
-                            colorPending = true;
-                          }),
-                  ),
-                ],
-              ] else
-                const Text('This profile has inherited power commands only.'),
-              const SizedBox(height: 12),
-              const Text(
-                'Prototype: foreground control only. No schedules, effects, or device readback yet.',
-              ),
-            ],
+          title: Text(
+            selected == null ? 'KS Light' : displayName(selected!),
+            overflow: TextOverflow.ellipsis,
+          ),
+          actions: [
+            if (selected != null) lightOptions(),
+            IconButton(
+              tooltip: 'Settings',
+              onPressed: busy ? null : appSettings,
+              icon: const Icon(Icons.tune_rounded),
+            ),
+            const SizedBox(width: 8),
           ],
+        ),
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (colorType != null)
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      key: const Key('apply-color'),
+                      onPressed: busy || !settingsReady || !colorValid
+                          ? null
+                          : () => send(null),
+                      icon: Icon(busy ? Icons.hourglass_top : Icons.check),
+                      label: Text(
+                        busy
+                            ? 'Sending…'
+                            : colorPending
+                            ? 'Apply color'
+                            : 'Apply again',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            NavigationBar(
+              selectedIndex: 0,
+              onDestinationSelected: busy
+                  ? null
+                  : (index) {
+                      if (index == 0) {
+                        setState(() => selected = null);
+                      }
+                      if (index == 1 && settingsReady) openLibrary();
+                      if (index == 2) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => const HubScreen(),
+                          ),
+                        );
+                      }
+                    },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.lightbulb_outline),
+                  selectedIcon: Icon(Icons.lightbulb),
+                  label: 'Lights',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.grid_view_rounded),
+                  label: 'Scenes',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.hub_outlined),
+                  label: 'Hub',
+                ),
+              ],
+            ),
+          ],
+        ),
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (showMessage)
+                  StatusNotice(busy ? 'Working…' : message, busy: busy),
+                if (selected == null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    'Your lights',
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      StatePill(
+                        demo ? 'Demo mode' : 'Bluetooth',
+                        icon: demo ? Icons.science_outlined : Icons.bluetooth,
+                      ),
+                      Text(
+                        '${lights.length} saved',
+                        style: const TextStyle(color: Color(0xffaab7ac)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  if (lights.isEmpty)
+                    const EmptyPanel(
+                      icon: Icons.lightbulb_outline,
+                      title: 'Add your first light',
+                      subtitle: 'Scan for nearby lights to get started.',
+                    ),
+                  for (final light in lights) deviceCard(light),
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    onPressed: busy ? null : scan,
+                    icon: const Icon(Icons.add),
+                    label: Text(
+                      busy
+                          ? 'Scanning…'
+                          : lights.isEmpty
+                          ? 'Scan for lights'
+                          : 'Add devices',
+                    ),
+                  ),
+                ] else ...[
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      StatePill(
+                        demo ? 'Demo mode' : 'Bluetooth',
+                        icon: demo ? Icons.science_outlined : Icons.bluetooth,
+                      ),
+                      if (defaultLightId == selected!.id)
+                        const StatePill('Default', icon: Icons.star_rounded),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(26),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color.lerp(panel, preview, .22)!, panel],
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: preview.withValues(alpha: .15),
+                              ),
+                              child: Icon(
+                                Icons.lightbulb_outline,
+                                color: preview,
+                                size: 29,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Power',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge,
+                                  ),
+                                  Text(
+                                    power == null
+                                        ? 'Power: unknown'
+                                        : 'Last sent: ${power ? 'On' : 'Off'}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xffc6cdc7),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (colorType != null)
+                              IconButton(
+                                tooltip: 'Effects',
+                                onPressed: busy || !settingsReady
+                                    ? null
+                                    : openEffects,
+                                icon: const Icon(Icons.auto_awesome_outlined),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 18),
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<bool>(
+                            segments: const [
+                              ButtonSegment(
+                                value: true,
+                                label: Text('On'),
+                                icon: Icon(Icons.power_settings_new),
+                              ),
+                              ButtonSegment(
+                                value: false,
+                                label: Text('Off'),
+                                icon: Icon(Icons.power_off),
+                              ),
+                            ],
+                            emptySelectionAllowed: true,
+                            selected: {?power},
+                            onSelectionChanged: busy
+                                ? null
+                                : (values) => send(
+                                    values.isEmpty ? power! : values.single,
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!settingsReady)
+                    const StatusNotice(
+                      'Saved settings unavailable. Restart to retry.',
+                    ),
+                  if (colorType == 'floor') ...[
+                    SectionHeading(
+                      'Brightness',
+                      trailing: Text(
+                        '${(brightness * 100 / 255).round()}%',
+                        style: const TextStyle(color: accent),
+                      ),
+                    ),
+                    Slider(
+                      value: brightness.toDouble(),
+                      min: 0,
+                      max: 255,
+                      divisions: 255,
+                      label: '${(brightness * 100 / 255).round()}%',
+                      semanticFormatterCallback: (v) =>
+                          'Brightness ${(v * 100 / 255).round()} percent',
+                      onChanged: busy
+                          ? null
+                          : (v) => setState(() {
+                              brightness = v.round();
+                              colorPending = true;
+                            }),
+                    ),
+                  ],
+                  if (colorType != null) ...[
+                    SectionHeading(
+                      'Color',
+                      trailing: Text(
+                        colorPending ? 'Preview' : 'Sent',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xffaab7ac),
+                        ),
+                      ),
+                    ),
+                    LightColorPicker(
+                      key: ValueKey(selected!.id),
+                      rgb: rgb,
+                      enabled: !busy,
+                      onValidityChanged: (valid) =>
+                          setState(() => colorValid = valid),
+                      onChanged: (value) => setState(() {
+                        rgb = value;
+                        colorPending = true;
+                      }),
+                    ),
+                  ],
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

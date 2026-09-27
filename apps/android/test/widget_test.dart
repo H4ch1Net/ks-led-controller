@@ -57,10 +57,7 @@ void main() {
           .selected,
       {false},
     );
-    expect(
-      find.text('Demo command applied. No Bluetooth writes.'),
-      findsOneWidget,
-    );
+    expect(find.text('Demo mode'), findsOneWidget);
   });
   testWidgets('failure is visible and controls recover', (tester) async {
     tester.view.physicalSize = const Size(430, 1000);
@@ -117,6 +114,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Demo floor lamp'));
     await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Light settings'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Rename'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), 'Desk lamp');
@@ -124,6 +123,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Desk lamp'), findsOneWidget);
     expect(saved, contains('Desk lamp'));
+    await tester.tap(find.byTooltip('Light settings'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Color balance'));
     await tester.pumpAndSettle();
     tester.widget<Slider>(find.byKey(const ValueKey('balance-0'))).onChanged!(
@@ -133,13 +134,13 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     await Scrollable.ensureVisible(
-      tester.element(find.text('Pink')),
+      tester.element(find.byTooltip('Pink')),
       alignment: 0.5,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Pink'));
+    await tester.tap(find.byTooltip('Pink'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Apply color & turn on'));
+    await tester.tap(find.byKey(const Key('apply-color')));
     await tester.pumpAndSettle();
     expect(backend.sent.last, [0x5a, 0, 1, 120, 66, 255, 0, 100, 0, 0xa5]);
     await tester.pumpWidget(const SizedBox());
@@ -155,9 +156,57 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Power: unknown'), findsOneWidget);
     expect(saved, contains('lastColor'));
-    expect(
-      find.textContaining(RegExp(r'^#EF42FF .*Not applied$')),
-      findsOneWidget,
+    expect(find.text('Preview'), findsOneWidget);
+  });
+  testWidgets(
+    'compact screen with large text keeps navigation and preview safe',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 740);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final backend = DemoBackend();
+      await tester.pumpWidget(KsLightApp(backend: backend));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Scan for lights'));
+      await tester.tap(find.text('Scan for lights'));
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Demo floor lamp'));
+      await tester.tap(find.text('Demo floor lamp'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('apply-color')).hitTestable(),
+        findsOneWidget,
+      );
+      expect(find.text('Brightness'), findsOneWidget);
+      await tester.ensureVisible(find.byTooltip('Pink'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Pink'));
+      await tester.pumpAndSettle();
+      expect(backend.sent, isEmpty, reason: 'Preview must not send a command');
+      await tester.tap(find.byTooltip('Light settings'));
+      await tester.pumpAndSettle();
+      expect(find.text('Rename'), findsOneWidget);
+      expect(find.text('Color balance'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets('fresh launch opens the real catalog without scanning', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const KsLightApp());
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
     );
+    await tester.pumpAndSettle();
+    expect(find.text('Bluetooth'), findsOneWidget);
+    expect(find.text('Demo mode'), findsNothing);
+    expect(find.text('Scan for lights'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

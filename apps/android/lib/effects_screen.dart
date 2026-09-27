@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'effects.dart';
+import 'app_style.dart';
 import 'native_effects.dart';
 import 'home_library.dart';
 import 'light_backend.dart';
@@ -199,17 +200,58 @@ class _EffectsScreenState extends State<EffectsScreen>
                 child: const Text('On-light effects'),
               ),
             const SizedBox(height: 12),
-            Semantics(liveRegion: true, child: Text(message)),
+            if (busy || runner.errors.isNotEmpty)
+              StatusNotice(message, busy: busy),
             const SizedBox(height: 12),
-            DropdownButtonFormField<EffectKind>(
-              initialValue: kind,
-              decoration: const InputDecoration(labelText: 'Effect'),
-              items: [
-                for (final entry in effectNames.entries)
-                  DropdownMenuItem(value: entry.key, child: Text(entry.value)),
-              ],
-              onChanged: busy ? null : (v) => setState(() => kind = v!),
+            LayoutBuilder(
+              builder: (context, constraints) => Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final entry in effectNames.entries)
+                    SizedBox(
+                      width: (constraints.maxWidth - 10) / 2,
+                      child: Semantics(
+                        selected: kind == entry.key,
+                        child: Material(
+                          color: kind == entry.key
+                              ? const Color(0xff34432a)
+                              : panel,
+                          borderRadius: BorderRadius.circular(20),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            onTap: busy
+                                ? null
+                                : () => setState(() => kind = entry.key),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    kind == entry.key
+                                        ? Icons.check_circle
+                                        : Icons.auto_awesome_outlined,
+                                    color: accent,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    entry.value,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
+            const SizedBox(height: 20),
             if ([
               EffectKind.breathing,
               EffectKind.drift,
@@ -249,15 +291,15 @@ class _EffectsScreenState extends State<EffectsScreen>
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Restore previous settings when I stop'),
+              title: const Text('Restore on stop'),
               subtitle: Text(
-                '${previous.length}/${widget.lights.length} lights have known pre-effect settings. Others keep the final effect color.',
+                '${previous.length}/${widget.lights.length} lights can be restored.',
               ),
               value: restore,
               onChanged: busy ? null : (v) => setState(() => restore = v),
             ),
             const Text(
-              'Foreground preview: about 6 color updates per second, with connections kept open for up to 4 lights. Larger groups update more slowly. Keep this screen open. Leaving the app stops new updates after the current transaction; it does not restore or switch the light off.',
+              'Keep this screen open. Leaving pauses updates; lights keep their last color.',
             ),
             if (kind == EffectKind.sunset)
               const Padding(
@@ -267,9 +309,7 @@ class _EffectsScreenState extends State<EffectsScreen>
             if (kind == EffectKind.wave)
               const Padding(
                 padding: EdgeInsets.only(top: 12),
-                child: Text(
-                  'Wave follows the saved member order. Group updates are sequential, not synchronized.',
-                ),
+                child: Text('Wave follows the room’s light order.'),
               ),
             for (final entry in runner.errors.entries)
               ListTile(

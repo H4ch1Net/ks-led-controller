@@ -122,7 +122,8 @@ class DemoBackend extends LightBackend {
 }
 
 class BluetoothBackend extends LightBackend {
-  final FlutterReactiveBle ble = FlutterReactiveBle();
+  // Opening the saved catalog should not initialize Bluetooth.
+  late final FlutterReactiveBle ble = FlutterReactiveBle();
   Uuid uuid(String short) =>
       Uuid.parse('0000$short-0000-1000-8000-00805f9b34fb');
   Future<void> permissions() async {

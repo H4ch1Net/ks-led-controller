@@ -4,7 +4,7 @@ An offline-first KS lighting system: Android direct control plus an optional alw
 
 ## Agreed scope
 Android can operate independently over BLE. A hub can run on a Raspberry Pi or supported computer and owns its assigned Bluetooth devices. Phones and integrations route through the hub for those devices. No cloud service or account is required for core operation. Retain and improve the existing Python CLI.
-Public distribution, monetization, final name and store publishing are undecided. Do not add payments, analytics or publish anything based on these documents.
+Distribution is GitHub-only Android APKs. Google Play/store enrollment and AAB work are out of scope. Do not add payments or analytics. Publishing a GitHub release is separate from preparing a candidate.
 
 ## First complete release
 - Discover, name, identify, connect and control supported lights.

@@ -73,12 +73,9 @@ class _LightColorPickerState extends State<LightColorPicker> {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text('Pick a shade'),
-      const Text('Drag inside the square. Slide the rainbow to change hue.'),
-      const SizedBox(height: 12),
       LayoutBuilder(
         builder: (context, constraints) {
-          const height = 180.0;
+          const height = 156.0;
           final width = constraints.maxWidth;
           void pick(Offset point) => choose(
             hsv
@@ -107,7 +104,7 @@ class _LightColorPickerState extends State<LightColorPicker> {
                 height: height,
                 width: width,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(22),
                   child: Stack(
                     children: [
                       Positioned.fill(
@@ -188,32 +185,9 @@ class _LightColorPickerState extends State<LightColorPicker> {
         ),
       ),
       const SizedBox(height: 12),
-      TextField(
-        key: const ValueKey('hex-color'),
-        controller: hex,
-        enabled: widget.enabled,
-        autocorrect: false,
-        textCapitalization: TextCapitalization.characters,
-        decoration: InputDecoration(
-          labelText: 'Hex color',
-          hintText: '#EF42FF',
-          errorText: error,
-          border: const OutlineInputBorder(),
-        ),
-        onChanged: (value) {
-          final parsed = parseColorHex(value);
-          setState(
-            () => error = parsed == null
-                ? 'Use six hex digits, such as #EF42FF.'
-                : null,
-          );
-          widget.onValidityChanged?.call(parsed != null);
-          if (parsed != null) widget.onChanged(parsed);
-        },
-      ),
       const SizedBox(height: 8),
       Wrap(
-        spacing: 8,
+        spacing: 4,
         children: [
           for (final entry in {
             'Red': [255, 0, 0],
@@ -224,30 +198,93 @@ class _LightColorPickerState extends State<LightColorPicker> {
             'Pink': [239, 66, 255],
             'White': [255, 255, 255],
           }.entries)
-            ActionChip(
-              avatar: CircleAvatar(
-                backgroundColor: Color.fromARGB(
-                  255,
-                  entry.value[0],
-                  entry.value[1],
-                  entry.value[2],
+            Tooltip(
+              message: entry.key,
+              child: Semantics(
+                label: entry.key,
+                button: true,
+                selected: colorHex(widget.rgb) == colorHex(entry.value),
+                child: InkResponse(
+                  onTap: widget.enabled
+                      ? () {
+                          widget.onValidityChanged?.call(true);
+                          hex.text = colorHex(entry.value);
+                          setState(() => error = null);
+                          widget.onChanged(List.of(entry.value));
+                        }
+                      : null,
+                  radius: 24,
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color.fromARGB(
+                            255,
+                            entry.value[0],
+                            entry.value[1],
+                            entry.value[2],
+                          ),
+                          border: Border.all(
+                            color: colorHex(widget.rgb) == colorHex(entry.value)
+                                ? Colors.white
+                                : Colors.white24,
+                            width: colorHex(widget.rgb) == colorHex(entry.value)
+                                ? 3
+                                : 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              label: Text(entry.key),
-              onPressed: widget.enabled
-                  ? () {
-                      widget.onValidityChanged?.call(true);
-                      hex.text = colorHex(entry.value);
-                      setState(() => error = null);
-                      widget.onChanged(List.of(entry.value));
-                    }
-                  : null,
             ),
         ],
       ),
       ExpansionTile(
-        title: const Text('Fine adjustments'),
+        tilePadding: EdgeInsets.zero,
+        title: const Text('Fine adjustments', style: TextStyle(fontSize: 14)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              colorHex(widget.rgb),
+              style: const TextStyle(fontSize: 12, color: Colors.white54),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.expand_more, size: 20),
+          ],
+        ),
         children: [
+          TextField(
+            key: const ValueKey('hex-color'),
+            controller: hex,
+            enabled: widget.enabled,
+            autocorrect: false,
+            textCapitalization: TextCapitalization.characters,
+            decoration: InputDecoration(
+              labelText: 'Hex color',
+              hintText: '#EF42FF',
+              errorText: error,
+              border: const OutlineInputBorder(),
+            ),
+            onChanged: (value) {
+              final parsed = parseColorHex(value);
+              setState(
+                () => error = parsed == null
+                    ? 'Use six hex digits, such as #EF42FF.'
+                    : null,
+              );
+              widget.onValidityChanged?.call(parsed != null);
+              if (parsed != null) widget.onChanged(parsed);
+            },
+          ),
+
           for (var i = 0; i < 3; i++) ...[
             Text('${['Red', 'Green', 'Blue'][i]}: ${widget.rgb[i]}'),
             Slider(

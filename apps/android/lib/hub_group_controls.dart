@@ -59,9 +59,7 @@ class _HubGroupControlsState extends State<HubGroupControls> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             Text('${(widget.group['members'] as List).length} lights'),
-            const Text(
-              'Preview changes here, then apply to every light. Each light keeps its own hub color balance.',
-            ),
+            const Text('Preview · applies to the whole group'),
             const SizedBox(height: 16),
             if (dim) ...[
               Text('Brightness: ${brightness.round()}%'),
@@ -77,11 +75,9 @@ class _HubGroupControlsState extends State<HubGroupControls> {
                 key: const Key('hub-group-apply-brightness'),
                 onPressed: () =>
                     apply({'power': true, 'brightness': brightness.round()}),
-                child: const Text('Apply brightness & turn all on'),
+                child: const Text('Apply brightness'),
               ),
-              const Text(
-                'Brightness keeps each light’s last hub color or effect. If a light has no compatible saved state, the hub rejects the whole request before sending.',
-              ),
+              const Text('Keeps each light’s saved color or effect.'),
             ],
             if (color) ...[
               LightColorPicker(
@@ -99,7 +95,7 @@ class _HubGroupControlsState extends State<HubGroupControls> {
                         'brightness': dim ? brightness.round() : 100,
                       })
                     : null,
-                child: const Text('Apply color & turn all on'),
+                child: const Text('Apply color'),
               ),
             ],
             if (effects)
@@ -110,12 +106,10 @@ class _HubGroupControlsState extends State<HubGroupControls> {
                   'speed': 35,
                   'brightness': dim ? brightness.round() : 100,
                 }, native: true),
-                child: const Text('Start Purple breathing on all'),
+                child: const Text('Purple breathing'),
               ),
             if (!color || !dim || !effects)
-              const Text(
-                'Only controls supported by every light are shown. You can control other features on each light separately.',
-              ),
+              const Text('Showing controls shared by all lights.'),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),

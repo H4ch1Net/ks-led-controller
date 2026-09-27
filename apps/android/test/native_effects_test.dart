@@ -73,6 +73,8 @@ void main() {
       await tester.ensureVisible(find.text('Evening'));
       await tester.tap(find.text('Evening'));
       await tester.pump();
+      await tester.scrollUntilVisible(find.text('Speed: 60%'), 180);
+      await tester.pumpAndSettle();
       expect(find.text('Speed: 60%'), findsOneWidget);
       expect(backend.sent, isEmpty);
       tester.widget<InputChip>(find.byType(InputChip)).onDeleted!();
@@ -95,7 +97,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Apply on-light effect'));
+    await tester.tap(find.text('Apply effect'));
     await tester.pumpAndSettle();
     expect(backend.sent.length, 2);
     expect(find.textContaining('settings could not be saved'), findsOneWidget);
@@ -116,12 +118,17 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Apply on-light effect'));
+      await tester.tap(find.text('Apply effect'));
       await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       await tester.pumpAndSettle();
       expect(backend.closes, 1);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('native-speed')),
+        180,
+      );
       await tester.pumpAndSettle();
       final slider = tester.widgetList<Slider>(find.byType(Slider)).first;
       slider.onChanged!(70);
@@ -148,8 +155,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Apply on-light effect'));
-      await tester.tap(find.text('Apply on-light effect'));
+      await tester.ensureVisible(find.text('Apply effect'));
+      await tester.tap(find.text('Apply effect'));
       await tester.pumpAndSettle();
       expect(backend.sent, [
         [0x5b, 0xf0, 1, 0xb5],
@@ -161,8 +168,8 @@ void main() {
         2,
         reason: 'No phone animation or polling loop',
       );
-      await tester.ensureVisible(find.text('Stop and turn off'));
-      await tester.tap(find.text('Stop and turn off'));
+      await tester.ensureVisible(find.text('Turn off'));
+      await tester.tap(find.text('Turn off'));
       await tester.pumpAndSettle();
       expect(backend.sent.last, [0x5b, 0x0f, 1, 0xb5]);
       expect(changed, 2);
@@ -186,7 +193,12 @@ void main() {
       );
       await tester.pumpWidget(page());
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Apply on-light effect'));
+      await tester.tap(find.text('Apply effect'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('native-speed')),
+        180,
+      );
       await tester.pumpAndSettle();
       final slider = tester.widgetList<Slider>(find.byType(Slider)).first;
       slider.onChanged!(60);
@@ -200,6 +212,8 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pump();
       await tester.pumpWidget(page());
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Speed: 60%'), 180);
       await tester.pumpAndSettle();
       expect(find.text('Speed: 60%'), findsOneWidget);
       expect(

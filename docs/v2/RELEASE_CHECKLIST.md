@@ -1,6 +1,6 @@
 # Release preparation
 
-Current outputs are development builds. Nothing has been published. Tooling is pinned in CI. Private APK sideloading is the selected first distribution route. Source archives matched byte-for-byte across Windows and WSL Linux; signed binary reproducibility and hosted CI remain unestablished. Play/AAB and public distribution are deferred.
+Current outputs are development builds. Nothing has been published. Tooling is pinned in CI. Private APK sideloading is the selected first distribution route. Source archives matched byte-for-byte across Windows and WSL Linux; signed binary reproducibility and hosted CI remain unestablished. Google Play/AAB are excluded; GitHub is the only distribution channel.
 
 ## Android
 
@@ -8,9 +8,9 @@ Use the Flutter revision pinned in `.github/workflows/android.yml`, JDK 21 and t
 
 Debug builds use the development key. Release builds require private `apps/android/android/key.properties`; copy `key.properties.example` and fill in your own signing-key details. Passwords and keystores must stay outside exported source packages. Release requests fail clearly if signing is not configured; there is no debug-signing fallback.
 
-After signing is configured, build with `flutter --no-version-check build appbundle --release --no-pub`. Verify the certificate, version code and package ID before distributing. An APK signed with a different key cannot update the current debug installation; export rooms/scenes first and plan migration before uninstalling. This backup does not include device calibration or credentials.
+After signing is configured, build with `flutter --no-version-check build apk --release --no-pub`. Verify the certificate, version code and package ID before distributing. An APK signed with a different key cannot update the current debug installation; export rooms/scenes first and plan migration before uninstalling. This backup does not include device calibration or credentials.
 
-Before publication: choose the distribution channel and signing owner, preserve the signing key securely, test a clean install and upgrade, check supported Android versions and permission handling, and complete the device checks in `DEFERRED_HARDWARE_CHECKS.md`.
+Before a GitHub release: choose the signing owner, preserve the signing key securely, test install/upgrade and Android permissions, and complete `DEFERRED_HARDWARE_CHECKS.md`. Google Play is excluded.
 
 ## Controllers
 
@@ -25,7 +25,7 @@ ESP32: compile all three PlatformIO environments and the native protocol/rotary 
 - Keep test logs, artifact hashes and a manifest for each candidate.
 - Run the remote CI workflows after an authorized push; local success does not establish remote success.
 - Complete physical acceptance separately from simulator results.
-- Publishing, release-key creation/ownership, and any store enrollment remain explicit release decisions.
+- Publishing, release-key creation/ownership, and permanent key ownership remain explicit release decisions.
 
 ## Updating dependency locks
 
@@ -36,7 +36,7 @@ uv pip compile requirements.txt --universal --python-version 3.10 --generate-has
 uv pip compile requirements-controllers.txt --universal --python-version 3.10 --generate-hashes --output-file requirements-controllers.lock
 ```
 
-Review changes before installing. The core lock's Windows dry-run matched the current environment without changes; the controller lock additionally resolves pyserial and a newer setuptools. No development environment was changed by this check. Linux execution has since passed in WSL; macOS markers are resolved but not locally executed. Flutter pub and npm lockfiles and toolchain pins already exist. Gradle/plugin checksum verification is enabled and passed Windows debug and optimized release APK assembly. Release artifacts and remote CI still need validation; dependency pins do not prove signed APK/AAB reproducibility.
+Review changes before installing. The core lock's Windows dry-run matched the current environment without changes; the controller lock additionally resolves pyserial and a newer setuptools. No development environment was changed by this check. Linux execution has since passed in WSL; macOS markers are resolved but not locally executed. Flutter pub and npm lockfiles and toolchain pins already exist. Gradle/plugin checksum verification is enabled and passed Windows debug and optimized release APK assembly. Release artifacts and remote CI still need validation; dependency pins do not prove signed APK reproducibility.
 
 ## Android bootstrap and dependency verification (2026-09-27)
 
@@ -64,4 +64,4 @@ The external `outputs/ks-light-dev-2026-09-27/` folder contains Android 1.1.0 (b
 
 An initial isolated release build also passed with a disposable validation key. Android CI now generates its own short-lived validation key, assembles/verifies a release APK and removes the signing configuration on exit. No validation-key APK is published. The workflow shell passed syntax validation; actual hosted execution remains open.
 
-Local Linux checks and source comparison passed. All three ESP32 variants have compiled across the latest two batches. Do not rerun passed broad suites after documentation/version-only changes; run checks for changed behavior, and keep physical acceptance separate. APK/AAB byte reproducibility and permanent public signing are future public-release work, not claims made for this private build.
+Local Linux checks and source comparison passed. All three ESP32 variants have compiled across the latest two batches. Do not rerun passed broad suites after documentation/version-only changes; run checks for changed behavior, and keep physical acceptance separate. APK byte reproducibility and permanent public signing are future public-release work, not claims made for this private build.

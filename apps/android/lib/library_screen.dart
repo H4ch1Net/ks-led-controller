@@ -10,6 +10,7 @@ import 'light_backend.dart';
 import 'settings.dart';
 import 'scene_color_editor.dart';
 import 'effects_screen.dart';
+import 'app_style.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({
@@ -686,7 +687,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     canPop: !busy,
     child: Scaffold(
       appBar: AppBar(
-        title: Text(widget.demo ? 'Rooms & scenes • Demo' : 'Rooms & scenes'),
+        title: const Text('Rooms & scenes'),
         leading: BackButton(
           onPressed: busy ? null : () => Navigator.pop(context),
         ),
@@ -736,78 +737,126 @@ class _LibraryScreenState extends State<LibraryScreen> {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
-            Semantics(liveRegion: true, child: Text(message)),
             if (busy && !editing) const LinearProgressIndicator(),
+            if (message.toLowerCase().contains('could not') ||
+                message.toLowerCase().contains('failed'))
+              StatusNotice(message),
             if (running)
               TextButton(
                 onPressed: stopRequested
                     ? null
                     : () => setState(() => stopRequested = true),
                 child: Text(
-                  stopRequested
-                      ? 'Stopping after current light…'
-                      : 'Stop after current light',
+                  stopRequested ? 'Stopping…' : 'Stop after current light',
                 ),
               ),
-            for (final result in results)
-              ListTile(
-                leading: Icon(
-                  result.delivered
-                      ? Icons.check_circle_outline
-                      : Icons.error_outline,
-                ),
-                title: Text(name(result.id)),
-                subtitle: Text(
-                  result.error ??
-                      result.persistenceWarning ??
-                      'Sent • unconfirmed',
+            if (results.isNotEmpty)
+              Card(
+                child: ExpansionTile(
+                  title: Text(
+                    '${results.where((r) => r.delivered).length}/${results.length} commands sent',
+                  ),
+                  initiallyExpanded: results.any(
+                    (r) => !r.delivered || r.persistenceWarning != null,
+                  ),
+                  children: [
+                    for (final result in results)
+                      ListTile(
+                        leading: Icon(
+                          result.delivered
+                              ? Icons.check_circle_outline
+                              : Icons.error_outline,
+                        ),
+                        title: Text(name(result.id)),
+                        subtitle: Text(
+                          result.error ??
+                              result.persistenceWarning ??
+                              'Sent • unconfirmed',
+                        ),
+                      ),
+                  ],
                 ),
               ),
             if (library != null) ...[
               const SizedBox(height: 12),
               Text(
-                '${library!.lights.length} saved lights',
-                style: Theme.of(context).textTheme.titleMedium,
+                'Set the mood',
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
-              if (library!.lights.isEmpty)
-                const Text(
-                  'Return and scan for lights first. Demo and Bluetooth libraries are separate.',
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: StatePill(
+                  '${library!.lights.length} ${library!.lights.length == 1 ? 'light' : 'lights'}${widget.demo ? ' · Demo' : ''}',
+                  icon: Icons.lightbulb_outline,
                 ),
-              Wrap(
-                spacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: busy || library!.lights.isEmpty
-                        ? null
-                        : () => create(false),
-                    child: const Text('New room / group'),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: busy || library!.lights.isEmpty
-                        ? null
-                        : () => create(true),
-                    child: const Text('Save scene'),
-                  ),
-                ],
               ),
+              SectionHeading(
+                'Rooms',
+                trailing: IconButton(
+                  tooltip: 'New room / group',
+                  icon: const Icon(Icons.add),
+                  onPressed: busy || library!.lights.isEmpty
+                      ? null
+                      : () => create(false),
+                ),
+              ),
+              if (library!.collections.isEmpty)
+                const EmptyPanel(
+                  icon: Icons.meeting_room_outlined,
+                  title: 'No rooms yet',
+                  subtitle: 'Group your lights by room or routine.',
+                ),
               for (final entry in library!.collections.entries)
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(18),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          entry.key,
-                          style: Theme.of(context).textTheme.titleLarge,
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.meeting_room_outlined,
+                              color: accent,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                entry.key,
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                              key: Key('edit-collection-${entry.key}'),
+                              tooltip: 'Room options',
+                              enabled: !busy,
+                              onSelected: (action) => action == 'edit'
+                                  ? create(false, existingName: entry.key)
+                                  : remove(entry.key, false),
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: const Text('Edit collection'),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: Text('Delete collection'),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                         Text(
-                          '${entry.value.kind} • ${entry.value.members.map(name).join(', ')}',
+                          '${entry.value.members.length} lights',
+                          style: const TextStyle(color: Color(0xffadb8ae)),
                         ),
+                        const SizedBox(height: 16),
                         Wrap(
                           spacing: 8,
+                          runSpacing: 8,
                           children: [
                             for (final power in [true, false])
                               OutlinedButton(
@@ -819,25 +868,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                       }),
                                 child: Text(power ? 'All on' : 'All off'),
                               ),
-                            OutlinedButton(
+                            IconButton.filledTonal(
+                              tooltip: 'Effects',
                               onPressed: busy
                                   ? null
                                   : () => effects(entry.value.members),
-                              child: const Text('Effects'),
-                            ),
-                            TextButton(
-                              key: Key('edit-collection-${entry.key}'),
-                              onPressed: busy
-                                  ? null
-                                  : () =>
-                                        create(false, existingName: entry.key),
-                              child: const Text('Edit collection'),
-                            ),
-                            TextButton(
-                              onPressed: busy
-                                  ? null
-                                  : () => remove(entry.key, false),
-                              child: const Text('Delete collection'),
+                              icon: const Icon(Icons.auto_awesome_outlined),
                             ),
                           ],
                         ),
@@ -845,50 +881,100 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   ),
                 ),
-              const SizedBox(height: 12),
-              Text('Scenes', style: Theme.of(context).textTheme.titleLarge),
+              SectionHeading(
+                'Scenes',
+                trailing: IconButton(
+                  tooltip: 'Save scene',
+                  icon: const Icon(Icons.add),
+                  onPressed: busy || library!.lights.isEmpty
+                      ? null
+                      : () => create(true),
+                ),
+              ),
               if (library!.scenes.isEmpty)
-                const Text(
-                  'Apply a color to each light, then save their settings as a scene.',
+                const EmptyPanel(
+                  icon: Icons.auto_awesome_outlined,
+                  title: 'Create your first scene',
+                  subtitle: 'Save your lights’ colors as a scene.',
                 ),
               for (final entry in library!.scenes.entries)
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(18),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          entry.key,
-                          style: Theme.of(context).textTheme.titleLarge,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                entry.key,
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                              key: Key('edit-scene-${entry.key}'),
+                              tooltip: 'Scene options',
+                              enabled: !busy,
+                              onSelected: (action) => action == 'edit'
+                                  ? create(true, existingName: entry.key)
+                                  : remove(entry.key, true),
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: const Text('Edit scene'),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: Text('Delete scene'),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        for (final target in entry.value.entries)
-                          Text(
-                            '${name(target.key)}: ${!target.value.power
-                                ? 'Off'
-                                : target.value.rgb == null
-                                ? 'On'
-                                : '${colorHex(target.value.rgb!)} • ${(target.value.brightness * 100 / 255).round()}%'}',
-                          ),
                         Wrap(
                           spacing: 8,
+                          runSpacing: 8,
                           children: [
-                            FilledButton(
+                            for (final target in entry.value.entries)
+                              Tooltip(
+                                message: name(target.key),
+                                child: Container(
+                                  width: 26,
+                                  height: 26,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white24),
+                                    color: !target.value.power
+                                        ? ink
+                                        : target.value.rgb == null
+                                        ? accent
+                                        : Color.fromARGB(
+                                            255,
+                                            target.value.rgb![0],
+                                            target.value.rgb![1],
+                                            target.value.rgb![2],
+                                          ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${entry.value.length} lights',
+                                style: const TextStyle(
+                                  color: Color(0xffadb8ae),
+                                ),
+                              ),
+                            ),
+                            FilledButton.icon(
                               onPressed: busy ? null : () => run(entry.value),
-                              child: const Text('Activate'),
-                            ),
-                            TextButton(
-                              key: Key('edit-scene-${entry.key}'),
-                              onPressed: busy
-                                  ? null
-                                  : () => create(true, existingName: entry.key),
-                              child: const Text('Edit scene'),
-                            ),
-                            TextButton(
-                              onPressed: busy
-                                  ? null
-                                  : () => remove(entry.key, true),
-                              child: const Text('Delete scene'),
+                              icon: const Icon(Icons.play_arrow_rounded),
+                              label: const Text('Activate'),
                             ),
                           ],
                         ),
@@ -896,10 +982,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   ),
                 ),
-              const SizedBox(height: 12),
-              const Text(
-                'Lights are controlled one at a time. Changes are not simultaneous. Scene colors use each light’s current calibration.',
-              ),
             ],
           ],
         ),
