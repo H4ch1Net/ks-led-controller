@@ -93,8 +93,6 @@ python led_control.py scan --json
 
 For the interactive terminal menu, run `python led_menu.py`. See the [CLI guide](docs/v2/CLI_GUIDE.md), [hub service setup](docs/v2/SERVICE_DEPLOYMENT.md), [Android build instructions](apps/android/README.md), and [source packaging guide](release/README.md).
 
-During release preparation the candidate work is on `ks-light-v2-foundation` locally. The default GitHub branch may still show the earlier CLI-only version until the source PR is merged. The [release plan](docs/v2/GITHUB_RELEASE_PLAN.md) tracks that handoff.
-
 ## Contributing and reporting problems
 
 Include your app/plugin version, Android/OS version, lamp prefix, the steps that failed, and whether you used direct Bluetooth or the hub. Remove device addresses, tokens, Wi-Fi credentials and personal screenshots from public reports. For a new lamp, distinguish a successful protocol write from an observed physical response.

@@ -4,7 +4,7 @@ Updated 2026-09-27. This is the resume point; ROADMAP.md and earlier test notes 
 ## Delivery
 Distribution is GitHub-only APK sideloading; Google Play and AAB work are excluded. The current private candidate is `outputs/ks-light-github-2026-09-27/ks-light-1.2.1-build6-private.apk`: optimized release-mode APK with the new launcher icon, signed with the existing development certificate for upgrade compatibility. Build 5 remains the user-tested behavior baseline. No phone was connected for build 6 installation; install over the existing app without uninstalling. Earlier outputs remain unchanged.
 
-Source is pushed to `ks-light-v2-foundation` and [PR #1](https://github.com/H4ch1Net/ks-led-controller/pull/1) is open. Git authentication works with the H4ch1Net credential selected explicitly; the connector's write permission still returns 403. Public APK signing and publication remain separate from the private candidate.
+Source is merged into `main` through [PR #1](https://github.com/H4ch1Net/ks-led-controller/pull/1). All five hosted workflows passed on source commit `881d7366ee45b5b7b7579ffb476b3ad4a8e0cd7a`. This final documentation update changes no application or build code. Git authentication works with the H4ch1Net credential selected explicitly; the connector's write permission still returns 403. Public APK signing and publication remain separate from the private candidate.
 
 ## Implemented
 - Build 6 replaces the Flutter template launcher with the KS Light bulb: five legacy densities, adaptive layers and Android themed-icon support. App behavior is unchanged from user-accepted build 5.
@@ -41,7 +41,7 @@ Source is pushed to `ks-light-v2-foundation` and [PR #1](https://github.com/H4ch
 - [x] User confirmed app testing is all good and authorized GitHub delivery. Detailed optional coverage is not a request to repeat accepted tests.
 - [x] Standard Stream Deck power/color/effect, repeat delivery speed and compensated color accepted by the user.
 - [ ] Optional hardware: multiple lights/partial failures, keyboard/dials, Pi/ESP32 wiring and USB configuration. See DEFERRED_HARDWARE_CHECKS.md.
-- [x] GitHub: pushed the branch and opened draft PR #1.
+- [x] GitHub: merged PR #1 after all five hosted workflows passed.
 - Hosted CI: [PR #1 checks](https://github.com/H4ch1Net/ks-led-controller/pull/1/checks) are the authoritative final-commit results. App tests are not a request for another manual phone pass.
 - [ ] Real deployment: persistent Windows/Linux/Pi service and trusted wireless hub acceptance when that hardware/setup is available.
 
@@ -52,4 +52,4 @@ No desktop UI while the PC is in use; the phone was available for the redesign r
 
 The pinned Flutter build succeeds but warns that reactive_ble_mobile still uses the Kotlin Gradle plugin. Revisit migration before upgrading Flutter. Verification hashes detect changed dependencies; they are not an independent upstream audit. This delivery batch did not change the running hub or send physical lamp commands.
 
-Repository preparation: documentation uses generic host/device identifiers. CI runs on pull requests and main pushes, avoiding duplicate branch-push/PR work. The source PR is now open; public release publication is pending. Build 4 is the redesign checkpoint; build 5 adds saved colors, grouped effects and appearance choices.
+Repository preparation: documentation uses generic host/device identifiers. CI runs on pull requests and main pushes, avoiding duplicate branch-push/PR work. The source PR is merged; public release publication is pending. Build 4 is the redesign checkpoint; build 5 adds saved colors, grouped effects and appearance choices.
