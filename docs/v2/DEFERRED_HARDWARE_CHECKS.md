@@ -22,8 +22,9 @@ Updated 2026-09-27. All features below are implemented. Use the private 1.2.1/bu
 - [x] Physical named Reading key -> simulator and BLE; user confirmed Reading/Off/Purple work. Reading still looks white; warm color accuracy remains unverified.
 - [x] Adopt existing connection without entering paths; persist setup across app restart; visually inspect color swatches, hex and brightness; verify editing sends no hub command.
 - [x] User confirmed new Power/Color/Effect controls work; reported slow/intermittent delivery and washed colors.
-- [x] Connection reuse: user says speed is great; first operation 1.879 s, next ten 0.113–0.232 s with no failures in that sequence. This is a short physical check, not a long-duration reliability claim.
-- [ ] Color-response compensation: 0.6.1 maps picker warm orange to the user's demonstrated redder drive values; final shade feedback pending. Brightness and Scene hardware acceptance remain separate.
+- [x] Connection reuse: user says speed is great; first operation 1.879 s, next ten 0.113â€“0.232 s with no failures in that sequence. This is a short physical check, not a long-duration reliability claim.
+- [x] Color-response compensation: user confirmed the final 0.6.1 result works great and accepted the Stream Deck setup. This closes the current Power/Color/Effect, speed and color-compensation work.
+- [ ] Separate future coverage: Brightness and Scene hardware acceptance.
 - [ ] Multiple legacy connections, fresh shared setup, connection changes, per-key opt-out, offline/repeated presses and mixed group/scene status.
 - [ ] Dials: action preview/press and brightness preview/press, touch-strip layout, continuous dimming coalescing, busy input, configuration changes, failure pause and deliberate recovery. Preview begins at 50%, not a lamp reading.
 - [ ] Optional live display: external hub changes, mixed groups/scenes, offline/recovery, profile switches and reader cleanup. Display remains last-sent evidence.
