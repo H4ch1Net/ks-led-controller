@@ -1,0 +1,6 @@
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+ android:minWidth="160dp" android:minHeight="56dp" android:minResizeWidth="160dp" android:minResizeHeight="48dp"
+ android:targetCellWidth="2" android:targetCellHeight="1"
+ android:configure="dev.kslight.ks_light.WidgetSetupActivity" android:widgetFeatures="reconfigurable"
+ android:updatePeriodMillis="0" android:initialLayout="@layout/light_widget" android:previewLayout="@layout/light_widget"
+ android:initialKeyguardLayout="@layout/light_widget" android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen" />

@@ -1,0 +1,21 @@
+[Unit]
+Description=KS Light hub
+After=network-online.target bluetooth.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=kslight
+WorkingDirectory=/opt/ks-light
+ExecStartPre=/opt/ks-light/.venv/bin/python -m ks_light.service --config /etc/ks-light/hub.json --check
+ExecStart=/opt/ks-light/.venv/bin/python -m ks_light.service --config /etc/ks-light/hub.json
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=30
+UMask=0077
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

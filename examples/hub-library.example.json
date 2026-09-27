@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "groups": [
+    {
+      "id": "room",
+      "name": "Room",
+      "members": [
+        "desk",
+        "sofa"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "evening",
+      "name": "Evening",
+      "actions": [
+        {
+          "light": "desk",
+          "type": "state",
+          "body": {
+            "power": true,
+            "rgb": [
+              255,
+              190,
+              120
+            ],
+            "brightness": 35
+          }
+        },
+        {
+          "light": "sofa",
+          "type": "native",
+          "body": {
+            "effect": 137,
+            "speed": 35,
+            "brightness": 25
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-off",
+      "name": "All off",
+      "actions": [
+        {
+          "light": "desk",
+          "type": "state",
+          "body": {
+            "power": false
+          }
+        },
+        {
+          "light": "sofa",
+          "type": "state",
+          "body": {
+            "power": false
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 KS Smart LED Control Menu - Interactive BLE controller for KS LED devices.
 
 Supports:
-- Multiple device types (KS01-06, ceiling/floor lamps)
+- Five inherited color profiles (hardware verification pending)
 - RGB color control with presets
 - Brightness adjustment (floor lamps)
 - Device nicknames for easy identification
@@ -20,28 +20,25 @@ import json
 import os
 import sys
 from pathlib import Path
+from ks_light.storage import read_json, write_json, validate_presets, StateStore
+from ks_light.controls import prepare_color
 
 try:
-    from bleak import BleakClient, BleakScanner
+    from bleak import BleakScanner
+    from ks_light.transport import write_sequence
 except ImportError:
     print("❌ Please install bleak: pip install bleak")
     sys.exit(1)
 
-# UUID template
-UUID_TEMPLATE = "0000%s-0000-1000-8000-00805f9b34fb"
-
 # Device mappings
-DEVICE_MAPPINGS = {
-    "KS03-": {"service": "FFF0", "write": "FFF3", "type": "ceiling"},
-    "KS03~": {"service": "AFD0", "write": "AFD1", "type": "floor"},
-    "KS04-": {"service": "FFF0", "write": "FFF3", "type": "ceiling"},
-    "KS01-": {"service": "AE00", "write": "AE01", "type": "ceiling"},
-    "KS02-": {"service": "AE00", "write": "AE01", "type": "ceiling"},
-}
+from ks_light.profiles import DEVICE_MAPPINGS
+from ks_light.protocol import power as build_on_off_cmd
+from ks_light.protocol import color as build_color_cmd, white_brightness
 
 # Presets file
 PRESETS_FILE = Path.home() / ".ks_led_presets.json"
 DEVICES_FILE = Path.home() / ".ks_led_devices.json"
+STATE_FILE = Path.home() / ".ks_led_state.json"
 
 # Default presets
 DEFAULT_PRESETS = {
@@ -79,22 +76,19 @@ class Colors:
         return f"\033[38;2;{r};{g};{b}m"
 
 def load_presets():
-    """Load presets from file or return defaults."""
-    if PRESETS_FILE.exists():
-        try:
-            with open(PRESETS_FILE, 'r') as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return DEFAULT_PRESETS.copy()
+    try:
+        return read_json(PRESETS_FILE, validate_presets, DEFAULT_PRESETS)
+    except (ValueError, OSError) as error:
+        print(f"Preset file needs repair; using defaults without overwriting it: {error}")
+        return {name: rgb.copy() for name, rgb in DEFAULT_PRESETS.items()}
 
 def save_presets(presets):
-    """Save presets to file."""
     try:
-        with open(PRESETS_FILE, 'w') as f:
-            json.dump(presets, f, indent=2)
-    except Exception as e:
-        print(f"⚠️  Could not save presets: {e}")
+        write_json(PRESETS_FILE, presets, validate_presets)
+        return True
+    except (ValueError, OSError) as error:
+        print(f"Could not save presets: {error}")
+        return False
 
 def load_devices():
     """Load device nicknames from file."""
@@ -120,38 +114,6 @@ def get_device_display_name(addr, name, nicknames):
         return f"{nicknames[addr]} ({name})"
     return name
 
-def build_on_off_cmd(is_on: bool) -> bytes:
-    """Build ON/OFF command (from CmdFloor.getTopOn)."""
-    return bytes.fromhex("5BF001B5" if is_on else "5B0F01B5")
-
-def build_color_cmd(r: int, g: int, b: int, device_type: str = "ceiling", brightness: int = 255) -> bytes:
-    """
-    Build RGB color command for KS LED devices.
-    
-    Args:
-        r: Red value (0-255)
-        g: Green value (0-255)
-        b: Blue value (0-255)
-        device_type: "ceiling" or "floor" lamp type
-        brightness: Brightness value (0-255)
-    
-    Returns:
-        Bytes command to send to device
-    
-    Command formats:
-        Ceiling: 7E070503RRGGBB00EF
-        Floor:   5A0001RRGGBB00BB00A5 (with brightness control)
-    """
-    if device_type == "floor":
-        rgb_hex = f"{r:02X}{g:02X}{b:02X}"
-        brightness_hex = f"{brightness:02X}"
-        cmd_str = f"5A0001{rgb_hex}00{brightness_hex}00A5"
-    else:
-        rgb_hex = f"{r:02X}{g:02X}{b:02X}"
-        cmd_str = f"7E070503{rgb_hex}00EF"
-    
-    return bytes.fromhex(cmd_str)
-
 async def scan_devices(timeout=8.0):
     """Scan for KS devices and return list of (address, name, prefix)."""
     devices = []
@@ -166,33 +128,8 @@ async def scan_devices(timeout=8.0):
     
     return devices
 
-async def write_command(address: str, service_short: str, char_short: str, payload: bytes):
-    """Write command to BLE device."""
-    service_uuid = UUID_TEMPLATE % service_short
-    char_uuid = UUID_TEMPLATE % char_short
-    
-    client = BleakClient(address)
-    try:
-        await client.connect()
-        if not client.is_connected:
-            raise RuntimeError("Failed to connect")
-        
-        await asyncio.sleep(0.3)
-        
-        # Try write without response first (preferred for KS devices)
-        try:
-            await client.write_gatt_char(char_uuid, payload, response=False)
-        except Exception:
-            # Fallback to write with response
-            await client.write_gatt_char(char_uuid, payload, response=True)
-        
-        await asyncio.sleep(0.2)
-    finally:
-        if client.is_connected:
-            try:
-                await client.disconnect()
-            except Exception:
-                pass
+async def write_command(address, service_short, char_short, payload):
+    await write_sequence(address, service_short, char_short, [payload])
 
 def clear_screen():
     """Clear terminal screen."""
@@ -254,40 +191,33 @@ def get_input(prompt, valid_choices=None):
         print(f"{Colors.RED}Invalid choice. Try again.{Colors.RESET}")
 
 async def send_command(device, payload, action_name, is_color=False):
-    """Send command to device with visual feedback."""
     addr, name, prefix = device
     mapping = DEVICE_MAPPINGS[prefix]
-    
-    print(f"\n{Colors.BLUE}⏳ Sending {action_name}...{Colors.RESET}")
-    
+    print(f"Sending {action_name}...")
+    payloads = [build_on_off_cmd(True), payload] if is_color else [payload]
     try:
-        if is_color:
-            # For color commands, keep connection open for ON + color sequence
-            char_uuid = UUID_TEMPLATE % mapping["write"]
-            
-            client = BleakClient(addr)
-            await client.connect()
-            await asyncio.sleep(0.3)
-            
-            # Send ON command first
-            on_cmd = build_on_off_cmd(True)
-            await client.write_gatt_char(char_uuid, on_cmd, response=False)
-            await asyncio.sleep(0.5)
-            
-            # Send color command on same connection
-            await client.write_gatt_char(char_uuid, payload, response=False)
-            await asyncio.sleep(0.2)
-            
-            await client.disconnect()
-        else:
-            # Regular commands use standard write
-            await write_command(addr, mapping["service"], mapping["write"], payload)
-        
-        print(f"{Colors.GREEN}✓ {action_name} sent successfully!{Colors.RESET}")
+        await write_sequence(addr, mapping["service"], mapping["write"], payloads)
+        print(f"{action_name} sent (device state unconfirmed).")
+        return True
     except Exception as e:
-        print(f"{Colors.RED}✗ Failed: {e}{Colors.RESET}")
-    
-    await asyncio.sleep(1)
+        print(f"Failed: {e}")
+        return False
+
+async def apply_rgb(device, action_name, rgb=None, brightness=None):
+    addr, name, prefix = device
+    store = StateStore(STATE_FILE)
+    try:
+        payload, rgb, brightness = prepare_color(prefix, store.get(addr, prefix), rgb, brightness)
+    except (ValueError, OSError) as error:
+        print(f"Cannot apply settings: {error}")
+        return False
+    if not await send_command(device, payload, action_name, is_color=True):
+        return False
+    try:
+        store.put(addr, prefix, rgb, brightness)
+    except (ValueError, OSError) as error:
+        print(f"Command sent, but settings could not be saved: {error}")
+    return True
 
 async def color_preset_menu(device, presets):
     """Handle color preset selection."""
@@ -310,8 +240,7 @@ async def color_preset_menu(device, presets):
             if 0 <= idx < len(items):
                 name, rgb = items[idx]
                 r, g, b = rgb['r'], rgb['g'], rgb['b']
-                cmd = build_color_cmd(r, g, b, device_type)
-                await send_command(device, cmd, f"{name} color", is_color=True)
+                await apply_rgb(device, f"{name} color", [r, g, b])
             else:
                 print(f"{Colors.RED}Invalid preset number{Colors.RESET}")
                 await asyncio.sleep(1)
@@ -345,8 +274,7 @@ async def custom_color_menu(device):
         
         confirm = get_input("Send this color? (y/n): ", ['y', 'n', 'yes', 'no'])
         if confirm in ['y', 'yes']:
-            cmd = build_color_cmd(r, g, b, device_type)
-            await send_command(device, cmd, "custom color", is_color=True)
+            await apply_rgb(device, "custom color", [r, g, b])
             
             # Offer to save as preset
             save = get_input("Save as preset? (y/n): ", ['y', 'n', 'yes', 'no'])
@@ -355,8 +283,8 @@ async def custom_color_menu(device):
                 if name:
                     presets = load_presets()
                     presets[name] = {"r": r, "g": g, "b": b}
-                    save_presets(presets)
-                    print(f"{Colors.GREEN}✓ Saved as '{name}'{Colors.RESET}")
+                    if save_presets(presets):
+                        print(f"{Colors.GREEN}✓ Saved as '{name}'{Colors.RESET}")
                     await asyncio.sleep(1.5)
     
     except ValueError:
@@ -409,11 +337,7 @@ async def brightness_menu(device):
     
     if brightness is not None:
         if device_type == "floor":
-            # White mode format for floor lamps
-            brightness_hex = f"{brightness:02X}"
-            cmd_str = f"5A000200000000{brightness_hex}00A5"
-            cmd = bytes.fromhex(cmd_str)
-            await send_command(device, cmd, f"brightness {brightness}", is_color=True)
+            await apply_rgb(device, f"brightness {brightness}", brightness=brightness)
         else:
             print(f"{Colors.YELLOW}⚠️  Brightness control not yet supported for ceiling lights{Colors.RESET}")
             await asyncio.sleep(2)
@@ -448,8 +372,8 @@ async def manage_presets_menu():
                 
                 if all(0 <= x <= 255 for x in (r, g, b)):
                     presets[name] = {"r": r, "g": g, "b": b}
-                    save_presets(presets)
-                    print(f"{Colors.GREEN}✓ Preset '{name}' added{Colors.RESET}")
+                    if save_presets(presets):
+                        print(f"{Colors.GREEN}✓ Preset '{name}' added{Colors.RESET}")
                 else:
                     print(f"{Colors.RED}Invalid values{Colors.RESET}")
             except ValueError:
@@ -469,8 +393,8 @@ async def manage_presets_menu():
                         confirm = get_input(f"Delete '{name}'? (y/n): ", ['y', 'n'])
                         if confirm == 'y':
                             del presets[name]
-                            save_presets(presets)
-                            print(f"{Colors.GREEN}✓ Deleted{Colors.RESET}")
+                            if save_presets(presets):
+                                print(f"{Colors.GREEN}✓ Deleted{Colors.RESET}")
                             await asyncio.sleep(1)
             except ValueError:
                 pass
@@ -479,8 +403,8 @@ async def manage_presets_menu():
             # Reset to defaults
             confirm = get_input("Reset all presets to defaults? (y/n): ", ['y', 'n'])
             if confirm == 'y':
-                save_presets(DEFAULT_PRESETS)
-                print(f"{Colors.GREEN}✓ Reset to defaults{Colors.RESET}")
+                if save_presets(DEFAULT_PRESETS):
+                    print(f"{Colors.GREEN}✓ Reset to defaults{Colors.RESET}")
                 await asyncio.sleep(1.5)
                 break
 
@@ -583,6 +507,7 @@ async def main():
             presets = load_presets()  # Reload in case of changes
         elif choice == '4':
             await custom_color_menu(device)
+            presets = load_presets()
         elif choice == '5':
             await brightness_menu(device)
         elif choice == '6':

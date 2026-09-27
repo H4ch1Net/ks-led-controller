@@ -1,0 +1,32 @@
+name: Stream Deck controller
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/streamdeck/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --require-hashes -r requirements.lock
+      - run: npm ci
+        working-directory: apps/streamdeck
+      - run: npm test
+        working-directory: apps/streamdeck
+      - run: npm run build
+        working-directory: apps/streamdeck
+      - run: npm run validate
+        working-directory: apps/streamdeck
+      - run: python -m apps.streamdeck.test.smoke
+      - run: npm run pack -- --force
+        working-directory: apps/streamdeck

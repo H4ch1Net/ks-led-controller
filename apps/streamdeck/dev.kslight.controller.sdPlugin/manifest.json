@@ -1,0 +1,97 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "Actions": [
+    {
+      "UUID": "dev.kslight.controller.run",
+      "Name": "Run light action",
+      "Tooltip": "Run a named KS Light hub action and show delivery feedback.",
+      "Icon": "imgs/light",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/settings.html",
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Title": "KS Light",
+          "TitleAlignment": "bottom",
+          "FontSize": 12
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.dial",
+      "Name": "Choose light action",
+      "Tooltip": "Turn to choose an action; press to run it.",
+      "Icon": "imgs/light",
+      "Controllers": [
+        "Encoder"
+      ],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Rotate": "Choose action",
+          "Push": "Run selected action"
+        }
+      },
+      "PropertyInspectorPath": "ui/dial.html",
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Title": "KS Light"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.brightness",
+      "Name": "Choose brightness",
+      "Tooltip": "Turn to choose brightness; press to apply a configured color or effect.",
+      "Icon": "imgs/light",
+      "Controllers": [
+        "Encoder"
+      ],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Rotate": "Choose brightness",
+          "Push": "Apply color/effect at chosen level"
+        }
+      },
+      "PropertyInspectorPath": "ui/brightness.html",
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Title": "KS Light"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    }
+  ],
+  "Author": "KS Light contributors",
+  "CodePath": "bin/plugin.js",
+  "Description": "Local KS Light hub actions with delivery feedback. Requires the KS Light Python controller.",
+  "Icon": "imgs/plugin",
+  "Name": "KS Light",
+  "Nodejs": {
+    "Version": "20"
+  },
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "UUID": "dev.kslight.controller",
+  "Version": "0.5.0.0",
+  "SDKVersion": 3,
+  "Software": {
+    "MinimumVersion": "7.1"
+  },
+  "Category": "KS Light",
+  "CategoryIcon": "imgs/light"
+}

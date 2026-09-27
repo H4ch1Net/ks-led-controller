@@ -1,0 +1,10 @@
+{
+  "debounce_ms": 50,
+  "buttons": [
+    {"pin": 17, "action": "desk-on"},
+    {"pin": 27, "action": "desk-off"},
+    {"pin": 22, "action": "reading"},
+    {"pin": 23, "action": "purple-breathing"}
+  ],
+  "status_leds": {"sending": 24, "completed": 25, "error": 26}
+}

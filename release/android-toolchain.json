@@ -1,0 +1,39 @@
+{
+  "gradle_version": "9.3.1",
+  "distribution_sha256": "17f277867f6914d61b1aa02efab1ba7bb439ad652ca485cd8ca6842fccec6e43",
+  "wrapper_sha256": "b3a875ddc1f044746e1b1a55f645584505f4a10438c1afea9f15e92a7c42ec13",
+  "platform_artifacts": [
+    {
+      "group": "com.android.tools.build",
+      "name": "aapt2",
+      "version": "9.1.0-14792394",
+      "artifact": "aapt2-9.1.0-14792394-windows.jar",
+      "url": "https://dl.google.com/dl/android/maven2/com/android/tools/build/aapt2/9.1.0-14792394/aapt2-9.1.0-14792394-windows.jar",
+      "sha256": "e27e3c895bfb9698c956d5e35c514570a0f084874c081d95a690181a606dbe10"
+    },
+    {
+      "group": "com.android.tools.build",
+      "name": "aapt2",
+      "version": "9.1.0-14792394",
+      "artifact": "aapt2-9.1.0-14792394-linux.jar",
+      "url": "https://dl.google.com/dl/android/maven2/com/android/tools/build/aapt2/9.1.0-14792394/aapt2-9.1.0-14792394-linux.jar",
+      "sha256": "e7ae17af6e4093c771243e82d66462353de87befaac206bfb43e557ac1c34440"
+    },
+    {
+      "group": "com.android.tools.build",
+      "name": "aapt2",
+      "version": "9.1.0-14792394",
+      "artifact": "aapt2-9.1.0-14792394.pom",
+      "url": "https://dl.google.com/dl/android/maven2/com/android/tools/build/aapt2/9.1.0-14792394/aapt2-9.1.0-14792394.pom",
+      "sha256": "038bb533d0332d08cdf556892a4094a922767f0e5610d4dec1c08ffee5af06ab"
+    },
+    {
+      "group": "com.google.protobuf",
+      "name": "protoc",
+      "version": "3.25.3",
+      "artifact": "protoc-3.25.3-linux-x86_64.exe",
+      "url": "https://repo.maven.apache.org/maven2/com/google/protobuf/protoc/3.25.3/protoc-3.25.3-linux-x86_64.exe",
+      "sha256": "e718992c5733ece01264f160c0890229770791e51c9612a2b34dc17f83ab3773"
+    }
+  ]
+}

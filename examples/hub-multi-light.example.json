@@ -1,0 +1,16 @@
+{
+  "lights": [
+    {
+      "id": "desk",
+      "name": "Desk light",
+      "prefix": "KS03~",
+      "address": "REPLACE_WITH_DESK_ADDRESS"
+    },
+    {
+      "id": "sofa",
+      "name": "Sofa light",
+      "prefix": "KS03~",
+      "address": "REPLACE_WITH_SOFA_ADDRESS"
+    }
+  ]
+}

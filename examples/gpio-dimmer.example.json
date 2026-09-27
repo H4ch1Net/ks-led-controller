@@ -1,0 +1,4 @@
+{
+  "debounce_ms": 50,
+  "encoders": [{"a": 5, "b": 6, "press": 13, "brightness_action": "reading"}]
+}

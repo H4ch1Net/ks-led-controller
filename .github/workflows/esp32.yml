@@ -1,0 +1,23 @@
+name: ESP32 controller
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test portable controller logic
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Werror apps/esp32/test/native/core_test.cpp -o /tmp/ks-esp32-test
+          /tmp/ks-esp32-test
+      - run: python -m pip install platformio==6.1.18
+      - name: Compile classic ESP32 DevKit dry-run, selector and dimmer variants
+        working-directory: apps/esp32
+        run: pio run

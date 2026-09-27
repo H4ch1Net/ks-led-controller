@@ -1,0 +1,61 @@
+name: Android and hub contract
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install the verified Flutter SDK revision
+        shell: bash
+        run: |
+          git clone --depth 1 --branch 3.47.5 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          test "$(git -C "$RUNNER_TEMP/flutter" rev-parse HEAD)" = "6a19cca56475dbfba1478ee68d7bd0c2ef891da1"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: Install Android SDK components
+        run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "platforms;android-35" "build-tools;36.0.0" "ndk;28.2.13676358"'
+      - run: python -m pip install --require-hashes -r requirements.lock
+      - name: Verify Android bootstrap and platform pins
+        run: python -m ks_light.build_toolchain
+      - run: flutter --no-version-check pub get --enforce-lockfile
+        working-directory: apps/android
+      - run: flutter --no-version-check analyze --no-pub
+        working-directory: apps/android
+      - run: flutter --no-version-check test --no-pub
+        working-directory: apps/android
+      - run: python -m apps.android.tool.smoke_hub --dart "$RUNNER_TEMP/flutter/bin/cache/dart-sdk/bin/dart"
+      - run: flutter --no-version-check build apk --debug --no-pub
+        working-directory: apps/android
+      - name: Native shortcut routing tests
+        run: bash gradlew :app:testDebugUnitTest --console=plain --max-workers=2
+        working-directory: apps/android/android
+      - name: Validate release assembly with disposable signing
+        shell: bash
+        working-directory: apps/android
+        run: |
+          set -euo pipefail
+          test ! -e android/key.properties
+          validation_dir=$(mktemp -d)
+          trap 'rm -f android/key.properties "$validation_dir/validation.jks"; rmdir "$validation_dir"' EXIT
+          export KS_VALIDATION_PASSWORD=$(python -c 'import secrets; print(secrets.token_hex(32))')
+          keytool -genkeypair -noprompt -keystore "$validation_dir/validation.jks" \
+            -storepass:env KS_VALIDATION_PASSWORD -keypass:env KS_VALIDATION_PASSWORD \
+            -alias validation-only -dname "CN=Disposable CI build validation" \
+            -keyalg RSA -keysize 2048 -validity 2
+          printf 'storeFile=%s\nstorePassword=%s\nkeyAlias=validation-only\nkeyPassword=%s\n' \
+            "$validation_dir/validation.jks" "$KS_VALIDATION_PASSWORD" "$KS_VALIDATION_PASSWORD" > android/key.properties
+          chmod 600 android/key.properties
+          flutter --no-version-check build apk --release --no-pub
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify build/app/outputs/flutter-apk/app-release.apk

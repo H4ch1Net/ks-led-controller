@@ -1,0 +1,17 @@
+{
+  "lights": [
+    {
+      "id": "desk",
+      "name": "Desk light",
+      "prefix": "KS03~",
+      "address": "REPLACE_WITH_BLUETOOTH_ADDRESS",
+      "calibration": {
+        "rgb_gains": [
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  ]
+}

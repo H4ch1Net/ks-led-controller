@@ -1,0 +1,107 @@
+[
+  {
+    "prefix": "KS03-",
+    "service": "FFF0",
+    "write": "FFF3",
+    "color_type": "ceiling",
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS04-",
+    "service": "FFF0",
+    "write": "FFF3",
+    "color_type": "ceiling",
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS03~",
+    "service": "AFD0",
+    "write": "AFD1",
+    "color_type": "floor",
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS01-",
+    "service": "AE00",
+    "write": "AE01",
+    "color_type": "ceiling",
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS02-",
+    "service": "AE00",
+    "write": "AE01",
+    "color_type": "ceiling",
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS04~",
+    "service": "AE00",
+    "write": "AE10",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS05-",
+    "service": "AE00",
+    "write": "AE02",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS07-",
+    "service": "AE00",
+    "write": "AE10",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS08-",
+    "service": "AE00",
+    "write": "AE10",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS09-",
+    "service": "AE00",
+    "write": "AE10",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS10-",
+    "service": "AE00",
+    "write": "AE10",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS11-",
+    "service": "AE00",
+    "write": "AE10",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS12-",
+    "service": "AE00",
+    "write": "AE10",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS13-",
+    "service": "AE00",
+    "write": "AE10",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  },
+  {
+    "prefix": "KS15~",
+    "service": "AFD0",
+    "write": "AFD3",
+    "color_type": null,
+    "evidence": "inherited_unverified"
+  }
+]

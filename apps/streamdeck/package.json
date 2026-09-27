@@ -1,0 +1,19 @@
+{
+  "name": "ks-light-streamdeck",
+  "version": "0.5.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test",
+    "validate": "streamdeck validate dev.kslight.controller.sdPlugin",
+    "pack": "streamdeck pack dev.kslight.controller.sdPlugin"
+  },
+  "dependencies": {
+    "@elgato/streamdeck": "3.0.0"
+  },
+  "devDependencies": {
+    "@elgato/cli": "1.10.0",
+    "esbuild": "0.28.2"
+  }
+}

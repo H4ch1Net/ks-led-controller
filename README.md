@@ -4,7 +4,7 @@
 
 **Open-source Bluetooth controller for KS LED lights**
 
-[![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](https://github.com/hbldh/bleak)
 
@@ -17,6 +17,13 @@
 ---
 
 ## 📖 About
+
+### Version 2 development
+
+The [v2 planning pack](docs/v2/README.md) defines Android, KS Hub, the local API,
+effects, Home Assistant, Stream Deck and DIY controllers. These features are
+planned; see the [working status](docs/v2/ROADMAP.md) for implemented changes and
+the [development handoff](docs/v2/DEVELOPMENT.md) for tests.
 
 This project was born out of necessity. The **KeepSmile app was removed from the Google Play Store**, and the **KS Smart Light app has numerous bugs and security concerns**. Rather than dealing with unreliable or unavailable software, this open-source controller provides a stable, privacy-respecting alternative for controlling KS LED devices via Bluetooth Low Energy (BLE).
 
@@ -85,7 +92,7 @@ This project was born out of necessity. The **KeepSmile app was removed from the
 
 ### Requirements
 
-- **Python 3.7+**
+- **Python 3.10+**
 - **Bluetooth adapter** with BLE support
 - **Operating System**: Linux, macOS, or Windows 10/11
 
@@ -93,11 +100,11 @@ This project was born out of necessity. The **KeepSmile app was removed from the
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ks-led-controller.git
+git clone https://github.com/H4ch1Net/ks-led-controller.git
 cd ks-led-controller
 
 # Install dependencies
-pip install -r requirements.txt
+pip install --require-hashes -r requirements.lock
 
 # Run the interactive menu
 python3 led_menu.py
@@ -106,7 +113,7 @@ python3 led_menu.py
 ### Manual Install
 
 ```bash
-pip install bleak>=0.21.0
+pip install bleak==3.0.2
 ```
 
 ---
@@ -127,16 +134,18 @@ python3 led_menu.py
 - 🏷️ Device nicknames
 - 🔄 Easy device switching
 
+See the [updated CLI guide](docs/v2/CLI_GUIDE.md) for discovery, RGB and color-preserving brightness commands.
+
 ### Command Line Interface
 
 Perfect for automation and scripting:
 
 ```bash
 # Turn on
-python3 led_control.py on KS03~ --address BE:60:4D:00:58:37
+python3 led_control.py on KS03~ --address AA:BB:CC:DD:EE:FF
 
 # Turn off
-python3 led_control.py off KS03~ --address BE:60:4D:00:58:37
+python3 led_control.py off KS03~ --address AA:BB:CC:DD:EE:FF
 
 # Auto-scan and control
 python3 led_control.py on KS03~
@@ -234,7 +243,7 @@ Green:  7E07050300FF0000EF
 ```
 25% brightness:   5A0002000000004000A5
 50% brightness:   5A0002000000008000A5
-100% brightness:  5A00020000000FF00A5
+100% brightness:  5A000200000000FF00A5
 ```
 </details>
 
@@ -265,7 +274,7 @@ Green:  7E07050300FF0000EF
 # led.sh - Simple wrapper script
 
 DEVICE="KS03~"
-ADDRESS="BE:60:4D:00:58:37"
+ADDRESS="AA:BB:CC:DD:EE:FF"
 
 case "$1" in
   on)
@@ -383,3 +392,21 @@ This project is released under the MIT License. See [LICENSE](LICENSE) for detai
 If this project helped you, consider giving it a ⭐ on GitHub!
 
 </div>
+
+### Local hub API preview
+An authenticated local API and simulator are available via `python -m ks_light.hub`. See [Hub API setup and supported routes](docs/v2/HUB_API.md). MQTT/Home Assistant and optional trusted TLS service deployment are also available.
+
+### Home Assistant bridge
+The optional MQTT 5 bridge shares the local hub queue and publishes Home Assistant discovery. See [setup and validation](docs/v2/HOME_ASSISTANT.md).
+
+### Continuous hub operation
+See [service deployment](docs/v2/SERVICE_DEPLOYMENT.md) for configuration checks, runtime locking, rotating logs, and deployment helpers.
+
+### Raspberry Pi buttons
+Map physical GPIO buttons to named hub actions using `python -m ks_light.gpio_controller`. Supports debounce, no-backlog dispatch and hardware-free dry-run simulation. See [setup and validation](docs/v2/RASPBERRY_PI_BUTTONS.md). Physical Pi acceptance remains pending.
+
+### ESP32/Arduino buttons
+[Four-button ESP32 firmware](apps/esp32/README.md) controls the hub through verified HTTPS. Includes a no-network dry-run build, pinned PlatformIO configuration and host tests. Physical board acceptance remains pending.
+
+### Groups and scenes through the hub
+Define a shared room or scene once and run it from Android Hub control, Stream Deck, keyboard launchers or Pi buttons. See [configuration, API and failure behavior](docs/v2/HUB_LIBRARY.md). Multi-light physical acceptance remains pending.

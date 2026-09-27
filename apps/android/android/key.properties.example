@@ -1,0 +1,6 @@
+# Copy to key.properties, which must remain private. Use forward slashes on Windows.
+# Use an existing release key or create and securely back up your own signing key.
+storeFile=C:/private/ks-light-release.jks
+storePassword=
+keyAlias=ks-light
+keyPassword=

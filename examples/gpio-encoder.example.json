@@ -1,0 +1,8 @@
+{
+  "debounce_ms": 50,
+  "buttons": [],
+  "encoders": [
+    {"a": 5, "b": 6, "press": 13, "actions": ["desk-on", "reading", "purple-breathing", "desk-off"]}
+  ],
+  "status_leds": {"sending": 24, "completed": 25, "error": 26}
+}
