@@ -34,10 +34,10 @@ Existing workflows already cover the required areas:
 | `esp32.yml` | Portable C++ logic and all three firmware compile configurations |
 | `source-package.yml` | Source inventory/package checks and equal Windows/Linux archive bytes |
 
-- [ ] Let checks run on the final PR commit. Investigate failures; do not repeatedly rerun already-passing suites for documentation changes.
+- [x] All five workflows passed on `881d7366ee45b5b7b7579ffb476b3ad4a8e0cd7a`. The post-merge documentation cleanup changes no application/build code and does not repeat those suites.
 - [ ] Treat disposable CI signing as assembly validation only. Those APKs must never become public update assets.
 - [x] Verified the remote README and all seven image files against local bytes; visually reviewed the icon and six screenshots.
-- [ ] Review and merge only after required checks pass. A future release workflow can be added when the permanent signing setup is decided; it is not needed to plan this release.
+- [x] PR #1 merged after checks passed. Public APK signing and publication remain separate.
 
 ## 3. Decide and preserve the Android signing identity
 
