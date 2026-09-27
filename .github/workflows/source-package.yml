@@ -1,0 +1,38 @@
+name: Repeatable source package
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Focused archive checks
+        run: python -m unittest tests.test_source_package
+      - name: Create and verify reviewed source archive
+        run: |
+          python -m ks_light.source_package --check-inventory
+          python -m ks_light.source_package --output dist/ks-light-source.zip
+          python -m ks_light.source_package --verify dist/ks-light-source.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: source-${{ matrix.os }}
+          path: dist/ks-light-source.zip
+  compare:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: candidates
+      - name: Compare Windows and Linux bytes
+        run: cmp candidates/source-ubuntu-latest/ks-light-source.zip candidates/source-windows-latest/ks-light-source.zip

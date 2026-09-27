@@ -1,0 +1,11 @@
+{
+  "hub_url": "http://127.0.0.1:8765/api/v1",
+  "token_file": "controller-token.txt",
+  "timeout_seconds": 20,
+  "actions": {
+    "desk-on": {"light": "desk", "type": "state", "body": {"power": true}},
+    "desk-off": {"light": "desk", "type": "state", "body": {"power": false}},
+    "reading": {"light": "desk", "type": "state", "body": {"power": true, "rgb": [255, 190, 120], "brightness": 50}},
+    "purple-breathing": {"light": "desk", "type": "native", "body": {"effect": 137, "speed": 35, "brightness": 50}}
+  }
+}

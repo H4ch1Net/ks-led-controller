@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "mode": "simulation",
+  "port": 8765,
+  "lights_file": "lights.json",
+  "token_file": "api-token.txt",
+  "runtime_dir": "runtime",
+  "persist_state": false
+}

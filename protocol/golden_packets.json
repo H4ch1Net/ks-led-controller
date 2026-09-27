@@ -1,0 +1,13 @@
+[
+  {"name":"on","encoder":"power","args":[true],"hex":"5BF001B5"},
+  {"name":"off","encoder":"power","args":[false],"hex":"5B0F01B5"},
+  {"name":"standard red","encoder":"color","args":[255,0,0],"hex":"7E070503FF000000EF"},
+  {"name":"standard blue","encoder":"color","args":[0,0,255],"hex":"7E0705030000FF00EF"},
+  {"name":"standard black","encoder":"color","args":[0,0,0],"hex":"7E07050300000000EF"},
+  {"name":"standard white","encoder":"color","args":[255,255,255],"hex":"7E070503FFFFFF00EF"},
+  {"name":"extended red","encoder":"color","args":[255,0,0,"floor",255],"hex":"5A0001FF000000FF00A5"},
+  {"name":"extended dim blue","encoder":"color","args":[0,0,255,"floor",127],"hex":"5A00010000FF007F00A5"},
+  {"name":"extended zero brightness","encoder":"color","args":[255,255,255,"floor",0],"hex":"5A0001FFFFFF000000A5"},
+  {"name":"white full","encoder":"white_brightness","args":[255],"hex":"5A000200000000FF00A5"},
+  {"name":"white zero","encoder":"white_brightness","args":[0],"hex":"5A0002000000000000A5"}
+]

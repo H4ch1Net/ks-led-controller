@@ -1,0 +1,197 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "Actions": [
+    {
+      "UUID": "dev.kslight.controller.power",
+      "Name": "Power",
+      "Tooltip": "Power for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/power",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/power",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        },
+        {
+          "Image": "imgs/power-on",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.color",
+      "Name": "Set Color",
+      "Tooltip": "Set Color for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/color",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/color",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.effect",
+      "Name": "Effect",
+      "Tooltip": "Effect for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/effect",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/effect",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.level",
+      "Name": "Brightness",
+      "Tooltip": "Brightness for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/level",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/level",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.scene",
+      "Name": "Scene",
+      "Tooltip": "Scene for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/scene",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/scene",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.run",
+      "Name": "Run light action",
+      "Tooltip": "Run a named KS Light hub action and show delivery feedback.",
+      "Icon": "imgs/light",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/settings.html",
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Title": "KS Light",
+          "TitleAlignment": "bottom",
+          "FontSize": 12
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.dial",
+      "Name": "Choose light action",
+      "Tooltip": "Turn to choose an action; press to run it.",
+      "Icon": "imgs/light",
+      "Controllers": [
+        "Encoder"
+      ],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Rotate": "Choose action",
+          "Push": "Run selected action"
+        }
+      },
+      "PropertyInspectorPath": "ui/dial.html",
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Title": "KS Light"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.brightness",
+      "Name": "Choose brightness",
+      "Tooltip": "Turn to choose brightness; press to apply a configured color or effect.",
+      "Icon": "imgs/light",
+      "Controllers": [
+        "Encoder"
+      ],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Rotate": "Choose brightness",
+          "Push": "Apply color/effect at chosen level"
+        }
+      },
+      "PropertyInspectorPath": "ui/brightness.html",
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Title": "KS Light"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    }
+  ],
+  "Author": "KS Light contributors",
+  "CodePath": "bin/plugin.js",
+  "Description": "Local KS Light hub actions with delivery feedback. Requires the KS Light Python controller.",
+  "Icon": "imgs/plugin",
+  "Name": "KS Light",
+  "Nodejs": {
+    "Version": "20"
+  },
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "UUID": "dev.kslight.controller",
+  "Version": "0.6.1.0",
+  "SDKVersion": 3,
+  "Software": {
+    "MinimumVersion": "7.1"
+  },
+  "Category": "KS Light",
+  "CategoryIcon": "imgs/light"
+}

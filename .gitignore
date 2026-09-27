@@ -14,7 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -48,3 +48,29 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb
+
+# Last sent RGB state
+.ks_led_state.json
+
+# Local MQTT discovery ownership manifest
+.ks_light_mqtt_*.json
+.ks_light_mqtt_*.tmp
+
+# Private service files
+.hub-local/
+
+# Stream Deck development
+node_modules/
+apps/streamdeck/dev.kslight.controller.sdPlugin/bin/
+*.streamDeckPlugin
+
+# ESP32 build cache and local credentials
+.pio/
+apps/esp32/include/ks_config.h
+apps/esp32/connection.private.json
+
+# Android release signing material
+.kotlin/
+key.properties
+*.jks
+*.keystore

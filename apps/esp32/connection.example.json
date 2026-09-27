@@ -1,0 +1,9 @@
+{
+  "wifi_ssid": "CHANGE_ME",
+  "wifi_password": "CHANGE_ME",
+  "hub_origin": "https://hub.example.invalid",
+  "hub_token": "CHANGE_ME_TO_A_SCOPED_CONTROL_TOKEN",
+  "light_id": "desk",
+  "hub_ca": "-----BEGIN CERTIFICATE-----\nREPLACE_WITH_YOUR_TRUSTED_CA_CERTIFICATE\n-----END CERTIFICATE-----",
+  "ntp_host": "pool.ntp.org"
+}
