@@ -74,3 +74,6 @@ apps/esp32/connection.private.json
 key.properties
 *.jks
 *.keystore
+*.p12
+*.pfx
+*.dpapi

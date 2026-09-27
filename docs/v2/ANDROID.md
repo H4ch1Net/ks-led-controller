@@ -1,5 +1,7 @@
 # Android prototype
 
+Historical implementation notes. For current public signing, version, installation and migration instructions, use [the Android guide](../../apps/android/README.md) and [current status](CURRENT_STATUS.md). Statements below about pending features/signing refer to earlier development checkpoints.
+
 ## Implemented
 Flutter app at apps/android. Starts in clearly labelled demo mode, with no real
 Bluetooth operations until demo mode is disabled and a scan is requested.

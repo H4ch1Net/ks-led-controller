@@ -4,7 +4,7 @@
 
 Local control for compatible KS Bluetooth lights, with an Android app and an optional hub for integrations. No cloud account is required for direct Bluetooth control.
 
-**Android 1.2.1 is available as a private APK candidate.** Public downloads will be on [GitHub Releases](https://github.com/H4ch1Net/ks-led-controller/releases) once published. No Google Play release is planned.
+**Android 1.2.1 / build 6 is available in the [first public prerelease](https://github.com/H4ch1Net/ks-led-controller/releases/tag/v1.2.1-rc.1).** Download `KS-Light-1.2.1.apk` from GitHub Releases. No Google Play release is planned.
 
 [Current status](docs/v2/CURRENT_STATUS.md) · [Release plan](docs/v2/GITHUB_RELEASE_PLAN.md) · [Documentation](docs/v2/README.md) · [MIT license](LICENSE)
 
@@ -43,13 +43,13 @@ App screens with demo lights and scenes. [How the screenshots are captured](docs
 
 Android 7.0 or later and a compatible Bluetooth light are required. A PC, Raspberry Pi or hub is **optional**.
 
-1. Obtain the APK from a maintainer-provided private candidate, or from this repository's [GitHub Releases](https://github.com/H4ch1Net/ks-led-controller/releases) when a release is published. Avoid APK mirrors.
+1. Download `KS-Light-1.2.1.apk` from the [GitHub prerelease](https://github.com/H4ch1Net/ks-led-controller/releases/tag/v1.2.1-rc.1). Avoid APK mirrors; verify it against `SHA256SUMS-public.txt`.
 2. Install the APK and grant Bluetooth access when requested. Older Android versions may also require location access for scanning.
 3. Choose **Add devices** / **Scan for lights**, then select your light. Use the star to make it the default.
 4. Choose a color and brightness, then **Apply color**. Use **Saved colors → Save current** to name a preset. Tapping a saved color previews it; Apply sends it.
 5. Open **Effects** for animation and color choices, or **Settings → Appearance** to change the app theme.
 
-Updates must use the same signing certificate to install over an existing app. Current private builds use a development certificate. The permanent public signing identity and migration instructions must be established before the first public APK; see the [release plan](docs/v2/GITHUB_RELEASE_PLAN.md). Do not uninstall an existing setup just to bypass a signature mismatch.
+Public updates use a permanent signing certificate. Older private development-signed builds cannot update directly to the public APK. Keep your existing install until its configuration is preserved; the rooms/scenes export is not a full backup. Read the [migration and signing instructions](apps/android/README.md#private-build-migration) before choosing to uninstall.
 
 ### Integrations: add the hub when you need it
 
@@ -57,7 +57,7 @@ The hub is a small service on a Bluetooth-capable computer that owns the connect
 
 | Component | What it provides | Status |
 | --- | --- | --- |
-| [Android](apps/android/README.md) | Direct BLE, presets, scenes, effects, widgets and themes | Private APK; app testing accepted by the user |
+| [Android](apps/android/README.md) | Direct BLE, presets, scenes, effects, widgets and themes | Public prerelease 1.2.1/build 6; app testing accepted by the user |
 | [Hub/API](docs/v2/HUB_API.md) | Authenticated light, group and scene control | Implemented; selected real lamp paths verified |
 | [Home Assistant](docs/v2/HOME_ASSISTANT.md) | MQTT discovery and controls through the hub | Implemented; selected commands physically confirmed |
 | [Stream Deck](docs/v2/STREAM_DECK.md) | Power, color picker, effects, brightness and scenes; shared setup; advanced keys/dials | 0.6.1 installed; physical Power/Color/Effect and faster repeat delivery accepted; color compensation adjustable |

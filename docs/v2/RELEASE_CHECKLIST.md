@@ -2,7 +2,7 @@
 
 For the current GitHub-only release sequence, signing decision, assets and publication gates, use [GITHUB_RELEASE_PLAN.md](GITHUB_RELEASE_PLAN.md). Earlier dated results below are historical; current candidate and user acceptance are in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
-Current outputs are development builds. Nothing has been published. Tooling is pinned in CI. Private APK sideloading is the selected first distribution route. Source archives matched byte-for-byte across Windows and WSL Linux; signed binary reproducibility and hosted CI remain unestablished. Google Play/AAB are excluded; GitHub is the only distribution channel.
+The permanent-key Android 1.2.1/build 6 APK is distributed in [v1.2.1-rc.1](https://github.com/H4ch1Net/ks-led-controller/releases/tag/v1.2.1-rc.1). All five hosted workflows passed on the merged application code. Release-specific install/update checks passed on an Android 16 emulator. See the current release plan and public build receipt for final evidence; older dated notes below describe earlier candidates. Signed binary reproducibility is not claimed. Google Play/AAB are excluded.
 
 ## Android
 
@@ -12,7 +12,7 @@ Debug builds use the development key. Release builds require private `apps/andro
 
 After signing is configured, build with `flutter --no-version-check build apk --release --no-pub`. Verify the certificate, version code and package ID before distributing. An APK signed with a different key cannot update the current debug installation; export rooms/scenes first and plan migration before uninstalling. This backup does not include device calibration or credentials.
 
-Before a GitHub release: choose the signing owner, preserve the signing key securely, test install/upgrade and Android permissions, and complete `DEFERRED_HARDWARE_CHECKS.md`. Google Play is excluded.
+For future releases, preserve the existing permanent identity and verify signing/install/update behavior. Review `DEFERRED_HARDWARE_CHECKS.md` without treating intentionally deferred optional hardware as a prerelease blocker. The [Android guide](../../apps/android/README.md) records the public build command and private-build migration limits. Google Play is excluded.
 
 ## Controllers
 

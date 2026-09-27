@@ -1,73 +1,35 @@
 # GitHub release plan
 
-Prepared 2026-09-27. Scope: publish the Android-first KS Light project through GitHub. Google Play, AAB, iOS and Stream Deck Marketplace are excluded. Source delivery is in PR #1 and a draft prerelease exists. The source and Stream Deck assets are uploaded; public APK signing and publication remain pending.
+Completed 2026-09-27 for [v1.2.1-rc.1](https://github.com/H4ch1Net/ks-led-controller/releases/tag/v1.2.1-rc.1). Distribution is GitHub Releases only. Google Play, AAB, iOS and Stream Deck Marketplace are excluded.
 
-## Release shape
+## Release identity
 
-- Repository: `H4ch1Net/ks-led-controller`.
-- Source branch: the existing local `ks-light-v2-foundation`; target: `main`.
-- Proposed first public candidate tag: `v1.2.1-rc.1` (verify availability before creating). Keep it a prerelease while the remaining hardware checks are open.
-- Android source candidate: 1.2.1/build 6 (launcher artwork update after accepted build 5); Stream Deck package: 0.6.1.
-- Android usability is accepted by the user. Raspberry Pi GPIO and ESP32 integrations are explicitly **Experimental** and do not block an Android prerelease.
-- Local source history includes the foundation, redesign and preset/theme work. Release assets must name the exact final source commit and their own component versions.
+- Android: 1.2.1/build 6, `KS-Light-1.2.1.apk`, package `dev.kslight.ks_light`.
+- Reviewed APK/source archive commit: `aff972cca61bc4190ea8ce1d8c1c942106ee9c60`.
+- Stream Deck: existing accepted 0.6.1 installer, unchanged; its own source commit is in the receipts.
+- Prerelease status is retained while optional hardware coverage remains deferred.
 
-## 1. Finish the source handoff
+## Completed gates
 
-- [x] Rewrite README around Android, optional hub and implemented capabilities.
-- [x] Include public-safe screenshots rendered from the real Flutter widgets with synthetic data.
-- [x] Add explicit experimental labels and a bounded DIY sanity report.
-- [x] Rechecked 2026-09-27: connector branch writes still return HTTP 403, but Git push authentication works with the existing H4ch1Net credential selected explicitly.
-- [x] Fetched remote refs: local history contains the remote base with no divergent remote commits.
-- [x] Pushed the existing branch and opened [draft PR #1](https://github.com/H4ch1Net/ks-led-controller/pull/1). Main and remote history were preserved.
+- [x] Source merged into main through PR #1; repository history preserved.
+- [x] All five hosted workflows passed on merged application revision `693cb6506035f0e7dd74a6b9c5e5f9fd03826ab5`. Later publication changes are documentation only; accepted broad suites were not repeated.
+- [x] Android usability and Stream Deck 0.6.1 physical power/color/effect, repeat speed and color compensation accepted.
+- [x] Permanent RSA signing identity created and stored privately under the owner's control, outside the repository. Credentials never uploaded to GitHub or CI; temporary build signing configuration removed.
+- [x] Public certificate, backup responsibilities and development-build migration documented in the [Android guide](../../apps/android/README.md).
+- [x] Public APK assembled from the reviewed main commit with permanent signing. Package, version/code, signature and non-debuggable status verified.
+- [x] Android 16 emulator fresh installation/startup and same-key code-6 to local-only code-7 update passed, retaining an appearance preference. Existing phone installations were not changed.
+- [x] Compiled Dart local path removed using a logical generated-package URI and private symbols. APK and all release asset archives scanned for credentials, signing files and personal machine paths.
+- [x] Existing source and Stream Deck bytes and original handoff records preserved. Added the public APK, complete checksums and public build receipt; downloaded hashes verified.
+- [x] Release notes explain compatibility, migration limits, historical receipt status and optional hardware coverage. Public prerelease published using the exact reviewed source tag.
 
-The README's candidate notice must remain until a release exists. Remove the local-only branch warning after the source PR lands. Keep compatibility claims tied to physical evidence, and keep private addresses/configuration outside the PR.
+## Signing ownership and recovery
 
-## 2. Run the hosted checks once on the PR
+The permanent certificate SHA-256 is `37:E0:15:4E:39:EB:91:9D:6A:66:C6:E1:57:CF:C1:91:F4:D3:37:AD:53:41:78:06:29:23:CE:02:F2:F6:52:62`. Future public updates must use this key. The owner must retain two protected offline copies of the keystore and save the password separately. Machine-bound password protection is not a portable recovery backup. No online key escrow or disposable CI signing is used for public assets.
 
-Existing workflows already cover the required areas:
+Existing development-signed installs cannot update directly to this identity. The rooms/scenes export is only a partial backup; device calibration, saved colors, credentials and other preferences require separate preservation. Migration is an optional manual phone action after preserving configuration. Never uninstall or clear an existing phone app silently.
 
-| Workflow | Purpose |
-| --- | --- |
-| `tests.yml` | Python/controller checks on Windows/Linux and Python 3.10/3.12; simulator |
-| `android.yml` | Pinned toolchain, Flutter analysis/tests, native shortcut tests, debug and disposable-key release assembly |
-| `streamdeck.yml` | Node checks, plugin build/validation, simulator smoke and installer packaging |
-| `esp32.yml` | Portable C++ logic and all three firmware compile configurations |
-| `source-package.yml` | Source inventory/package checks and equal Windows/Linux archive bytes |
+## Evidence and remaining scope
 
-- [x] All five workflows passed on `881d7366ee45b5b7b7579ffb476b3ad4a8e0cd7a`. The post-merge documentation cleanup changes no application/build code and does not repeat those suites.
-- [ ] Treat disposable CI signing as assembly validation only. Those APKs must never become public update assets.
-- [x] Verified the remote README and all seven image files against local bytes; visually reviewed the icon and six screenshots.
-- [x] PR #1 merged after checks passed. Public APK signing and publication remain separate.
+`public-build-receipt.json` and `SHA256SUMS-public.txt` are the completed public release records. The original `release-receipt.json` and `SHA256SUMS.txt` are preserved historical source/Stream Deck records. The unchanged source ZIP contains its original pre-publication documentation; current main and the public receipt supersede those notices.
 
-## 3. Decide and preserve the Android signing identity
-
-Current private APKs use the existing development certificate so the user's installed app can update in place. Public releases need a deliberately owned permanent key.
-
-- [ ] Generate the permanent key in a private location; store its password separately and keep two protected recovery copies. Record the certificate fingerprint in release documentation, never the private key/password.
-- [ ] Choose a migration before publishing. A new unrelated certificate cannot update the current package in place. Preserve the user's development install; do not silently uninstall it or clear its data. Verify export/import coverage for settings that need migration before recommending a reinstall.
-- [ ] Build the public candidate from the final reviewed commit with explicit signing. Confirm package ID, version/code, certificate fingerprint and absence of the debuggable flag.
-- [ ] Test installation and a subsequent same-key upgrade on an appropriate device. Permanent signing is a public-release gate; private sideloading can continue with the current certificate.
-
-Do not treat signing-key ownership as solved by putting a key in GitHub secrets. If automated signing is later chosen, use an explicitly approved release environment and keep untrusted PR jobs away from signing credentials.
-
-## 4. Focused device acceptance
-
-- [x] Android usability accepted for 1.2.1.
-- [x] User confirmed app testing is all good on 2026-09-27. No broad repeat phone pass is required.
-- [x] Stream Deck: install the development plugin in a separate KS Light profile; verify a physical simulator press followed by deliberate BLE lamp actions. The connected 15-key model has no dials. Version 0.6.1 adds typed controls, shared setup and color response; installer is packaged separately.
-- [x] User accepted Stream Deck 0.6.1 Power/Color/Effect, repeat delivery speed and final compensated color. Details are in DEFERRED_HARDWARE_CHECKS.md.
-- [ ] Multiple lights, Pi/ESP32 boards and always-on deployments remain deferred hardware coverage; list that honestly rather than blocking the Android prerelease on unavailable equipment.
-
-## 5. Assemble a draft GitHub prerelease
-
-A draft with source and Stream Deck assets is prepared before publication. Update it to the reviewed source commit after the PR is merged; add the public APK only after signing gates are satisfied.
-
-- [ ] Verify the proposed tag is unused; tag the exact reviewed source commit.
-- [x] Created draft prerelease `v1.2.1-rc.1`; it is not published. Source ZIP, Stream Deck 0.6.1, checksums and a receipt are uploaded and downloaded hashes were verified.
-- [ ] Attach the signed Android APK, Stream Deck 0.6.1 installer, reviewed source ZIP, SHA-256 checksums and a build receipt with source commit, versions, certificate fingerprint and verification results.
-- [ ] Keep configured ESP32 firmware, Wi-Fi credentials, hub tokens, key files, SDK caches and personal phone captures out of assets. Ship experimental DIY source/examples only.
-- [ ] Verify asset hashes after download and inspect the draft page. Publishing the reviewed draft is the final external step, not part of this planning request.
-
-## Completion criteria
-
-README and screenshots match the shipped app; release notes distinguish implemented, user-accepted and unverified hardware behavior; the APK has a stable signing identity; hosted checks pass on the released source; every asset is traceable to its build/source; no private data is included. A clear experimental label is sufficient for the optional DIY adapters until hardware is available.
+Emulator checks establish software installation/update behavior, not physical BLE acceptance. Multi-light synchronization, keyboard/dials, Pi/ESP32 boards and persistent service deployments remain optional deferred hardware coverage. Signed APK byte reproducibility is not claimed. The user must make protected offline signing backups and decide when to migrate their private phone install.

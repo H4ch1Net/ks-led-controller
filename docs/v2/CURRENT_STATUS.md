@@ -2,9 +2,11 @@
 Updated 2026-09-27. This is the resume point; ROADMAP.md and earlier test notes are historical.
 
 ## Delivery
-Distribution is GitHub-only APK sideloading; Google Play and AAB work are excluded. The current private candidate is `outputs/ks-light-github-2026-09-27/ks-light-1.2.1-build6-private.apk`: optimized release-mode APK with the new launcher icon, signed with the existing development certificate for upgrade compatibility. Build 5 remains the user-tested behavior baseline. No phone was connected for build 6 installation; install over the existing app without uninstalling. Earlier outputs remain unchanged.
+The [first public prerelease `v1.2.1-rc.1`](https://github.com/H4ch1Net/ks-led-controller/releases/tag/v1.2.1-rc.1) distributes `KS-Light-1.2.1.apk`, Android 1.2.1/build 6, through GitHub Releases only. Google Play/AAB are excluded. The APK uses the maintainer-owned permanent signing identity; the key, password and symbols remain private outside the repository. See the [Android guide](../../apps/android/README.md) for the certificate and migration instructions.
 
-Source is merged into `main` through [PR #1](https://github.com/H4ch1Net/ks-led-controller/pull/1). All five hosted workflows passed on source commit `881d7366ee45b5b7b7579ffb476b3ad4a8e0cd7a`. This final documentation update changes no application or build code. Git authentication works with the H4ch1Net credential selected explicitly; the connector's write permission still returns 403. Public APK signing and publication remain separate from the private candidate.
+APK and preserved source archive commit: `aff972cca61bc4190ea8ce1d8c1c942106ee9c60`. All five hosted workflows passed on merged application commit `693cb6506035f0e7dd74a6b9c5e5f9fd03826ab5`; later changes only update documentation. The release preserves the existing source/Stream Deck assets and handoff records, and adds the signed APK, `public-build-receipt.json` and `SHA256SUMS-public.txt`. The original receipt's pre-signing Android status is historical.
+
+Release-specific checks: APK signature and package metadata verified; version 1.2.1/code 6; not debuggable. Android 16 emulator fresh install/startup and a separate same-key code-7 update passed with appearance preference retention. Code 7 is local validation only. Asset privacy scans and downloaded SHA-256 verification passed. No physical phone install was changed and no broad accepted usability/lamp tests were repeated.
 
 ## Implemented
 - Build 6 replaces the Flutter template launcher with the KS Light bulb: five legacy densities, adaptive layers and Android themed-icon support. App behavior is unchanged from user-accepted build 5.
@@ -20,7 +22,7 @@ Source is merged into `main` through [PR #1](https://github.com/H4ch1Net/ks-led-
 - Pinned dependencies/toolchain, strict Gradle verification, deterministic source packaging and CI definitions including disposable-key release assembly.
 
 ## Latest evidence
-- Build 6 release assembly and APK signature verification passed. Version 1.2.1/code 6 is non-debuggable; its certificate matches build 5. Compiled resources include all five PNG densities, adaptive v26 and monochrome v33 variants. README icon and all six screenshots were visually reviewed; README has no em dashes or decorative emoji.
+- Earlier private build 6: release assembly and APK signature verification passed. Version 1.2.1/code 6 is non-debuggable; its certificate matches build 5. Compiled resources include all five PNG densities, adaptive v26 and monochrome v33 variants. README icon and all six screenshots were visually reviewed; README has no em dashes or decorative emoji.
 - Hosted Linux Android analysis, Flutter tests, hub contract, debug assembly, native shortcut tests and disposable-key release assembly passed. Hosted Stream Deck, ESP32, source-package comparison and Python Windows/Linux jobs have passed. Initial clean-run issues were corrected: canonical Windows TEMP paths, transient Kotlin inventory files and four missing metadata checksum entries verified from Maven Central. A timing-sensitive controller test now initializes TLS outside its deadline. See the PR checks for final commit status.
 - User accepted Android 1.2.1 usability, including the latest presets/effect/theme changes. This is not blanket hardware acceptance.
 - DIY sanity check: 24 focused GPIO and ESP32 contract/setup checks passed. No Pi/ESP32 hardware was connected or flashed; both adapters are explicitly experimental.
@@ -45,11 +47,11 @@ Source is merged into `main` through [PR #1](https://github.com/H4ch1Net/ks-led-
 - Hosted CI: [PR #1 checks](https://github.com/H4ch1Net/ks-led-controller/pull/1/checks) are the authoritative final-commit results. App tests are not a request for another manual phone pass.
 - [ ] Real deployment: persistent Windows/Linux/Pi service and trusted wireless hub acceptance when that hardware/setup is available.
 
-A [draft prerelease](https://github.com/H4ch1Net/ks-led-controller/releases) contains source, Stream Deck, checksums and a receipt. Private APK build 6 remains local. Public APK publication requires permanent signing ownership and a migration decision; signed binary reproducibility is not claimed. Google Play/AAB are excluded. iOS remains deferred. Feature implementation and user app acceptance are complete for this candidate; optional hardware coverage remains deferred.
+The public prerelease includes the permanent-key APK. Existing development-signed phone installs remain untouched and require the documented manual migration if the user chooses to switch. Offline signing-key/password backups remain the owner's responsibility. Signed binary reproducibility is not claimed. Google Play/AAB are excluded; iOS and optional hardware coverage remain deferred.
 
 ## Constraints and known limitations
 No desktop UI while the PC is in use; the phone was available for the redesign review. One BLE owner per lamp. No command replay after uncertain delivery. Power/color/live status describe requested or last successful commands, not reliable physical readback. Native breathing was physically accepted as smoother; selected hub/MQTT/Android paths and catalog/widget flows were accepted previously, not every new feature.
 
 The pinned Flutter build succeeds but warns that reactive_ble_mobile still uses the Kotlin Gradle plugin. Revisit migration before upgrading Flutter. Verification hashes detect changed dependencies; they are not an independent upstream audit. This delivery batch did not change the running hub or send physical lamp commands.
 
-Repository preparation: documentation uses generic host/device identifiers. CI runs on pull requests and main pushes, avoiding duplicate branch-push/PR work. The source PR is merged; public release publication is pending. Build 4 is the redesign checkpoint; build 5 adds saved colors, grouped effects and appearance choices.
+Repository preparation: documentation uses generic host/device identifiers. CI runs on pull requests and main pushes, avoiding duplicate branch-push/PR work. The source PR is merged and the permanent-key APK is delivered through the public prerelease. Build 4 is the redesign checkpoint; build 5 adds saved colors, grouped effects and appearance choices.
