@@ -289,9 +289,13 @@ class _HubScreenState extends State<HubScreen> {
         children: [
           if (client == null) ...[
             const SizedBox(height: 20),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
-              child: Icon(Icons.hub_outlined, size: 44, color: accent),
+              child: Icon(
+                Icons.hub_outlined,
+                size: 44,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 20),
             Text(

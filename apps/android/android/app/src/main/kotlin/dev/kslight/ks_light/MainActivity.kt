@@ -93,6 +93,13 @@ class MainActivity : FlutterActivity() {
                             result.success(true)
                         } else result.success(false)
                     }
+                    "loadAppPreferences" -> result.success(preferences.getString("app_preferences", null))
+                    "saveAppPreferences" -> {
+                        val value = call.arguments as? String
+                        if (value == null || value.length > 32768) result.error("INVALID", "Invalid app preferences", null)
+                        else if (preferences.edit().putString("app_preferences", value).commit()) result.success(null)
+                        else result.error("SAVE_FAILED", "Could not save preferences", null)
+                    }
                     "load" -> result.success(preferences.getString("devices", null))
                     "save" -> {
                         val value = call.arguments as? String

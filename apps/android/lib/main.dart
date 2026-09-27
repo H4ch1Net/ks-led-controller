@@ -15,19 +15,47 @@ import 'native_effects.dart';
 import 'hub_screen.dart';
 import 'diagnostics_screen.dart';
 import 'app_style.dart';
+import 'app_preferences.dart';
 
 void main() => runApp(const KsLightApp());
 
-class KsLightApp extends StatelessWidget {
+class KsLightApp extends StatefulWidget {
   const KsLightApp({super.key, this.backend, this.settingsStore});
   final SettingsStore? settingsStore;
   final LightBackend? backend;
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'KS Light',
-    debugShowCheckedModeBanner: false,
-    theme: lightAppTheme(),
-    home: LightScreen(testBackend: backend, settingsStore: settingsStore),
+  State<KsLightApp> createState() => _KsLightAppState();
+}
+
+class _KsLightAppState extends State<KsLightApp> {
+  final preferences = AppPreferences();
+  @override
+  void initState() {
+    super.initState();
+    preferences.load();
+  }
+
+  @override
+  void dispose() {
+    preferences.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => PreferencesScope(
+    preferences: preferences,
+    child: AnimatedBuilder(
+      animation: preferences,
+      builder: (context, _) => MaterialApp(
+        title: 'KS Light',
+        debugShowCheckedModeBanner: false,
+        theme: lightAppTheme(preferences.appearance),
+        home: LightScreen(
+          testBackend: widget.backend,
+          settingsStore: widget.settingsStore,
+        ),
+      ),
+    ),
   );
 }
 
@@ -360,6 +388,7 @@ class _LightScreenState extends State<LightScreen> {
     final target = selected!;
     Widget custom(BuildContext context) => EffectsScreen(
       showNativeShortcut: false,
+      initialColor: List.of(rgb),
       lights: [target],
       backend: backend,
       settings: settings,
@@ -523,6 +552,7 @@ class _LightScreenState extends State<LightScreen> {
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
               ),
             ),
+            const AppearancePicker(),
             SwitchListTile(
               title: const Text('Demo mode'),
               subtitle: const Text('Explore without changing real lights'),
@@ -615,13 +645,14 @@ class _LightScreenState extends State<LightScreen> {
               width: 54,
               height: 62,
               decoration: BoxDecoration(
-                color: accent.withValues(alpha: .1),
+                color: Theme.of(context).colorScheme.primary
+                    .withValues(alpha: .1),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.lightbulb_outline,
                 size: 30,
-                color: accent,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(width: 16),
@@ -655,7 +686,9 @@ class _LightScreenState extends State<LightScreen> {
                     ? Icons.star_rounded
                     : Icons.star_outline_rounded,
               ),
-              color: defaultLightId == light.id ? accent : null,
+              color: defaultLightId == light.id
+                  ? Theme.of(context).colorScheme.primary
+                  : null,
               onPressed: busy ? null : () => setDefaultDevice(light),
             ),
             const Icon(Icons.chevron_right, size: 20),
@@ -850,7 +883,14 @@ class _LightScreenState extends State<LightScreen> {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Color.lerp(panel, preview, .22)!, panel],
+                        colors: [
+                          Color.lerp(
+                            Theme.of(context).colorScheme.surfaceContainer,
+                            preview,
+                            .22,
+                          )!,
+                          Theme.of(context).colorScheme.surfaceContainer,
+                        ],
                       ),
                     ),
                     child: Column(
@@ -940,7 +980,9 @@ class _LightScreenState extends State<LightScreen> {
                       'Brightness',
                       trailing: Text(
                         '${(brightness * 100 / 255).round()}%',
-                        style: const TextStyle(color: accent),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ),
                     Slider(
@@ -960,6 +1002,17 @@ class _LightScreenState extends State<LightScreen> {
                     ),
                   ],
                   if (colorType != null) ...[
+                    SavedColors(
+                      rgb: rgb,
+                      brightness: brightness,
+                      enabled: !busy && colorValid,
+                      onSelected: (saved) => setState(() {
+                        rgb = List.of(saved.rgb);
+                        brightness = saved.brightness;
+                        colorPending = true;
+                        colorValid = true;
+                      }),
+                    ),
                     SectionHeading(
                       'Color',
                       trailing: Text(

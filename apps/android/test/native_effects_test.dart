@@ -40,6 +40,45 @@ class FailingNativeStore extends NativePreferencesStore {
 
 void main() {
   testWidgets(
+    'animation and color compose the native command without preview writes',
+    (tester) async {
+      final backend = NativeTestBackend();
+      await tester.binding.setSurfaceSize(const Size(500, 1100));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: NativeEffectsScreen(
+            light: const Light('a', 'Desk', {'prefix': 'KS03~'}),
+            backend: backend,
+            store: MemoryNativeStore(),
+            onChanged: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Green'));
+      await tester.pumpAndSettle();
+      expect(backend.sent, isEmpty);
+      await tester.tap(find.text('Color fade'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('RGB'));
+      await tester.pumpAndSettle();
+      expect(backend.sent, isEmpty);
+      await tester.tap(find.text('Breathing'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Green'))
+            .selected,
+        isTrue,
+      );
+      await tester.tap(find.text('Apply effect'));
+      await tester.pumpAndSettle();
+      expect(backend.sent.last, nativeEffectPacket(0x85, 35, 50));
+    },
+  );
+
+  testWidgets(
     'named preset saves without transmitting and survives screen reopening',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 1600));

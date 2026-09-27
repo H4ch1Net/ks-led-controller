@@ -4,15 +4,33 @@ const ink = Color(0xff111514);
 const panel = Color(0xff1c2220);
 const accent = Color(0xffd4efa3);
 
-ThemeData lightAppTheme() {
+enum AppAppearance {
+  lime('Lime', Color(0xffd4efa3), Color(0xff111514)),
+  ocean('Ocean', Color(0xff8cd5ff), Color(0xff10151d)),
+  violet('Violet', Color(0xffd0b4ff), Color(0xff17121e)),
+  rose('Rose', Color(0xffffb4cc), Color(0xff1c1217)),
+  amber('Amber', Color(0xffffd08a), Color(0xff1b1610));
+
+  const AppAppearance(this.label, this.accent, this.background);
+  final String label;
+  final Color accent, background;
+}
+
+ThemeData lightAppTheme([AppAppearance appearance = AppAppearance.lime]) {
+  final accent = appearance.accent;
+  final ink = appearance.background;
+  final panel = Color.lerp(ink, accent, .065)!;
   final scheme = ColorScheme.fromSeed(
     seedColor: accent,
     brightness: Brightness.dark,
     surface: ink,
     primary: accent,
-    onPrimary: const Color(0xff243216),
+    onPrimary: const Color(0xff161b17),
   );
-  final base = ThemeData(useMaterial3: true, colorScheme: scheme);
+  final base = ThemeData(
+    useMaterial3: true,
+    colorScheme: scheme.copyWith(surfaceContainer: panel),
+  );
   return base.copyWith(
     scaffoldBackgroundColor: ink,
     textTheme: base.textTheme.copyWith(
@@ -34,13 +52,13 @@ ThemeData lightAppTheme() {
       titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       bodyMedium: const TextStyle(fontSize: 14, height: 1.4),
     ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: ink,
       surfaceTintColor: Colors.transparent,
       centerTitle: false,
       elevation: 0,
       titleSpacing: 20,
-      titleTextStyle: TextStyle(
+      titleTextStyle: const TextStyle(
         fontSize: 19,
         fontWeight: FontWeight.w600,
         color: Colors.white,
@@ -66,7 +84,7 @@ ThemeData lightAppTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: accent),
+        borderSide: BorderSide(color: accent),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
@@ -88,9 +106,9 @@ ThemeData lightAppTheme() {
       trackHeight: 10,
       showValueIndicator: ShowValueIndicator.onDrag,
     ),
-    navigationBarTheme: const NavigationBarThemeData(
+    navigationBarTheme: NavigationBarThemeData(
       backgroundColor: ink,
-      indicatorColor: Color(0xff34432a),
+      indicatorColor: scheme.primaryContainer,
       height: 72,
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
     ),
@@ -102,7 +120,7 @@ ThemeData lightAppTheme() {
       backgroundColor: ink,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
     ),
-    bottomSheetTheme: const BottomSheetThemeData(
+    bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: ink,
       showDragHandle: true,
     ),
@@ -138,13 +156,13 @@ class StatePill extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
     decoration: BoxDecoration(
-      color: panel,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: BorderRadius.circular(30),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: accent),
+        Icon(icon, size: 14, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 6),
         Flexible(
           child: Text(
@@ -192,7 +210,9 @@ class StatusNotice extends StatelessWidget {
               Icon(
                 error ? Icons.error_outline : Icons.info_outline,
                 size: 17,
-                color: error ? Theme.of(context).colorScheme.error : accent,
+                color: error
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary,
               ),
             const SizedBox(width: 9),
             Expanded(
@@ -228,7 +248,7 @@ class EmptyPanel extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
       child: Column(
         children: [
-          Icon(icon, size: 40, color: accent),
+          Icon(icon, size: 40, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 18),
           Text(
             title,

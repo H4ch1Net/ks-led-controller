@@ -1,5 +1,5 @@
 # Deferred acceptance checklist
-Updated 2026-09-27. All features below are implemented. Use the private 1.2.0/build 4 APK and Stream Deck 0.5.0 package; rebuilding is unnecessary unless source changes. The optimized APK upgrade, saved light/default retention, startup and redesigned screens were checked on the phone; desktop UI remains deferred while the PC is in use.
+Updated 2026-09-27. All features below are implemented. Use the private 1.2.1/build 5 APK and Stream Deck 0.5.0 package; rebuilding is unnecessary unless source changes. The optimized APK upgrade, saved light/default retention, startup and redesigned screens were checked on the phone; desktop UI remains deferred while the PC is in use.
 
 ## Android - one combined session
 - [x] Upgrade without uninstalling, optimized-build startup and saved light/default retention; visually inspect the redesigned screens.

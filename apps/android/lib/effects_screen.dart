@@ -6,6 +6,8 @@ import 'native_effects.dart';
 import 'home_library.dart';
 import 'light_backend.dart';
 import 'settings.dart';
+import 'color_picker.dart';
+import 'app_preferences.dart';
 
 class EffectsScreen extends StatefulWidget {
   const EffectsScreen({
@@ -18,7 +20,9 @@ class EffectsScreen extends StatefulWidget {
     required this.onDelivered,
     required this.onFailed,
     this.showNativeShortcut = true,
+    this.initialColor = const [200, 40, 255],
   });
+  final List<int> initialColor;
   final bool showNativeShortcut;
   final List<Light> lights;
   final LightBackend backend;
@@ -37,6 +41,8 @@ class _EffectsScreenState extends State<EffectsScreen>
   late final Map<String, SceneState> previous = Map.of(widget.previous);
   EffectKind kind = EffectKind.breathing;
   String palette = 'Aurora';
+  late List<int> customColor = List.of(widget.initialColor);
+  bool colorValid = true;
   double seconds = 30, intensity = 0.7;
   bool busy = false, stopping = false, restore = false;
   String message =
@@ -63,6 +69,7 @@ class _EffectsScreenState extends State<EffectsScreen>
   }
 
   Future<void> start() async {
+    if (kind == EffectKind.breathing && !colorValid) return;
     setState(() {
       busy = true;
       stopping = false;
@@ -75,7 +82,9 @@ class _EffectsScreenState extends State<EffectsScreen>
         lights: widget.lights,
         spec: EffectSpec(
           kind: kind,
-          palette: effectPalettes[palette]!,
+          palette: kind == EffectKind.breathing
+              ? [customColor]
+              : effectPalettes[palette]!,
           period: Duration(seconds: seconds.round()),
           intensity: intensity,
         ),
@@ -147,7 +156,9 @@ class _EffectsScreenState extends State<EffectsScreen>
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: FilledButton.icon(
-            onPressed: stopping
+            onPressed:
+                stopping ||
+                    (!busy && kind == EffectKind.breathing && !colorValid)
                 ? null
                 : busy
                 ? () {
@@ -215,8 +226,8 @@ class _EffectsScreenState extends State<EffectsScreen>
                         selected: kind == entry.key,
                         child: Material(
                           color: kind == entry.key
-                              ? const Color(0xff34432a)
-                              : panel,
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Theme.of(context).colorScheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(20),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(20),
@@ -232,7 +243,9 @@ class _EffectsScreenState extends State<EffectsScreen>
                                     kind == entry.key
                                         ? Icons.check_circle
                                         : Icons.auto_awesome_outlined,
-                                    color: accent,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary,
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
@@ -252,11 +265,30 @@ class _EffectsScreenState extends State<EffectsScreen>
               ),
             ),
             const SizedBox(height: 20),
-            if ([
-              EffectKind.breathing,
-              EffectKind.drift,
-              EffectKind.wave,
-            ].contains(kind))
+            if (kind == EffectKind.breathing) ...[
+              const SectionHeading('Color'),
+              LightColorPicker(
+                rgb: customColor,
+                enabled: !busy,
+                onChanged: (value) => setState(() => customColor = value),
+                onValidityChanged: (valid) =>
+                    setState(() => colorValid = valid),
+              ),
+              SavedColors(
+                rgb: customColor,
+                brightness: (intensity * 255).round(),
+                enabled: !busy && colorValid,
+                onSelected: (saved) => setState(() {
+                  customColor = List.of(saved.rgb);
+                  intensity = (saved.brightness / 255).clamp(.05, 1);
+                  colorValid = true;
+                }),
+              ),
+              const Text(
+                'Custom shades run from this phone; fading may be less smooth than built-in effects.',
+              ),
+            ],
+            if ([EffectKind.drift, EffectKind.wave].contains(kind))
               DropdownButtonFormField<String>(
                 initialValue: palette,
                 decoration: const InputDecoration(labelText: 'Palette'),

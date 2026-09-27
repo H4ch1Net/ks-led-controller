@@ -818,9 +818,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.meeting_room_outlined,
-                              color: accent,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -946,9 +946,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                     shape: BoxShape.circle,
                                     border: Border.all(color: Colors.white24),
                                     color: !target.value.power
-                                        ? ink
+                                        ? Theme.of(context).colorScheme.surface
                                         : target.value.rgb == null
-                                        ? accent
+                                        ? Theme.of(context).colorScheme.primary
                                         : Color.fromARGB(
                                             255,
                                             target.value.rgb![0],

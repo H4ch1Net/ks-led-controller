@@ -100,6 +100,11 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
       setState(() {
         library = saved;
         effect = saved.last.effect;
+        if (effect >= 0x84) {
+          breathingColor = effect;
+        } else {
+          fadeMode = effect;
+        }
         speed = saved.last.speed.toDouble();
         brightness = saved.last.brightness.toDouble();
         ready = true;
@@ -201,7 +206,16 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
     }
   }
 
-  int effect = 0x89;
+  int effect = 0x89, breathingColor = 0x89, fadeMode = 0x82;
+  static const breathingColors = <int, Color>{
+    0x84: Colors.red,
+    0x85: Colors.green,
+    0x86: Colors.blue,
+    0x87: Colors.yellow,
+    0x88: Colors.cyan,
+    0x89: Colors.purpleAccent,
+    0x8a: Colors.white,
+  };
   double speed = 35, brightness = 50;
   String status =
       'Choose a built-in effect. The light creates the animation itself.';
@@ -294,17 +308,20 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Row(
             children: [
-              FilledButton(
-                onPressed: busy || !ready ? null : () => execute('apply'),
-                child: const Text('Apply effect'),
+              Expanded(
+                child: FilledButton(
+                  onPressed: busy || !ready ? null : () => execute('apply'),
+                  child: const Text('Apply effect'),
+                ),
               ),
-              OutlinedButton(
-                onPressed: busy || !ready ? null : () => execute('off'),
-                child: const Text('Turn off'),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: busy || !ready ? null : () => execute('off'),
+                  child: const Text('Turn off'),
+                ),
               ),
             ],
           ),
@@ -314,115 +331,99 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            Text(
-              widget.light.name,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
             if (!status.startsWith('Choose') &&
                 !status.startsWith('Saved choices loaded'))
               StatusNotice(status, busy: busy),
-            const SizedBox(height: 20),
-            const StatePill(
-              'Runs on your light',
-              icon: Icons.auto_awesome_outlined,
+            const SectionHeading('Animation'),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final item in {
+                  0x84: 'Breathing',
+                  0x82: 'Color fade',
+                }.entries)
+                  ChoiceChip(
+                    label: Text(item.value),
+                    selected: item.key == 0x84 ? effect >= 0x84 : effect < 0x84,
+                    onSelected: busy || !ready
+                        ? null
+                        : (_) {
+                            setState(
+                              () => effect = item.key == 0x84
+                                  ? breathingColor
+                                  : fadeMode,
+                            );
+                            releaseChange();
+                          },
+                  ),
+              ],
             ),
-            const SizedBox(height: 16),
-            LayoutBuilder(
-              builder: (context, constraints) => Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final e in nativeEffects.entries)
-                    SizedBox(
-                      width: MediaQuery.textScalerOf(context).scale(1) > 1.8
-                          ? constraints.maxWidth
-                          : MediaQuery.textScalerOf(context).scale(1) > 1.2
-                          ? (constraints.maxWidth - 8) / 2
-                          : (constraints.maxWidth - 16) / 3,
-                      child: Semantics(
-                        selected: effect == e.key,
-                        child: Material(
-                          color: effect == e.key
-                              ? const Color(0xff34432a)
-                              : panel,
-                          borderRadius: BorderRadius.circular(18),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(18),
-                            onTap: busy || !ready
-                                ? null
-                                : () {
-                                    setState(() => effect = e.key);
-                                    releaseChange();
-                                  },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 14,
-                              ),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: 28,
-                                    height: 28,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        colors: e.key < 0x84
-                                            ? [
-                                                const Color(0xffffbe85),
-                                                const Color(0xffbba1ff),
-                                              ]
-                                            : [
-                                                Colors.white,
-                                                <int, Color>{
-                                                  0x84: Colors.redAccent,
-                                                  0x85: Colors.greenAccent,
-                                                  0x86: Colors.blueAccent,
-                                                  0x87: Colors.yellow,
-                                                  0x88: Colors.cyanAccent,
-                                                  0x89: Colors.purpleAccent,
-                                                  0x8a: Colors.white,
-                                                }[e.key]!,
-                                              ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  SizedBox(
-                                    height:
-                                        36 *
-                                        MediaQuery.textScalerOf(context)
-                                            .scale(1),
-                                    child: Center(
-                                      child: Text(
-                                        e.value,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 6),
-                                    child: Icon(
-                                      Icons.check,
-                                      size: 14,
-                                      color: effect == e.key
-                                          ? accent
-                                          : Colors.transparent,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+            SectionHeading(effect >= 0x84 ? 'Color' : 'Palette'),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final item in nativeEffects.entries.where(
+                  (e) => effect >= 0x84 ? e.key >= 0x84 : e.key < 0x84,
+                ))
+                  ChoiceChip(
+                    avatar: item.key >= 0x84
+                        ? CircleAvatar(
+                            radius: 9,
+                            backgroundColor: breathingColors[item.key],
+                          )
+                        : null,
+                    label: Text(
+                      item.value
+                          .replaceAll(' breathing', '')
+                          .replaceAll(' fade', ''),
                     ),
-                ],
-              ),
+                    selected: effect == item.key,
+                    onSelected: busy || !ready
+                        ? null
+                        : (_) {
+                            setState(() {
+                              effect = item.key;
+                              if (effect >= 0x84) {
+                                breathingColor = effect;
+                              } else {
+                                fadeMode = effect;
+                              }
+                            });
+                            releaseChange();
+                          },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Built-in effects run on the light using these fixed colors.',
             ),
             const SizedBox(height: 20),
+            if (widget.customBuilder != null)
+              TextButton(
+                onPressed: busy
+                    ? null
+                    : () async {
+                        active = false;
+                        await closeSession();
+                        if (!context.mounted) return;
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: widget.customBuilder!,
+                          ),
+                        );
+                        if (mounted) {
+                          setState(
+                            () => status =
+                                'Choose an effect to run on the light.',
+                          );
+                        }
+                      },
+                child: const Text('Custom effects from phone'),
+              ),
             Text('Speed: ${speed.round()}%'),
             Slider(
               key: const Key('native-speed'),
@@ -459,6 +460,11 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
                           : () {
                               setState(() {
                                 effect = entry.value.effect;
+                                if (effect >= 0x84) {
+                                  breathingColor = effect;
+                                } else {
+                                  fadeMode = effect;
+                                }
                                 speed = entry.value.speed.toDouble();
                                 brightness = entry.value.brightness.toDouble();
                               });
@@ -491,29 +497,6 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
                 ),
               ],
             ),
-            if (widget.customBuilder != null)
-              TextButton(
-                onPressed: busy
-                    ? null
-                    : () async {
-                        active = false;
-                        await closeSession();
-                        if (!context.mounted) return;
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: widget.customBuilder!,
-                          ),
-                        );
-                        if (mounted) {
-                          setState(
-                            () => status =
-                                'Choose an effect to run on the light.',
-                          );
-                        }
-                      },
-                child: const Text('Custom effects from phone'),
-              ),
             const SizedBox(height: 12),
             const Text('Apply a static color to return to steady light.'),
           ],
