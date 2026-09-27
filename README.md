@@ -58,7 +58,7 @@ The hub is a small service on a Bluetooth-capable computer that owns the connect
 | [Android](apps/android/README.md) | Direct BLE, presets, scenes, effects, widgets and themes | Private APK; user usability accepted, remaining device checks documented |
 | [Hub/API](docs/v2/HUB_API.md) | Authenticated light, group and scene control | Implemented; selected real lamp paths verified |
 | [Home Assistant](docs/v2/HOME_ASSISTANT.md) | MQTT discovery and controls through the hub | Implemented; selected commands physically confirmed |
-| [Stream Deck](docs/v2/STREAM_DECK.md) | Keys, dials, shared setup and optional last-sent status | Plugin 0.5.0 packaged; physical installation/acceptance pending |
+| [Stream Deck](docs/v2/STREAM_DECK.md) | Power, color picker, effects, brightness and scenes; shared setup; advanced keys/dials | 0.6.1 installed; physical Power/Color/Effect and faster repeat delivery accepted; color compensation adjustable |
 | [Keyboard actions](docs/v2/CONTROLLER_ACTIONS.md) | Named actions for macro keys and launchers | Implemented; assign bindings in your keyboard software |
 | [Raspberry Pi GPIO](docs/v2/RASPBERRY_PI_BUTTONS.md) | Buttons, rotary controls and status LEDs | **Experimental** — host checks pass; no physical board verification |
 | [ESP32](apps/esp32/README.md) | Arduino-framework buttons/rotary controls through HTTPS | **Experimental** — classic ESP32 DevKit only; no board flashed or wiring verified |

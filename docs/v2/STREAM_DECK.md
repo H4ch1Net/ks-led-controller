@@ -1,10 +1,26 @@
-# Stream Deck plugin 0.5.0
+# Stream Deck plugin 0.6.1
 
 ## Current status
 
-Version 0.5.0 includes action keys, shared connection settings, action/brightness dials, continuous dimming and optional last-sent key status. The installer has been packaged and checked with a simulator; physical installation/key acceptance remains pending. On 2026-09-27 the user reported the Stream Deck plugged in, the app was running, and an Elgato USB device was present. KS Light was not in the installed plugin directory. Existing profiles were not changed.
+Version **0.6.1** includes separate **Power**, **Set Color**, **Effect**, **Brightness** and **Scene** actions. Drag an action from KS Light in Stream Deck's sidebar and choose its target/settings. All five share one hub connection. If a single existing legacy connection is visible, the first new settings panel adopts it automatically. Otherwise configure **Shared hub connection** once; per-key paths are no longer required. Existing advanced named-action keys and dials remain compatible.
 
-See the [GitHub release plan](GITHUB_RELEASE_PLAN.md) for the short device acceptance sequence. The versioned sections below preserve implementation history; the capabilities in this current summary supersede first-release limitations.
+- **Power:** Toggle, On or Off. The icon highlights the hub's last-sent On state. Toggle requires a known, non-restored state; use explicit On/Off after unknown state or a hub restart.
+- **Set Color:** native color picker, editable hex, swatches, brightness and Color response. Balanced (gamma 2.2) and Stronger saturation (gamma 2.5) compensate intermediate RGB levels before hub calibration; Raw RGB preserves legacy output. Existing keys without a response setting stay Raw; new empty color keys default to Balanced. The user's orange example motivated Stronger saturation: picker `#FF7800` maps to `#FF2700`. This is adjustable perceptual compensation, not measured display/lamp color matching. The key displays its selected picker color. Settings save automatically; only a physical press sends them.
+- **Effect:** Breathing with separate built-in color selection, seven-color fade or RGB fade, speed and brightness. These run smoothly on the lamp. Arbitrary RGB breathing is not a native capability exposed by this hub.
+- **Brightness:** set a level using the last color/effect; turns the lamp on. The hub rejects it when no color/effect is known.
+- **Scene:** choose an existing hub scene. Empty or incompatible catalogs do not substitute another device.
+
+Live labels distinguish Sim/Saved/Sent; they are not physical readback. Full RGB/effect identifiers stay in the hub; keys show compact Color/FX + brightness. Status refreshes do not replay commands. Configuring a key never sends a lamp command.
+
+## Local device setup and evidence (2026-09-27)
+
+A separate **KS Light** profile is installed on the 15-key Stream Deck: Power toggle, Color, Effect, Brightness and explicit Off. Existing personal profiles were preserved. The connection was adopted from the prior named-action setup and persisted across app restart. Color swatches/hex/brightness were visually inspected, and changing to blue saved without any new hub operation. Power icons and compact last-sent labels were inspected after restart.
+
+The user physically accepted the earlier Reading/Off/Purple keys, including lamp Off and purple breathing. Reading looked white even after an amber adjustment; no warm-color accuracy claim is made. The hub is using neutral calibration, separate from phone-local calibration. The user then confirmed new Power/Color/Effect controls work, but reported slow/intermittent delivery and washed colors. The hub transport was subsequently changed to retain at most two connections for 30 seconds of idle time, use the Android 100 ms packet spacing, and discard a failed session without replay. Earlier operation durations were about 2.2–10 seconds. Four connection lifecycle checks pass; 22 existing hub/controller checks also passed. Post-patch hub evidence: first command 1.879 seconds, next ten 0.113–0.232 seconds, all succeeded; these exclude Stream Deck client startup. User confirmed speed is great. Color still required overcompensation, so 0.6.1 adds selectable response curves; exact matching remains lamp-dependent. The RGB packet layout remains the one found in the original app.
+
+Focused validation: 15 Node runner/status checks and 5 Python bridge/status checks passed. The bundled SDK smoke passed direct RGB packet bytes, power toggle, native effect and brightness through Python and the simulator, including no writes on action appearance. Existing named keys/dials remained passing in that smoke. A focused response-curve check also verifies legacy/raw compatibility, primary endpoints and the orange mapping. Build and official manifest validation passed. No broad Android or unrelated regression run was performed.
+
+Private files and **Start KS Light Hub** shortcut are in `.hub-local/streamdeck/` (ignored). The physical hub runs on authenticated loopback; startup at login is not enabled. Keep it running for these keys and avoid a second direct-Bluetooth owner for the lamp. Idle hub sessions release after 30 seconds; stop using the keys before switching to phone-direct BLE. This installation is a development link, so keep the checkout path stable. The standalone installer is in `outputs/ks-light-streamdeck-0.6.1/` outside the repository.
 
 ## Action keys
 The Windows plugin provides **KS Light > Run light action**, a property inspector and per-key completion feedback. It uses the shared Python controller from CONTROLLER_ACTIONS.md, so it does not open a second Bluetooth connection. Configure separate keys for explicit On, Off, static colors or native effects.
@@ -21,7 +37,7 @@ Requires Windows 10+, Stream Deck 7.1+, the KS Light checkout with its Python vi
 
 The inspector stores only these paths and the action name. Credentials remain in the separately protected token file referenced by the controller configuration. Process arguments are passed without a command shell; child stderr is drained without exposing its contents in Stream Deck. The client has a bounded timeout, and the plugin stops waiting after 125 seconds. Timeout/cancellation cannot retract a command already accepted by the hub.
 
-Action and brightness dials plus shared connection setup are implemented; see the versioned sections below. Multi-actions are not advertised. Credentials remain in the protected controller token file. No Stream Deck profiles, keyboard bindings, services or firewall rules were modified during development.
+Action and brightness dials plus shared connection setup are implemented; see the versioned sections below. Multi-actions are not advertised. Credentials remain in the protected controller token file. Hardware setup added only the separate KS Light profile. Existing personal profiles, keyboard bindings, startup tasks and firewall rules were preserved.
 
 ## Build and verify
 From `apps/streamdeck`:

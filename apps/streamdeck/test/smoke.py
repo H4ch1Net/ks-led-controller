@@ -131,6 +131,29 @@ async def main():
             await send("didReceiveSettings");await until("setTitle")
             await send("keyDown");await until("showAlert")
             assert len(writes)==10
+            await ws.send_json({"event":"didReceiveGlobalSettings","context":"test-plugin",
+                "payload":{"settings":shared_settings}})
+            for kind, direct_settings in [
+                ("color", {"light":"desk","color":"#12A4EF","level":42}),
+                ("power", {"light":"desk","power":"toggle"}),
+                ("effect", {"light":"desk","effect":137,"speed":35,"level":50}),
+                ("level", {"light":"desk","level":30}),
+            ]:
+                event={"action":"dev.kslight.controller."+kind,"context":"direct-"+kind,"device":"test-device",
+                    "payload":{"settings":direct_settings,"coordinates":{"column":0,"row":1},"controller":"Keypad","state":0,"isInMultiAction":False}}
+                count=len(writes)
+                await ws.send_json({**event,"event":"willAppear"})
+                while (await until('setTitle'))['context']!=event['context']:pass
+                assert len(writes)==count, 'configuration/appearance must not send'
+                await ws.send_json({**event,"event":"keyDown"})
+                while (await until('showOk'))['context']!=event['context']:pass
+                assert len(writes)==count+1
+                if kind=='color':assert writes[-1][-1]==bytes.fromhex('5a000112a4ef002a00a5')
+                if kind=='power':assert writes[-1]==[bytes.fromhex('5b0f01b5')]
+                if kind=='effect':assert writes[-1][-1]==bytes.fromhex('5c0089233200c5')
+                if kind=='level':assert writes[-1][-1]==bytes.fromhex('5c0089231e00c5')
+                await ws.send_json({**event,"event":"willDisappear"})
+            print('PASS: direct color bytes, power toggle, native effect and brightness via SDK -> Python -> simulator; editing/appearance sends nothing.')
             print("PASS: group key, partial scene failure, SDK keys/shared setup, action dial, press brightness and continuous brightness; saved config unchanged; no physical BLE.")
     finally:
         if process and process.returncode is None:

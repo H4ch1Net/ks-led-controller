@@ -42,6 +42,8 @@ export class StatePool {
             if(!["online","offline"].includes(value.status)||value.status==="online"&&
               (!value.states||Array.isArray(value.states)||typeof value.states!=="object"||
                Object.entries(value.states).some(([k,v])=>!/^[a-zA-Z0-9_-]{1,64}$/.test(k)||typeof v!=="string"||v.length>64||/[\r\n\0]/.test(v))))throw new Error();
+            if(value.lights!==undefined&&(!value.lights||Array.isArray(value.lights)||typeof value.lights!=="object"||
+              Object.entries(value.lights).some(([k,v])=>!/^[a-zA-Z0-9_-]{1,64}$/.test(k)||typeof v!=="string"||v.length>64||/[\r\n\0]/.test(v))))throw new Error();
             clearTimeout(entry.watchdog);entry.watchdog=setTimeout(failed,60000);
             this.publish(entry,value);
           }catch{failed();return;}

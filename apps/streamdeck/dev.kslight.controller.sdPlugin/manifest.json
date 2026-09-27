@@ -2,6 +2,106 @@
   "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
   "Actions": [
     {
+      "UUID": "dev.kslight.controller.power",
+      "Name": "Power",
+      "Tooltip": "Power for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/power",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/power",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        },
+        {
+          "Image": "imgs/power-on",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.color",
+      "Name": "Set Color",
+      "Tooltip": "Set Color for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/color",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/color",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.effect",
+      "Name": "Effect",
+      "Tooltip": "Effect for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/effect",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/effect",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.level",
+      "Name": "Brightness",
+      "Tooltip": "Brightness for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/level",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/level",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
+      "UUID": "dev.kslight.controller.scene",
+      "Name": "Scene",
+      "Tooltip": "Scene for a chosen hub light or scene. Shared connection setup.",
+      "Icon": "imgs/scene",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/direct.html",
+      "States": [
+        {
+          "Image": "imgs/scene",
+          "TitleAlignment": "bottom",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false
+    },
+    {
       "UUID": "dev.kslight.controller.run",
       "Name": "Run light action",
       "Tooltip": "Run a named KS Light hub action and show delivery feedback.",
@@ -87,7 +187,7 @@
     }
   ],
   "UUID": "dev.kslight.controller",
-  "Version": "0.5.0.0",
+  "Version": "0.6.1.0",
   "SDKVersion": 3,
   "Software": {
     "MinimumVersion": "7.1"

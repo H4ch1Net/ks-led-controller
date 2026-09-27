@@ -1,5 +1,5 @@
 # Deferred acceptance checklist
-Updated 2026-09-27. All features below are implemented. Use the private 1.2.1/build 5 APK and Stream Deck 0.5.0 package; rebuilding is unnecessary unless source changes. The optimized APK upgrade, saved light/default retention, startup and redesigned screens were checked on the phone; desktop UI remains deferred while the PC is in use.
+Updated 2026-09-27. All features below are implemented. Use the private 1.2.1/build 5 APK and Stream Deck 0.6.1 package; rebuilding is unnecessary unless source changes. The optimized APK upgrade, saved light/default retention, startup and redesigned screens were checked on the phone; desktop UI remains deferred while the PC is in use.
 
 ## Android - one combined session
 - [x] User accepted 1.2.1 usability, including saved colors, effect selection and appearance.
@@ -18,9 +18,13 @@ Updated 2026-09-27. All features below are implemented. Use the private 1.2.1/bu
 - [ ] Persistent Windows/Linux/Pi hub startup/restart/shutdown and trusted wireless Android connection. Confirm a single BLE owner, scoped credentials/revocation and no replay after reconnect.
 
 ## Stream Deck and keyboard
-User reports the device plugged in; Elgato USB presence and running Stream Deck software observed on 2026-09-27. KS Light plugin installation is pending; existing profiles are unchanged.
-- [ ] Install 0.5.0; settings layout, simulator feedback, two shared keys and a legacy per-key configuration, global connection changes and opt-out.
-- [ ] Real key On/Off/color/native effect, busy/repeated presses and offline failures; verify actual lamp response separately from command completion.
+- [x] Install/link 0.6.1 on the 15-key Stream Deck; separate KS Light profile with Power/Color/Effect/Brightness/Off; inspect compact status and power highlighting. Existing personal profiles preserved.
+- [x] Physical named Reading key -> simulator and BLE; user confirmed Reading/Off/Purple work. Reading still looks white; warm color accuracy remains unverified.
+- [x] Adopt existing connection without entering paths; persist setup across app restart; visually inspect color swatches, hex and brightness; verify editing sends no hub command.
+- [x] User confirmed new Power/Color/Effect controls work; reported slow/intermittent delivery and washed colors.
+- [x] Connection reuse: user says speed is great; first operation 1.879 s, next ten 0.113–0.232 s with no failures in that sequence. This is a short physical check, not a long-duration reliability claim.
+- [ ] Color-response compensation: 0.6.1 maps picker warm orange to the user's demonstrated redder drive values; final shade feedback pending. Brightness and Scene hardware acceptance remain separate.
+- [ ] Multiple legacy connections, fresh shared setup, connection changes, per-key opt-out, offline/repeated presses and mixed group/scene status.
 - [ ] Dials: action preview/press and brightness preview/press, touch-strip layout, continuous dimming coalescing, busy input, configuration changes, failure pause and deliberate recovery. Preview begins at 50%, not a lamp reading.
 - [ ] Optional live display: external hub changes, mixed groups/scenes, offline/recovery, profile switches and reader cleanup. Display remains last-sent evidence.
 - [ ] Assign keyboard launchers in macro software without overwriting existing bindings; verify target and action.

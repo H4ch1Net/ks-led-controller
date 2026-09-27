@@ -79,7 +79,10 @@ async def watch(config, emit):
                 snapshot = await read_json(session, url + "/lights", token, context)
                 groups = (await read_json(session, url + "/groups", token, context))["groups"] if any("group" in a for a in actions.values()) else []
                 scenes = (await read_json(session, url + "/scenes", token, context))["scenes"] if any("scene" in a for a in actions.values()) else []
-                emit({"status": "online", "states": action_labels(actions, snapshot["lights"], groups, scenes)})
+                emit({"status": "online", "states": action_labels(actions, snapshot["lights"], groups, scenes),
+                      "lights": {item["id"]: light_label(item) for item in snapshot["lights"]},
+                      "powers": {item["id"]: (item.get("last_sent") or {}).get("power") for item in snapshot["lights"]
+                                 if not item.get("restored")}})
                 delay = 1
                 await read_json(session, url + "/events", token, context,
                                 {"after": snapshot["cursor"], "instance": snapshot["instance"], "wait": 25})

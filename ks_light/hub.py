@@ -16,7 +16,7 @@ from .api_errors import APIError, integer
 from .profiles import DEVICE_UUIDS, DEVICE_MAPPINGS
 from .protocol import color, power
 from .queue import CommandQueue
-from .transport import write_sequence
+from .ble_pool import BleSessionPool
 from .hub_state import StateStore
 from .calibration import apply as calibrate_rgb, gains, valid_calibration, PRESETS
 from .hub_library import load_library, validate_library
@@ -52,6 +52,7 @@ class Hub:
     def __init__(self, lights, *, simulation=True, sender=None, limit=256, retention=600, state_file=None, library=None):
         self.lights = validate_lights(lights)
         self.simulation = simulation
+        self.ble_pool = BleSessionPool() if not simulation and sender is None else None
         self.sender = sender or self._transport
         self.operations, self.keys, self.last_sent = {}, {}, {}
         self.state_store = StateStore(state_file, self.lights, simulation) if state_file else None
@@ -78,7 +79,7 @@ class Hub:
             await asyncio.sleep(0.01)
         else:
             profile = DEVICE_UUIDS[light["prefix"]]
-            await write_sequence(light["address"], profile["service"], profile["write"], packets)
+            await self.ble_pool.write(light["address"], profile["service"], profile["write"], packets)
 
     def event(self, kind, target, operation):
         self.sequence += 1
@@ -309,6 +310,8 @@ class Hub:
         self.changed.set()
         await self.queue.close()
         await asyncio.gather(*list(self.tasks))
+        if self.ble_pool:
+            await self.ble_pool.close()
 
 
 def create_app(lights, token, *, simulation=True, sender=None, limit=256, retention=600, mqtt=None, state_file=None, library=None, credentials_file=None, library_file=None, lights_file=None):

@@ -7,7 +7,7 @@ Prepared 2026-09-27. Scope: publish the Android-first KS Light project through G
 - Repository: `H4ch1Net/ks-led-controller`.
 - Source branch: the existing local `ks-light-v2-foundation`; target: `main`.
 - Proposed first public candidate tag: `v1.2.1-rc.1` (verify availability before creating). Keep it a prerelease while the remaining hardware checks are open.
-- Android candidate: 1.2.1/build 5; Stream Deck package: 0.5.0.
+- Android candidate: 1.2.1/build 5; Stream Deck package: 0.6.1.
 - Android usability is accepted by the user. Raspberry Pi GPIO and ESP32 integrations are explicitly **Experimental** and do not block an Android prerelease.
 - Local source history includes the foundation, redesign and preset/theme work. Release assets must name the exact final source commit and their own component versions.
 
@@ -54,8 +54,8 @@ Do not treat signing-key ownership as solved by putting a key in GitHub secrets.
 
 - [x] Android usability accepted for 1.2.1.
 - [ ] Finish the short lamp/phone pass: preset apply, custom breathing, shortcuts and reconnect behavior. Fix failures only; prior successful paths need not be retested wholesale.
-- [ ] Stream Deck: install the packaged 0.5.0 plugin when desktop interaction is available, create a new temporary test profile without altering existing profiles, configure the simulator first, then verify a deliberate lamp action. Use dials only if the attached model has them.
-- [ ] Record physical Stream Deck results separately from its already-passing simulator/package checks. The user reports it plugged in; Windows sees an Elgato device and Stream Deck is running, but the KS Light plugin is not installed.
+- [x] Stream Deck: install the development plugin in a separate KS Light profile; verify a physical simulator press followed by deliberate BLE lamp actions. The connected 15-key model has no dials. Version 0.6.0 adds typed controls and shared setup; installer is packaged separately.
+- [x] Record Stream Deck evidence separately: user confirmed prior Reading/Off/Purple physical operation, but Reading looked white. New 0.6.0 control acceptance is tracked in DEFERRED_HARDWARE_CHECKS.md.
 - [ ] Multiple lights, Pi/ESP32 boards and always-on deployments remain deferred hardware coverage; list that honestly rather than blocking the Android prerelease on unavailable equipment.
 
 ## 5. Assemble a draft GitHub prerelease
@@ -64,7 +64,7 @@ After the PR is merged and the signing/device gates are satisfied:
 
 - [ ] Verify the proposed tag is unused; tag the exact reviewed source commit.
 - [ ] Create a **draft prerelease** using [RELEASE_NOTES_DRAFT.md](../../release/RELEASE_NOTES_DRAFT.md).
-- [ ] Attach the signed Android APK, Stream Deck 0.5.0 installer, reviewed source ZIP, SHA-256 checksums and a build receipt with source commit, versions, certificate fingerprint and verification results.
+- [ ] Attach the signed Android APK, Stream Deck 0.6.1 installer, reviewed source ZIP, SHA-256 checksums and a build receipt with source commit, versions, certificate fingerprint and verification results.
 - [ ] Keep configured ESP32 firmware, Wi-Fi credentials, hub tokens, key files, SDK caches and personal phone captures out of assets. Ship experimental DIY source/examples only.
 - [ ] Verify asset hashes after download and inspect the draft page. Publishing the reviewed draft is the final external step, not part of this planning request.
 
