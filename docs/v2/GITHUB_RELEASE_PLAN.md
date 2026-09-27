@@ -18,7 +18,7 @@ Prepared 2026-09-27. Scope: publish the Android-first KS Light project through G
 - [x] Add explicit experimental labels and a bounded DIY sanity report.
 - [x] Rechecked 2026-09-27: connector branch writes still return HTTP 403, but Git push authentication works with the existing H4ch1Net credential selected explicitly.
 - [x] Fetched remote refs: local history contains the remote base with no divergent remote commits.
-- [ ] Push the existing branch, then open one draft source PR using [PR_DRAFT.md](../../release/PR_DRAFT.md). Do not push directly to main or force-push over someone else's work.
+- [x] Pushed the existing branch and opened [draft PR #1](https://github.com/H4ch1Net/ks-led-controller/pull/1). Main and remote history were preserved.
 
 The README's candidate notice must remain until a release exists. Remove the local-only branch warning after the source PR lands. Keep compatibility claims tied to physical evidence, and keep private addresses/configuration outside the PR.
 

@@ -13,7 +13,6 @@
   "apps/android/README.md",
   "apps/android/analysis_options.yaml",
   "apps/android/android/.gitignore",
-  "apps/android/android/.kotlin/sessions/kotlin-compiler-13848857471652718087.salive",
   "apps/android/android/app/build.gradle.kts",
   "apps/android/android/app/src/debug/AndroidManifest.xml",
   "apps/android/android/app/src/debug/res/xml/debug_network_security.xml",

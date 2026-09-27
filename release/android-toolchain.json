@@ -34,6 +34,30 @@
       "artifact": "protoc-3.25.3-linux-x86_64.exe",
       "url": "https://repo.maven.apache.org/maven2/com/google/protobuf/protoc/3.25.3/protoc-3.25.3-linux-x86_64.exe",
       "sha256": "e718992c5733ece01264f160c0890229770791e51c9612a2b34dc17f83ab3773"
+    },
+    {
+      "group": "org.jetbrains.kotlin",
+      "name": "kotlin-gradle-plugins-bom",
+      "version": "2.2.20",
+      "artifact": "kotlin-gradle-plugins-bom-2.2.20.module",
+      "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-gradle-plugins-bom/2.2.20/kotlin-gradle-plugins-bom-2.2.20.module",
+      "sha256": "3fbb4575ae37c4a776aeb86d8ff93c6aa11b0cf2da75749c5320e25850b0229e"
+    },
+    {
+      "group": "org.jetbrains.kotlin",
+      "name": "kotlin-gradle-plugins-bom",
+      "version": "2.2.20",
+      "artifact": "kotlin-gradle-plugins-bom-2.2.20.pom",
+      "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-gradle-plugins-bom/2.2.20/kotlin-gradle-plugins-bom-2.2.20.pom",
+      "sha256": "3c6d469e915fbb3096ac4cb8c2f46c79d027c3c590e658a10688a1571eb578d8"
+    },
+    {
+      "group": "org.jetbrains.kotlinx",
+      "name": "kotlinx-coroutines-bom",
+      "version": "1.8.0",
+      "artifact": "kotlinx-coroutines-bom-1.8.0.pom",
+      "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-bom/1.8.0/kotlinx-coroutines-bom-1.8.0.pom",
+      "sha256": "1239e9dbe1397cd5971342956b2511bc3ace7b641842e4372a088dcfa8b9ad55"
     }
   ]
 }

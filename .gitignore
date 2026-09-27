@@ -70,6 +70,7 @@ apps/esp32/include/ks_config.h
 apps/esp32/connection.private.json
 
 # Android release signing material
+.kotlin/
 key.properties
 *.jks
 *.keystore

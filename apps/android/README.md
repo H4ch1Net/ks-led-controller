@@ -1,6 +1,8 @@
 # KS Light for Android
 
-Current private APK: **1.2.1 / build 5**, Android 7.0+. Distribution is GitHub-only APK sideloading; there is no Google Play/AAB work.
+Current private APK: **1.2.1 / build 6**, Android 7.0+. Distribution is GitHub-only APK sideloading; there is no Google Play/AAB work.
+
+Build 6 adds the KS Light bulb launcher icon, adaptive masks and Android themed-icon support. App behavior matches the user-accepted build 5.
 
 The app starts with the real light catalog. Demo mode is available in Settings. Direct Bluetooth does not require a hub. Saved colors, animation-first effects, rooms/scenes, calibration, widgets, Quick Settings, Device Controls and five appearance themes are implemented.
 

@@ -8,7 +8,9 @@ from ks_light.service import load_config, InstanceLock
 
 class ServiceTests(unittest.TestCase):
     def setUp(self):
-        self.tmp=TemporaryDirectory();self.root=Path(self.tmp.name)
+        # Windows runners can expose TEMP through an 8.3 alias (RUNNER~1).
+        # Compare canonical paths, matching load_config's path resolution.
+        self.tmp=TemporaryDirectory();self.root=Path(self.tmp.name).resolve()
         self.config={'version':1,'mode':'simulation','port':8765,'lights_file':'lights.json','token_file':'token.txt','runtime_dir':'runtime'}
         self.path=self.root/'hub.json'
         (self.root/'token.txt').write_text('test-secret-token-with-at-least-32-characters')

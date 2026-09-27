@@ -2,7 +2,9 @@
 Updated 2026-09-27. This is the resume point; ROADMAP.md and earlier test notes are historical.
 
 ## Delivery
-Distribution is GitHub-only APK sideloading; Google Play and AAB work are excluded. The current candidate is `outputs/ks-light-presets-2026-09-27/ks-light-1.2.1-build5.apk`: optimized release-mode APK signed explicitly with the existing development certificate for upgrade compatibility. It is a private candidate, not a published GitHub release. Install over the existing app; do not uninstall. Earlier outputs and Stream Deck packages remain unchanged.
+Distribution is GitHub-only APK sideloading; Google Play and AAB work are excluded. The current private candidate is `outputs/ks-light-github-2026-09-27/ks-light-1.2.1-build6-private.apk`: optimized release-mode APK with the new launcher icon, signed with the existing development certificate for upgrade compatibility. Build 5 remains the user-tested behavior baseline. No phone was connected for build 6 installation; install over the existing app without uninstalling. Earlier outputs remain unchanged.
+
+Source is pushed to `ks-light-v2-foundation` and [PR #1](https://github.com/H4ch1Net/ks-led-controller/pull/1) is open. Git authentication works with the H4ch1Net credential selected explicitly; the connector's write permission still returns 403. Public APK signing and publication remain separate from the private candidate.
 
 ## Implemented
 - Build 6 replaces the Flutter template launcher with the KS Light bulb: five legacy densities, adaptive layers and Android themed-icon support. App behavior is unchanged from user-accepted build 5.
@@ -18,6 +20,8 @@ Distribution is GitHub-only APK sideloading; Google Play and AAB work are exclud
 - Pinned dependencies/toolchain, strict Gradle verification, deterministic source packaging and CI definitions including disposable-key release assembly.
 
 ## Latest evidence
+- Build 6 release assembly and APK signature verification passed. Version 1.2.1/code 6 is non-debuggable; its certificate matches build 5. Compiled resources include all five PNG densities, adaptive v26 and monochrome v33 variants. README icon and all six screenshots were visually reviewed; README has no em dashes or decorative emoji.
+- Initial hosted checks passed Stream Deck and both Linux Python versions. Windows exposed a test fixture comparing an 8.3 TEMP alias against its resolved path; the fixture now resolves consistently and all 10 service tests pass locally. Source packaging exposed a temporary Kotlin session in the inventory; it was removed and `.kotlin/` is ignored. Hosted verification of those fixes is pending.
 - User accepted Android 1.2.1 usability, including the latest presets/effect/theme changes. This is not blanket hardware acceptance.
 - DIY sanity check: 24 focused GPIO and ESP32 contract/setup checks passed. No Pi/ESP32 hardware was connected or flashed; both adapters are explicitly experimental.
 - Stream Deck 0.6.1 installed with a dedicated profile and persisted shared setup. Color controls, no-send-on-edit, status labels and power highlighting inspected. User accepted the preceding real Reading/Off/Purple delivery, but Reading still looked white. User confirmed new Power/Color/Effect controls work but reported delay, occasional failures and washed colors. Hub now reuses up to two BLE sessions for 30 idle seconds with Android-equivalent packet pacing; user confirmed speed is great. First operation measured 1.879 s, next ten 0.113–0.232 s, all successful at the hub. Selectable Balanced/Stronger saturation/Raw RGB response curves now address washed intermediate shades; the user confirmed the compensated color works great and accepted the completed Stream Deck setup. 15 Node + 5 Python focused checks and SDK simulator smoke passed; build and manifest validation passed.
@@ -37,7 +41,8 @@ Distribution is GitHub-only APK sideloading; Google Play and AAB work are exclud
 - [x] User confirmed app testing is all good and authorized GitHub delivery. Detailed optional coverage is not a request to repeat accepted tests.
 - [x] Standard Stream Deck power/color/effect, repeat delivery speed and compensated color accepted by the user.
 - [ ] Optional hardware: multiple lights/partial failures, keyboard/dials, Pi/ESP32 wiring and USB configuration. See DEFERRED_HARDWARE_CHECKS.md.
-- [ ] Hosted CI: push the prepared `ks-light-v2-foundation` branch and open a draft PR against `main`, then follow failed jobs only. GitHub connector writes return HTTP 403, but local Git push authentication is available with credential.username=H4ch1Net. Local WSL Python/source results do not cover hosted Linux Android/release assembly.
+- [x] GitHub: pushed the branch and opened draft PR #1.
+- [ ] Hosted CI: follow required checks on the final PR commit; investigate failures only.
 - [ ] Real deployment: persistent Windows/Linux/Pi service and trusted wireless hub acceptance when that hardware/setup is available.
 
 Public GitHub release publication, permanent release-key ownership and signed binary reproducibility remain deferred beyond the private candidate. Google Play/AAB are excluded. iOS remains deferred. Feature implementation and user app acceptance are complete for this candidate; optional hardware coverage remains deferred.
@@ -45,6 +50,6 @@ Public GitHub release publication, permanent release-key ownership and signed bi
 ## Constraints and known limitations
 No desktop UI while the PC is in use; the phone was available for the redesign review. One BLE owner per lamp. No command replay after uncertain delivery. Power/color/live status describe requested or last successful commands, not reliable physical readback. Native breathing was physically accepted as smoother; selected hub/MQTT/Android paths and catalog/widget flows were accepted previously, not every new feature.
 
-The pinned Flutter build succeeds but warns that reactive_ble_mobile still uses the Kotlin Gradle plugin. Revisit migration before upgrading Flutter. Verification hashes detect changed dependencies; they are not an independent upstream audit. No production hub/settings changed, public publication or physical lamp commands occurred in this release-preparation batch.
+The pinned Flutter build succeeds but warns that reactive_ble_mobile still uses the Kotlin Gradle plugin. Revisit migration before upgrading Flutter. Verification hashes detect changed dependencies; they are not an independent upstream audit. This delivery batch did not change the running hub or send physical lamp commands.
 
-Repository preparation: documentation uses generic host/device identifiers. CI runs on pull requests and main pushes, avoiding duplicate branch-push/PR work. GitHub publication was not attempted during the redesign. Build 4 is the redesign checkpoint; build 5 adds saved colors, grouped effects and appearance choices.
+Repository preparation: documentation uses generic host/device identifiers. CI runs on pull requests and main pushes, avoiding duplicate branch-push/PR work. The source PR is now open; public release publication is pending. Build 4 is the redesign checkpoint; build 5 adds saved colors, grouped effects and appearance choices.
