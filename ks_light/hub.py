@@ -14,13 +14,15 @@ from aiohttp import web
 
 from .api_errors import APIError, integer
 from .profiles import DEVICE_UUIDS, DEVICE_MAPPINGS
-from .protocol import color, power
+from .protocol import NATIVE_EFFECTS, color, native_effect, power
 from .queue import CommandQueue
 from .ble_pool import BleSessionPool
 from .hub_state import StateStore
 from .calibration import apply as calibrate_rgb, gains, valid_calibration, PRESETS
 from .hub_library import load_library, validate_library
 import copy
+from pathlib import Path
+from urllib.parse import urlsplit
 from .credentials import authenticate, load_credentials
 from .config_io import revision, save_json, load_json
 
@@ -96,7 +98,7 @@ class Hub:
             raise APIError(422, "invalid_command")
         if action == "native":
             if (set(body) != {"effect", "speed", "brightness"}
-                    or not integer(body.get("effect"), 0x82, 0x8a)
+                    or type(body.get("effect")) is not int or body["effect"] not in NATIVE_EFFECTS
                     or not integer(body.get("speed"), 0, 100)
                     or not integer(body.get("brightness"), 1, 100)):
                 raise APIError(422, "invalid_native_effect")
@@ -136,14 +138,14 @@ class Hub:
         self.validate(target, action, body)
         light = self.lights[target]
         if action == "native":
-            packets = [power(True), bytes([0x5c, 0, body["effect"], body["speed"], body["brightness"], 0, 0xc5])]
+            packets = [power(True), native_effect(body["effect"], body["speed"], body["brightness"])]
             state = {"power": True, "native_effect": body["effect"], "speed": body["speed"], "brightness": body["brightness"]}
         else:
             state = dict(self.last_sent.get(target, {}))
             packets = [power(body["power"])] if "power" in body else []
             if "rgb" not in body and "brightness" in body and "native_effect" in state:
                 # Resolve partial updates at delivery time, behind preceding commands.
-                packets.append(bytes([0x5c, 0, state["native_effect"], state["speed"], body["brightness"], 0, 0xc5]))
+                packets.append(native_effect(state["native_effect"], state["speed"], body["brightness"]))
                 state["brightness"] = body["brightness"]
             elif "rgb" in body or "brightness" in body:
                 rgb = body.get("rgb", state.get("rgb"))
@@ -314,7 +316,25 @@ class Hub:
             await self.ble_pool.close()
 
 
-def create_app(lights, token, *, simulation=True, sender=None, limit=256, retention=600, mqtt=None, state_file=None, library=None, credentials_file=None, library_file=None, lights_file=None):
+WEB_ROOT = Path(__file__).with_name("web")
+WEB_FILES = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"),
+             "/app.css": ("app.css", "text/css"), "/icon.svg": ("icon.svg", "image/svg+xml")}
+WEB_HEADERS = {
+    "Content-Security-Policy": "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
+                               "connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+    "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer", "Cache-Control": "no-cache",
+}
+LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def same_origin(request, origin):
+    """Allow the bundled dashboard only: same scheme/host/port, and loopback unless TLS is in use."""
+    if origin != f"{request.scheme}://{request.host}":
+        return False
+    return request.secure or urlsplit(origin).hostname in LOOPBACK_HOSTS
+
+
+def create_app(lights, token, *, simulation=True, sender=None, limit=256, retention=600, mqtt=None, state_file=None, library=None, credentials_file=None, library_file=None, lights_file=None, dashboard=True):
     if not isinstance(token, str) or len(token) < 32 or not token.isascii() or any(c.isspace() for c in token):
         raise ValueError("Set a non-whitespace ASCII bearer token of at least 32 characters")
     if library_file:
@@ -344,6 +364,9 @@ def create_app(lights, token, *, simulation=True, sender=None, limit=256, retent
 
     @web.middleware
     async def security(request, handler):
+        if not request.path.startswith("/api/"):
+            # Static dashboard files hold no data; every API call still needs a token.
+            return await handler(request)
         try:
             supplied = request.headers.get("Authorization", "")
             if not hmac.compare_digest(supplied.encode(), ("Bearer " + token).encode()):
@@ -358,7 +381,8 @@ def create_app(lights, token, *, simulation=True, sender=None, limit=256, retent
                 request['credential'] = principal
                 if request.method not in {'GET', 'HEAD'} and principal['scope'] != 'control':
                     raise APIError(403, 'read_only_credential')
-            if request.headers.get("Origin"):
+            origin = request.headers.get("Origin")
+            if origin and not (dashboard and same_origin(request, origin)):
                 raise APIError(403, "browser_origin_not_allowed")
             return await handler(request)
         except APIError as error:
@@ -395,7 +419,8 @@ def create_app(lights, token, *, simulation=True, sender=None, limit=256, retent
                                  "library_edit": library_file is not None and request.get('credential') is None,
                                  "calibration_edit": lights_file is not None and request.get('credential') is None,
                                  "operation_retention_seconds": retention, "operation_limit": limit,
-                                 "calibration": True, "calibration_model": "static_rgb_gains", "durable_last_sent": hub.state_store is not None})
+                                 "calibration": True, "calibration_model": "static_rgb_gains", "durable_last_sent": hub.state_store is not None,
+                                 "native_effects": [{"id": key, "name": name} for key, name in NATIVE_EFFECTS.items()]})
 
     async def lights_list(request):
         return web.json_response({"lights": [hub.light(target) for target in hub.lights if allowed(request, [target])], "cursor": hub.sequence, "instance": hub.instance})
@@ -576,6 +601,11 @@ def create_app(lights, token, *, simulation=True, sender=None, limit=256, retent
                 visible.append(event)
         return web.json_response({"events": visible, "cursor": hub.sequence, "instance": hub.instance})
 
+    async def web_file(request):
+        name, content_type = WEB_FILES[request.path]
+        body = await asyncio.to_thread((WEB_ROOT / name).read_bytes)
+        return web.Response(body=body, content_type=content_type, charset="utf-8", headers=WEB_HEADERS)
+
     async def cleanup(app):
         await hub.close()
     app.on_cleanup.append(cleanup)
@@ -595,7 +625,27 @@ def create_app(lights, token, *, simulation=True, sender=None, limit=256, retent
     app.router.add_post("/api/v1/{kind:scenes}/{target}/apply", collection_command)
     app.router.add_get("/api/v1/operations/{operation}", operation)
     app.router.add_get("/api/v1/events", events)
+    if dashboard:
+        for path in WEB_FILES:
+            app.router.add_get(path, web_file)
     return app
+
+
+DEMO_LIGHTS = [
+    {"id": "desk", "name": "Desk lamp", "prefix": "KS03~", "address": "simulation-desk"},
+    {"id": "shelf", "name": "Shelf glow", "prefix": "KS03~", "address": "simulation-shelf"},
+    {"id": "ceiling", "name": "Ceiling strip", "prefix": "KS03-", "address": "simulation-ceiling"},
+]
+DEMO_LIBRARY = {"version": 1, "groups": [{"id": "living", "name": "Living room", "members": ["desk", "shelf"]}],
+                "scenes": [
+                    {"id": "evening", "name": "Evening", "actions": [
+                        {"light": "desk", "type": "state", "body": {"power": True, "rgb": [255, 170, 90], "brightness": 40}},
+                        {"light": "shelf", "type": "native", "body": {"effect": 0x89, "speed": 30, "brightness": 25}}]},
+                    {"id": "focus", "name": "Focus", "actions": [
+                        {"light": "desk", "type": "state", "body": {"power": True, "rgb": [235, 245, 255], "brightness": 100}},
+                        {"light": "ceiling", "type": "state", "body": {"power": True, "rgb": [255, 255, 255]}}]},
+                    {"id": "off", "name": "All off", "actions": [
+                        {"light": target, "type": "state", "body": {"power": False}} for target in ("desk", "shelf", "ceiling")]}]}
 
 
 def main():
@@ -611,7 +661,13 @@ def main():
     parser.add_argument("--mqtt-tls", action="store_true")
     parser.add_argument("--mqtt-ca-file")
     parser.add_argument("--mqtt-manifest")
+    parser.add_argument("--no-dashboard", action="store_true", help="Do not serve the browser dashboard")
     args = parser.parse_args()
+    token = os.environ.get("KS_LIGHT_TOKEN")
+    generated = not token and not args.ble
+    if generated:
+        # Simulation only: a throwaway token keeps first runs to one command.
+        token = secrets.token_urlsafe(32)
     try:
         if args.ble and not args.config:
             raise ValueError("BLE mode requires --config")
@@ -621,7 +677,7 @@ def main():
             with open(args.config, encoding="utf-8") as handle:
                 lights = json.load(handle)["lights"]
         else:
-            lights = [{"id": "desk", "name": "Demo desk light", "prefix": "KS03~", "address": "simulation"}]
+            lights = DEMO_LIGHTS
         mqtt = None
         if args.mqtt_host:
             mqtt = dict(hostname=args.mqtt_host, port=args.mqtt_port, hub_id=args.mqtt_id,
@@ -629,12 +685,22 @@ def main():
                         username=os.environ.get("KS_MQTT_USERNAME"), password=os.environ.get("KS_MQTT_PASSWORD"))
             if sys.platform == "win32":
                 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        app = create_app(lights, os.environ.get("KS_LIGHT_TOKEN"), simulation=not args.ble, mqtt=mqtt,
+        if not token:
+            raise ValueError("Set KS_LIGHT_TOKEN to a random value of at least 32 characters (required with --ble)")
+        library = DEMO_LIBRARY if not args.config and not args.library else None
+        app = create_app(lights, token, simulation=not args.ble, mqtt=mqtt, dashboard=not args.no_dashboard, library=library,
                          library_file=args.library, credentials_file=args.credentials, lights_file=args.config)
     except (ValueError, KeyError, TypeError, OSError) as error:
         parser.error(str(error))
-    # Loopback only in this first release. Never log authorization headers or a token.
-    web.run_app(app, host="127.0.0.1", port=args.port, access_log=None)
+    # Loopback only. Never log authorization headers; a token is shown only when generated for simulation.
+    url = f"http://127.0.0.1:{args.port}"
+    print(f"KS Light hub ({'Bluetooth' if args.ble else 'simulation'}) on {url}/api/v1")
+    if not args.no_dashboard:
+        print(f"Dashboard: {url}/")
+    if generated:
+        print(f"Temporary simulation token: {token}")
+    print("Press Ctrl+C to stop.", flush=True)
+    web.run_app(app, host="127.0.0.1", port=args.port, access_log=None, print=None)
 
 
 if __name__ == "__main__":

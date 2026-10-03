@@ -180,10 +180,35 @@ class BluetoothBackend extends LightBackend {
     }
   }
 
+  static const channel = MethodChannel('dev.kslight/settings');
+
+  // One native Bluetooth lock is shared by every session this app opens, so
+  // multi-light effects can keep several sessions without reporting BUSY.
+  Future<String?>? _lock;
+  int _holders = 0;
+
+  Future<void> _acquire() async {
+    _holders++;
+    final pending = _lock ??= channel.invokeMethod<String>('acquireBluetooth');
+    try {
+      await pending;
+    } catch (_) {
+      _holders--;
+      if (identical(_lock, pending)) _lock = null;
+      rethrow;
+    }
+  }
+
+  Future<void> _release() async {
+    if (_holders == 0 || --_holders > 0) return;
+    final pending = _lock;
+    _lock = null;
+    await channel.invokeMethod<void>('releaseBluetooth', await pending);
+  }
+
   @override
   Future<LightSession> openSession(Light light) async {
-    const channel = MethodChannel('dev.kslight/settings');
-    final owner = await channel.invokeMethod<String>('acquireBluetooth');
+    await _acquire();
     try {
       final session = await _openUnlocked(light);
       return LightSession(
@@ -193,10 +218,14 @@ class BluetoothBackend extends LightBackend {
           await session.send(packets);
           for (final packet in packets) {
             if (packet.length == 4 && packet[0] == 0x5b) {
-              await channel.invokeMethod<void>('shortcutPower', {
-                'id': light.id,
-                'on': packet[1] == 0xf0,
-              });
+              try {
+                await channel.invokeMethod<void>('shortcutPower', {
+                  'id': light.id,
+                  'on': packet[1] == 0xf0,
+                });
+              } catch (_) {
+                // Widget bookkeeping must not turn a delivered write into a failure.
+              }
             }
           }
         },
@@ -204,12 +233,12 @@ class BluetoothBackend extends LightBackend {
           try {
             await session.close();
           } finally {
-            await channel.invokeMethod<void>('releaseBluetooth', owner);
+            await _release();
           }
         },
       );
     } catch (_) {
-      await channel.invokeMethod<void>('releaseBluetooth', owner);
+      await _release();
       rethrow;
     }
   }

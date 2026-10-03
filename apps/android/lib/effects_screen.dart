@@ -62,7 +62,12 @@ class _EffectsScreenState extends State<EffectsScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed && busy) {
+    // Inactive covers the notification shade and system dialogs; keep running there.
+    final background =
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached;
+    if (background && busy) {
       runner.stop();
       if (mounted) setState(() => stopping = true);
     }

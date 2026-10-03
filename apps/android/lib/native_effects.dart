@@ -142,7 +142,9 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    foreground = state == AppLifecycleState.resumed;
+    foreground =
+        state == AppLifecycleState.resumed ||
+        state == AppLifecycleState.inactive;
     if (!foreground) {
       if (mounted && active) {
         setState(

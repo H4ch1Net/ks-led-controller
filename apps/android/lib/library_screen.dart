@@ -673,6 +673,28 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   Future<void> remove(String title, bool scene) async {
     if (busy) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete "$title"?'),
+        content: Text(
+          scene
+              ? 'This scene will be removed from this phone. Lights are not changed.'
+              : 'This room or group will be removed from this phone. Lights are not changed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted || busy) return;
     final next = library!.copy();
     if (scene) {
       next.scenes.remove(title);

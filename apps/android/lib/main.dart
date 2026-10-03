@@ -1008,7 +1008,8 @@ class _LightScreenState extends State<LightScreen> {
                       enabled: !busy && colorValid,
                       onSelected: (saved) => setState(() {
                         rgb = List.of(saved.rgb);
-                        brightness = saved.brightness;
+                        // Saved colors are shared; ceiling profiles only accept full brightness.
+                        brightness = colorType == 'floor' ? saved.brightness : 255;
                         colorPending = true;
                         colorValid = true;
                       }),

@@ -11,6 +11,7 @@ import aiomqtt
 from paho.mqtt.subscribeoptions import SubscribeOptions
 
 from .api_errors import APIError, integer
+from .protocol import NATIVE_EFFECT_IDS, NATIVE_EFFECTS
 
 LOG = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class MQTTBridge:
         return {"name": light["name"] + (" (Simulation)" if self.hub.simulation else ""),
                 "unique_id": device_id, "schema": "json", "supported_color_modes": ["rgb"],
                 "brightness": True, "brightness_scale": 100, "effect": True,
-                "effect_list": ["Purple breathing"], "optimistic": True, "qos": 0, "retain": False,
+                "effect_list": list(NATIVE_EFFECTS.values()), "optimistic": True, "qos": 0, "retain": False,
                 "command_topic": f"{self.root}/devices/{target}/set",
                 "state_topic": f"{self.root}/devices/{target}/state",
                 "json_attributes_topic": f"{self.root}/devices/{target}/attributes",
@@ -88,12 +89,12 @@ class MQTTBridge:
                 raise APIError(422, "off_with_settings_not_supported")
             return "state", {"power": False}, key
         if "effect" in body:
-            if body["effect"] != "Purple breathing" or "color" in body:
+            if body["effect"] not in NATIVE_EFFECT_IDS or "color" in body:
                 raise APIError(422, "unsupported_effect")
             speed, brightness = body.get("speed", 35), body.get("brightness", 50)
             if not integer(speed, 0, 100) or not integer(brightness, 1, 100):
                 raise APIError(422, "invalid_effect_settings")
-            return "native", {"effect": 137, "speed": speed, "brightness": brightness}, key
+            return "native", {"effect": NATIVE_EFFECT_IDS[body["effect"]], "speed": speed, "brightness": brightness}, key
         if "speed" in body:
             raise APIError(422, "speed_requires_effect")
         result = {"power": True}
@@ -178,7 +179,7 @@ class MQTTBridge:
                 rendered["color"] = dict(zip("rgb", state["rgb"]))
             if "brightness" in state:
                 rendered["brightness"] = state["brightness"]
-            rendered["effect"] = "Purple breathing" if state.get("native_effect") == 137 else None
+            rendered["effect"] = NATIVE_EFFECTS.get(state.get("native_effect"))
             signature = json.dumps(rendered, sort_keys=True)
             if self.states.get(target) != signature:
                 await self.publish_json(client, f"{self.root}/devices/{target}/state", rendered, retain=True)

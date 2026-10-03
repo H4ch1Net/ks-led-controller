@@ -20,7 +20,7 @@ def load_config(filename):
     path = Path(filename).resolve()
     data = json.loads(path.read_text(encoding="utf-8-sig"))
     required = {"version", "mode", "port", "lights_file", "token_file", "runtime_dir"}
-    if not isinstance(data, dict) or not required <= set(data) or set(data) - required - {"mqtt", "listen_host", "tls", "persist_state", "library_file", "credentials_file"}:
+    if not isinstance(data, dict) or not required <= set(data) or set(data) - required - {"mqtt", "listen_host", "tls", "persist_state", "library_file", "credentials_file", "dashboard"}:
         raise ValueError("Invalid service configuration fields")
     if type(data["version"]) is not int or data["version"] != 1:
         raise ValueError("Unsupported service configuration version")
@@ -63,6 +63,8 @@ def load_config(filename):
     runtime = resolve(data["runtime_dir"])
     if type(data.get("persist_state", False)) is not bool:
         raise ValueError("persist_state must be boolean")
+    if type(data.get("dashboard", True)) is not bool:
+        raise ValueError("dashboard must be boolean")
     mqtt = None
     if "mqtt" in data:
         raw = data["mqtt"]
@@ -90,7 +92,7 @@ def load_config(filename):
                 port=data["port"], runtime=runtime, state_file=runtime / "last-sent.json" if data.get("persist_state", False) else None, mqtt=mqtt, host=host, ssl_context=ssl_context,
                 credentials_file=resolve(data['credentials_file']) if 'credentials_file' in data else None,
                 library_file=resolve(data['library_file']) if 'library_file' in data else None,
-                lights_file=resolve(data['lights_file']))
+                lights_file=resolve(data['lights_file']), dashboard=data.get("dashboard", True))
 
 
 class InstanceLock:
@@ -131,10 +133,14 @@ def main():
         if config["mqtt"] and sys.platform == "win32":
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         def build_app():
-            return create_app(config["lights"], config["token"], simulation=config["simulation"], mqtt=config["mqtt"], state_file=config["state_file"], library=config["library"], credentials_file=config['credentials_file'], library_file=config['library_file'], lights_file=config['lights_file'])
+            return create_app(config["lights"], config["token"], simulation=config["simulation"], mqtt=config["mqtt"], state_file=config["state_file"], library=config["library"], credentials_file=config['credentials_file'], library_file=config['library_file'], lights_file=config['lights_file'], dashboard=config['dashboard'])
         if args.check:
             build_app()
             print("Configuration valid; no network connections or light commands sent")
+            if config["dashboard"]:
+                scheme = "https" if config["ssl_context"] else "http"
+                host = f"[{config['host']}]" if ":" in config["host"] else config["host"]
+                print(f"Dashboard: {scheme}://{host}:{config['port']}/")
             return
         with InstanceLock(config["runtime"] / "hub.lock"):
             app = build_app()
@@ -147,10 +153,24 @@ def main():
             finally:
                 logging.getLogger(__name__).info("Hub stopped")
                 handler.close()
-    except (ValueError, TypeError, KeyError, OSError, RuntimeError):
-        # Configuration/OS exception text can contain secrets or JSON fragments.
-        print("Hub setup failed. Check configuration, secret files, runtime ownership and port availability.", file=sys.stderr)
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as error:
+        print(f"Hub setup failed: {describe(error)}", file=sys.stderr)
         raise SystemExit(2)
+
+
+def describe(error):
+    """Explain a setup failure without echoing file contents, which may hold secrets."""
+    if isinstance(error, json.JSONDecodeError):
+        return f"invalid JSON at line {error.lineno}, column {error.colno}"
+    if isinstance(error, ssl.SSLError):
+        return "the TLS certificate or key could not be loaded"
+    if isinstance(error, UnicodeError):
+        return "a configuration file is not valid UTF-8"
+    if isinstance(error, OSError):
+        return f"{error.strerror or 'file error'}: {error.filename}" if error.filename else (error.strerror or "operating system error")
+    if isinstance(error, (ValueError, RuntimeError)):
+        return str(error)
+    return "check configuration, secret files, runtime ownership and port availability"
 
 
 if __name__ == "__main__":

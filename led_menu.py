@@ -33,7 +33,6 @@ except ImportError:
 # Device mappings
 from ks_light.profiles import DEVICE_MAPPINGS
 from ks_light.protocol import power as build_on_off_cmd
-from ks_light.protocol import color as build_color_cmd, white_brightness
 
 # Presets file
 PRESETS_FILE = Path.home() / ".ks_led_presets.json"
@@ -222,8 +221,6 @@ async def apply_rgb(device, action_name, rgb=None, brightness=None):
 async def color_preset_menu(device, presets):
     """Handle color preset selection."""
     addr, name, prefix = device
-    mapping = DEVICE_MAPPINGS[prefix]
-    device_type = mapping.get("type", "ceiling")
     
     while True:
         print_header()
@@ -251,8 +248,6 @@ async def color_preset_menu(device, presets):
 async def custom_color_menu(device):
     """Handle custom RGB color input."""
     addr, name, prefix = device
-    mapping = DEVICE_MAPPINGS[prefix]
-    device_type = mapping.get("type", "ceiling")
     
     print_header()
     print(f"{Colors.BOLD}Custom RGB Color{Colors.RESET}\n")
@@ -296,8 +291,7 @@ async def custom_color_menu(device):
 async def brightness_menu(device):
     """Handle brightness adjustment."""
     addr, name, prefix = device
-    mapping = DEVICE_MAPPINGS[prefix]
-    device_type = mapping.get("type", "ceiling")
+    device_type = DEVICE_MAPPINGS[prefix].get("type", "ceiling")
     
     print_header()
     print(f"{Colors.BOLD}Brightness Control{Colors.RESET}\n")
@@ -361,7 +355,7 @@ async def manage_presets_menu():
         elif choice == '1':
             # Add preset
             print(f"\n{Colors.BOLD}Add New Preset{Colors.RESET}\n")
-            name = input(f"Preset name: ").strip()
+            name = input("Preset name: ").strip()
             if not name:
                 continue
             

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="no-referrer">
+  <title>KS Light Hub</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="app.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to controls</a>
+
+  <section id="signin" class="signin" hidden aria-labelledby="signin-title">
+    <form id="signin-form" class="signin-card" novalidate>
+      <img src="icon.svg" alt="" width="56" height="56">
+      <h1 id="signin-title">Connect to this hub</h1>
+      <p class="muted">Enter the hub token. It is the <code>KS_LIGHT_TOKEN</code> value, the contents of the service <code>token_file</code>, or a scoped controller credential.</p>
+      <label class="field">
+        <span>Token</span>
+        <input id="token" type="password" autocomplete="current-password" spellcheck="false" required minlength="32">
+      </label>
+      <label class="check">
+        <input id="remember" type="checkbox">
+        <span>Remember on this device</span>
+      </label>
+      <p id="signin-error" class="error" role="alert" hidden></p>
+      <button class="button primary" type="submit" id="signin-submit">Connect</button>
+    </form>
+  </section>
+
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <img src="icon.svg" alt="" width="32" height="32">
+        <span>KS Light <span class="muted">Hub</span></span>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <div class="topbar-actions">
+        <div class="accents" role="radiogroup" aria-label="Accent color" id="accents"></div>
+        <button class="button ghost" type="button" id="signout">Sign out</button>
+      </div>
+    </header>
+
+    <div id="banner" class="banner" role="alert" hidden></div>
+
+    <main id="main" class="layout">
+      <section aria-labelledby="lights-title" class="lights">
+        <div class="section-head">
+          <h2 id="lights-title">Lights</h2>
+          <span class="muted small" id="lights-note">State shows the last command sent, not a reading from the light.</span>
+        </div>
+        <div id="lights" class="light-grid"></div>
+      </section>
+
+      <aside class="side">
+        <section aria-labelledby="scenes-title" class="panel">
+          <h2 id="scenes-title">Scenes</h2>
+          <ul id="scenes" class="list"></ul>
+        </section>
+        <section aria-labelledby="groups-title" class="panel">
+          <h2 id="groups-title">Groups</h2>
+          <ul id="groups" class="list"></ul>
+        </section>
+        <section aria-labelledby="activity-title" class="panel">
+          <h2 id="activity-title">Activity</h2>
+          <ol id="activity" class="activity" aria-live="off"></ol>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+
+  <template id="light-template">
+    <article class="card light">
+      <header class="light-head">
+        <span class="swatch" aria-hidden="true"></span>
+        <div class="light-title">
+          <h3></h3>
+          <span class="meta"></span>
+        </div>
+        <div class="segmented" role="group">
+          <button type="button" data-power="on">On</button>
+          <button type="button" data-power="off">Off</button>
+        </div>
+      </header>
+      <div class="light-body">
+        <label class="range" data-cap="brightness">
+          <span>Brightness <output></output></span>
+          <input type="range" min="1" max="100" step="1">
+        </label>
+        <div class="colors" data-cap="rgb">
+          <span class="label">Color</span>
+          <div class="chips" role="group"></div>
+        </div>
+        <details class="effects" data-cap="native_effects">
+          <summary>Built-in effects</summary>
+          <div class="effects-body">
+            <label class="field compact">
+              <span>Effect</span>
+              <select></select>
+            </label>
+            <label class="range">
+              <span>Speed <output></output></span>
+              <input type="range" min="0" max="100" step="1" value="35" data-role="speed">
+            </label>
+            <button type="button" class="button" data-role="start">Start effect</button>
+          </div>
+        </details>
+      </div>
+      <footer class="light-foot">
+        <span class="last"></span>
+        <span class="pending" hidden>Sending</span>
+      </footer>
+    </article>
+  </template>
+</body>
+</html>

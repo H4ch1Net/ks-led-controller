@@ -205,3 +205,48 @@ class HubQueueTests(unittest.IsolatedAsyncioTestCase):
             validate_lights([LIGHTS[0], {**LIGHTS[0], "id": "duplicate"}])
         with self.assertRaises(ValueError):
             create_app(LIGHTS, "weak")
+
+
+class DashboardTests(unittest.IsolatedAsyncioTestCase):
+    async def client(self, **kwargs):
+        client = TestClient(TestServer(create_app(LIGHTS, TOKEN, **kwargs)))
+        await client.start_server()
+        self.addAsyncCleanup(client.close)
+        return client
+
+    async def test_static_files_need_no_token_and_carry_security_headers(self):
+        client = await self.client()
+        for path, kind in [("/", "text/html"), ("/app.js", "text/javascript"), ("/app.css", "text/css"), ("/icon.svg", "image/svg+xml")]:
+            response = await client.get(path)
+            self.assertEqual(response.status, 200, path)
+            self.assertEqual(response.content_type, kind)
+            self.assertIn("frame-ancestors 'none'", response.headers["Content-Security-Policy"])
+        response = await client.get("/api/v1/lights")
+        self.assertEqual(response.status, 401)
+
+    async def test_same_origin_loopback_browser_requests_are_allowed(self):
+        client = await self.client()
+        auth = {"Authorization": "Bearer " + TOKEN}
+        origin = f"http://{client.host}:{client.port}"
+        response = await client.patch("/api/v1/lights/desk/state", json={"power": False},
+                                      headers={**auth, "Origin": origin, "Host": f"{client.host}:{client.port}"})
+        self.assertEqual(response.status, 202)
+        for foreign in ["http://evil.example", f"http://localhost:{client.port + 1}", "null"]:
+            response = await client.get("/api/v1/lights", headers={**auth, "Origin": foreign})
+            self.assertEqual(response.status, 403, foreign)
+        rebound = await client.get("/api/v1/lights", headers={**auth, "Origin": "http://evil.example:80", "Host": "evil.example:80"})
+        self.assertEqual(rebound.status, 403)
+
+    async def test_dashboard_can_be_disabled(self):
+        client = await self.client(dashboard=False)
+        self.assertEqual((await client.get("/")).status, 404)
+        response = await client.get("/api/v1/lights", headers={"Authorization": "Bearer " + TOKEN,
+                                                               "Origin": f"http://{client.host}:{client.port}"})
+        self.assertEqual(response.status, 403)
+
+    async def test_capabilities_list_native_effects(self):
+        client = await self.client()
+        response = await client.get("/api/v1/capabilities", headers={"Authorization": "Bearer " + TOKEN})
+        effects = (await response.json())["native_effects"]
+        self.assertEqual(len(effects), 9)
+        self.assertIn({"id": 137, "name": "Purple breathing"}, effects)

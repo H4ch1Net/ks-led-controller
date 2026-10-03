@@ -77,7 +77,9 @@ def check_inventory(root, names):
     for name in candidates:
         valid_name(name)
     if candidates != set(names) or len(names) != len(set(names)):
-        raise ValueError("Review and update release/source-files.json before packaging")
+        added, removed = sorted(candidates - set(names)), sorted(set(names) - candidates)
+        details = "".join(f"\n  + {name}" for name in added) + "".join(f"\n  - {name}" for name in removed)
+        raise ValueError("Review and update release/source-files.json before packaging" + (details or "\n  duplicate entries"))
 
 
 def create(root, names):
@@ -174,8 +176,9 @@ def main():
                 file.write(f"{digest}  {args.output.name}\n")
             print(f"Packaged {len(manifest['files'])} reviewed files; ZIP SHA-256 {digest}")
         return 0
-    except (OSError, ValueError, KeyError, TypeError, subprocess.CalledProcessError, zipfile.BadZipFile):
-        print("Package failed: check the reviewed inventory, paths and output. No existing artifact was replaced.")
+    except (OSError, ValueError, KeyError, TypeError, subprocess.CalledProcessError, zipfile.BadZipFile) as error:
+        detail = f" {error}" if isinstance(error, ValueError) and str(error).startswith("Review") else ""
+        print("Package failed: check the reviewed inventory, paths and output. No existing artifact was replaced." + detail)
         return 1
 
 

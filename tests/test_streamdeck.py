@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from aiohttp.test_utils import TestServer
 from ks_light.hub import create_app
-from ks_light.streamdeck import run, command
+from ks_light.streamdeck import run
 from ks_light.controller import ControllerError
 
 

@@ -244,27 +244,33 @@ class ShortcutPowerService : Service() {
     private var sceneRevision: String? = null
     private var sceneResults = org.json.JSONArray()
     override fun onBind(intent: Intent?) = null
+    // Started with startForegroundService: every start must reach startForeground,
+    // even one that exits immediately, or Android stops the app.
+    private fun promote() {
+        val nm = getSystemService(NotificationManager::class.java)
+        if(Build.VERSION.SDK_INT >= 26) nm.createNotificationChannel(NotificationChannel("light_commands", "Light commands", NotificationManager.IMPORTANCE_LOW))
+        val builder = if(Build.VERSION.SDK_INT >= 26) Notification.Builder(this, "light_commands") else Notification.Builder(this)
+        startForeground(43, builder.setSmallIcon(R.drawable.ic_light_tile).setContentTitle("KS Light")
+            .setContentText("Sending light command…").setContentIntent(Shortcuts.activity(this)).build())
+    }
+    private fun exitEarly(): Int { stopForeground(STOP_FOREGROUND_REMOVE); stopSelf(); return START_NOT_STICKY }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        try { promote() } catch (_: Exception) { stopSelf(); return START_NOT_STICKY }
         if (!done) return START_NOT_STICKY // Do not queue repeated taps.
-        if (intent == null || !intent.hasExtra("on")) { stopSelf(); return START_NOT_STICKY }
+        if (intent == null || !intent.hasExtra("on")) return exitEarly()
         val widgetId = intent.getIntExtra("widget_id", -1)
         val source = if (widgetId == -1) Shortcuts.prefs(this) else Shortcuts.widgetPrefs(this, widgetId)
         address = source.getString("address", "") ?: ""
         if (!ShortcutTargetPolicy.accepts(widgetId, Shortcuts.widgetIds(this).toSet(), address,
                 intent.getStringExtra("expected_address"), source.getString("revision", null),
-                intent.getStringExtra("expected_revision"))) { stopSelf(); return START_NOT_STICKY }
+                intent.getStringExtra("expected_revision"))) return exitEarly()
         sceneWidgetId = if (intent.getBooleanExtra("scene", false)) widgetId else -1
         sceneRevision = source.getString("revision", null)
         val allowed = Build.VERSION.SDK_INT < 31 || checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
-        if (!allowed) { Shortcuts.report(this, address, "Open app: Bluetooth permission needed"); stopSelf(); return START_NOT_STICKY }
+        if (!allowed) { Shortcuts.report(this, address, "Open app: Bluetooth permission needed"); return exitEarly() }
         try {
-            val nm = getSystemService(NotificationManager::class.java)
-            if(Build.VERSION.SDK_INT >= 26) nm.createNotificationChannel(NotificationChannel("light_commands", "Light commands", NotificationManager.IMPORTANCE_LOW))
-            val builder = if(Build.VERSION.SDK_INT >= 26) Notification.Builder(this, "light_commands") else Notification.Builder(this)
-            startForeground(43, builder.setSmallIcon(R.drawable.ic_light_tile).setContentTitle("KS Light")
-                .setContentText("Sending light command…").setContentIntent(Shortcuts.activity(this)).build())
             owner = ShortcutLock.acquire()
-            if(owner == null) { Shortcuts.report(this, address, "Light busy — stop the active effect or retry"); stopForeground(STOP_FOREGROUND_REMOVE); stopSelf(); return START_NOT_STICKY }
+            if(owner == null) { Shortcuts.report(this, address, "Light busy — stop the active effect or retry"); return exitEarly() }
             done = false
             on = intent.getBooleanExtra("on", false)
             steps = emptyList(); stepIndex = 0; sentCount = 0; sceneResults = org.json.JSONArray()

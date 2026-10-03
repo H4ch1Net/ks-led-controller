@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test test",
+    "test": "node --test \"test/*.test.mjs\"",
     "validate": "streamdeck validate dev.kslight.controller.sdPlugin",
     "pack": "streamdeck pack dev.kslight.controller.sdPlugin"
   },

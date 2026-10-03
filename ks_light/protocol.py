@@ -27,3 +27,26 @@ def color(r, g, b, device_type="ceiling", brightness=255):
 
 def white_brightness(value):
     return bytes.fromhex("5A000200000000") + bytes([byte(value), 0, 165])
+
+
+# KS03~ firmware effects: the lamp animates these itself and keeps running after disconnect.
+NATIVE_EFFECTS = {
+    0x82: "Seven-color fade",
+    0x83: "RGB fade",
+    0x84: "Red breathing",
+    0x85: "Green breathing",
+    0x86: "Blue breathing",
+    0x87: "Yellow breathing",
+    0x88: "Cyan breathing",
+    0x89: "Purple breathing",
+    0x8A: "White breathing",
+}
+NATIVE_EFFECT_IDS = {name: effect for effect, name in NATIVE_EFFECTS.items()}
+
+
+def native_effect(effect, speed, brightness):
+    if effect not in NATIVE_EFFECTS or type(effect) is not int:
+        raise ValueError("Unknown native effect")
+    if type(speed) is not int or not 0 <= speed <= 100 or type(brightness) is not int or not 1 <= brightness <= 100:
+        raise ValueError("Effect speed must be 0..100 and brightness 1..100")
+    return bytes([0x5C, 0, effect, speed, brightness, 0, 0xC5])

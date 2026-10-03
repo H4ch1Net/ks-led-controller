@@ -1,37 +1,35 @@
 #!/usr/bin/env python3
-import asyncio
+"""Control KS Bluetooth lights directly from a computer, without the hub."""
 import argparse
-import math
+import asyncio
 import json
+import math
+import re
 from pathlib import Path
-from ks_light.controls import prepare_color
-from ks_light.storage import StateStore
 from typing import Optional
+
+from ks_light.controls import prepare_color
+from ks_light.profiles import DEVICE_MAPPINGS, DEVICE_UUIDS, PROFILES
+from ks_light.protocol import NATIVE_EFFECT_IDS, NATIVE_EFFECTS, native_effect
+from ks_light.protocol import power as build_on_off_cmd
+from ks_light.storage import StateStore
 
 try:
     from bleak import BleakScanner
     from ks_light.transport import write_sequence
 except ImportError:
-    raise SystemExit("Please install bleak: pip install bleak")
+    raise SystemExit("Bleak is missing. Install dependencies: python -m pip install --require-hashes -r requirements.lock")
 
-# UUID template used in the original app: 0000%s-0000-1000-8000-00805f9b34fb
-UUID_TEMPLATE = "0000%s-0000-1000-8000-00805f9b34fb"
-
-# Optional defaults for convenience
 DEFAULT_PREFIX = "KS03~"
-DEFAULT_ADDRESS = None  # Discover a device unless the caller selects an address.
+EFFECT_SLUGS = {name.lower().replace(" ", "-"): effect for name, effect in NATIVE_EFFECT_IDS.items()}
 
-# Mappings derived from UUIDBeanList.smali
-# Each entry maps a device name prefix to its GATT service and characteristic short UUIDs
-from ks_light.profiles import DEVICE_UUIDS
 
-# Command builders based on CmdFloor.getTopOn(Z):
-# On:  "5B" + "F0" + "01B5"
-# Off: "5B" + "0F" + "01B5"
-# Many fragments use this for top/strip toggles. You may need other Cmd* for specific models,
-# but this is a good starting point observed across UI toggles.
+def hex_color(value):
+    match = re.fullmatch(r"#?([0-9a-fA-F]{6})", value)
+    if not match:
+        raise argparse.ArgumentTypeError("use six hex digits, for example ff8800")
+    return [int(match.group(1)[i:i + 2], 16) for i in (0, 2, 4)]
 
-from ks_light.protocol import power as build_on_off_cmd
 
 async def find_device_by_prefix(prefix: str, timeout: float = 8.0) -> Optional[str]:
     devices = await BleakScanner.discover(timeout=timeout)
@@ -57,30 +55,44 @@ async def write_command(address, service_short, char_short, payload, verbose=Fal
     await write_sequence(address, service_short, char_short, [payload])
 
 async def main(argv=None):
-    parser = argparse.ArgumentParser(description="Control KS smart LED lights over BLE")
-    parser.add_argument("action", choices=["on", "off", "scan", "list", "rgb", "brightness"], help="Power, discover, list profiles, or set RGB/brightness")
+    parser = argparse.ArgumentParser(description=__doc__, epilog="Effects (KS03~ only): " + ", ".join(EFFECT_SLUGS))
+    parser.add_argument("action", choices=["on", "off", "scan", "list", "rgb", "brightness", "effect"],
+                        help="Power, discover, list profiles, set RGB/brightness, or start a built-in effect")
     parser.add_argument("model_prefix", nargs="?", default=DEFAULT_PREFIX, help="Device name prefix (e.g., KS03-, KS04-, KS03~)")
-    parser.add_argument("--address", dest="address", default=DEFAULT_ADDRESS, help="BLE MAC/address (skip scan if provided)")
+    parser.add_argument("--address", dest="address", help="BLE MAC/address (skip scan if provided)")
     parser.add_argument("--all-ks03", dest="all_ks03", action="store_true", help="Send to all KS03-/KS03~ devices found")
     parser.add_argument("--timeout", type=float, default=8.0, help="Scan timeout seconds")
     parser.add_argument("--verbose", "-v", dest="verbose", action="store_true", help="Verbose output (show target and payload)")
-    parser.add_argument("--rgb", type=int, nargs=3, metavar=("R", "G", "B"))
+    color_group = parser.add_mutually_exclusive_group()
+    color_group.add_argument("--rgb", type=int, nargs=3, metavar=("R", "G", "B"), help="Color channels 0..255")
+    color_group.add_argument("--hex", type=hex_color, dest="rgb", metavar="RRGGBB", help="Color as hex, e.g. ff8800")
+    parser.add_argument("--name", dest="effect", choices=sorted(EFFECT_SLUGS), metavar="EFFECT", help="Built-in effect for the effect action")
+    parser.add_argument("--speed", type=int, default=35, help="Effect speed 0..100 (default 35)")
     parser.add_argument("--brightness", type=int, help="Brightness byte (0-255), RGB profiles only")
-    parser.add_argument("--json", action="store_true", help="JSON output for scan/list and RGB controls")
+    parser.add_argument("--json", action="store_true", help="JSON output for scan/list and RGB/effect controls")
     parser.add_argument("--state-file", type=Path, default=Path.home() / ".ks_led_state.json")
     args = parser.parse_args(argv)
     if args.action == "rgb" and args.rgb is None:
-        parser.error("rgb requires --rgb R G B")
+        parser.error("rgb requires --rgb R G B or --hex RRGGBB")
+    if args.action == "effect":
+        if args.effect is None:
+            parser.error("effect requires --name, one of: " + ", ".join(EFFECT_SLUGS))
+        if args.model_prefix != "KS03~":
+            parser.error("Built-in effects are available on KS03~ only")
+        if not 0 <= args.speed <= 100:
+            parser.error("--speed must be between 0 and 100")
+    elif args.effect is not None:
+        parser.error("--name requires the effect action")
     if args.action == "brightness" and args.brightness is None:
         parser.error("brightness requires --brightness 0..255")
     if args.rgb is not None and args.action != "rgb":
         parser.error("--rgb requires the rgb action")
-    if args.brightness is not None and args.action not in ("rgb", "brightness"):
-        parser.error("--brightness requires rgb or brightness")
+    if args.brightness is not None and args.action not in ("rgb", "brightness", "effect"):
+        parser.error("--brightness requires rgb, brightness or effect")
     if args.all_ks03 and args.action not in ("on", "off"):
         parser.error("--all-ks03 currently supports on/off only")
     if args.json and args.action in ("on", "off"):
-        parser.error("--json currently supports scan/list/rgb/brightness")
+        parser.error("--json supports scan, list, rgb, brightness and effect")
     if args.rgb is not None and any(not 0 <= v <= 255 for v in args.rgb):
         parser.error("RGB values must be between 0 and 255")
     if args.brightness is not None and not 0 <= args.brightness <= 255:
@@ -93,7 +105,6 @@ async def main(argv=None):
         raise SystemExit(f"Unknown model_prefix. Known: {known}")
 
     if args.action == "list":
-        from ks_light.profiles import PROFILES
         print(json.dumps(PROFILES, indent=2) if args.json else "\n".join(
             f"{p['prefix']}: {p['color_type'] or 'power only'} (inherited, unverified)" for p in PROFILES))
         return
@@ -109,7 +120,6 @@ async def main(argv=None):
             f"{d['name']} {d['address']}" for d in rows) or "No KS devices found")
         return
     if args.action in ("rgb", "brightness"):
-        from ks_light.profiles import DEVICE_MAPPINGS
         if args.model_prefix not in DEVICE_MAPPINGS:
             parser.error("RGB controls unavailable for this profile")
         if DEVICE_MAPPINGS[args.model_prefix]["type"] == "ceiling" and args.brightness not in (None, 255):
@@ -142,6 +152,19 @@ async def main(argv=None):
         address = await find_device_by_prefix(args.model_prefix, timeout=args.timeout)
         if not address:
             raise SystemExit(f"No device found with name starting '{args.model_prefix}'")
+
+    if args.action == "effect":
+        effect = EFFECT_SLUGS[args.effect]
+        brightness = 100 if args.brightness is None else round(args.brightness * 100 / 255)
+        try:
+            payload = native_effect(effect, args.speed, max(1, brightness))
+        except ValueError as error:
+            parser.error(str(error))
+        await write_sequence(address, mapping["service"], mapping["write"], [build_on_off_cmd(True), payload])
+        result = {"address": address, "effect": NATIVE_EFFECTS[effect], "speed": args.speed,
+                  "brightness": max(1, brightness), "confirmation": "unconfirmed"}
+        print(json.dumps(result) if args.json else f"Started {NATIVE_EFFECTS[effect]} on {address} (device state unconfirmed).")
+        return
 
     if args.action in ("rgb", "brightness"):
         store = StateStore(args.state_file)

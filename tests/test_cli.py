@@ -89,3 +89,31 @@ class CliTests(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CliEffectAndHexTests(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.output = io.StringIO()
+        redirect = contextlib.redirect_stdout(self.output)
+        redirect.__enter__()
+        self.addCleanup(redirect.__exit__, None, None, None)
+        sequence = patch.object(cli, "write_sequence", AsyncMock())
+        self.sequence = sequence.start()
+        self.addCleanup(sequence.stop)
+
+    async def test_effect_sends_power_then_native_packet(self):
+        await cli.main(["effect", "KS03~", "--address", "lamp", "--name", "red-breathing", "--speed", "40", "--json"])
+        packets = self.sequence.await_args.args[3]
+        self.assertEqual(packets, [bytes.fromhex("5BF001B5"), bytes([0x5C, 0, 0x84, 40, 100, 0, 0xC5])])
+        self.assertIn("Red breathing", self.output.getvalue())
+
+    async def test_effect_rejects_profiles_without_native_effects(self):
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            await cli.main(["effect", "KS03-", "--address", "lamp", "--name", "red-breathing"])
+        self.sequence.assert_not_awaited()
+
+    async def test_hex_color_matches_rgb(self):
+        with patch.object(cli, "StateStore") as store:
+            store.return_value.get.return_value = None
+            await cli.main(["rgb", "KS03~", "--address", "lamp", "--hex", "#ff8000", "--json"])
+        self.assertIn('"rgb": [255, 128, 0]', self.output.getvalue())

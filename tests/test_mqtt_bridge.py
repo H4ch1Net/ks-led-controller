@@ -167,3 +167,13 @@ class MQTTTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(self.client.last('/state')['state'])
 
 if __name__=='__main__': unittest.main()
+
+
+class NativeEffectCommandTests(unittest.TestCase):
+    def test_every_native_effect_is_discoverable_and_accepted(self):
+        from ks_light.mqtt_bridge import MQTTBridge
+        from ks_light.protocol import NATIVE_EFFECTS
+        for effect, name in NATIVE_EFFECTS.items():
+            self.assertEqual(MQTTBridge.command({"effect": name}), ("native", {"effect": effect, "speed": 35, "brightness": 50}, None))
+        with self.assertRaises(APIError):
+            MQTTBridge.command({"effect": "Strobe"})
