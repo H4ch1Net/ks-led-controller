@@ -1,15 +1,15 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><title>KS Light</title>
-<style>body{font:13px system-ui;color:#e8e9ee;background:#2d2d2d;padding:12px}label{display:block;margin:14px 0 5px}input{box-sizing:border-box;width:100%;padding:8px;background:#191a20;color:#fff;border:1px solid #555;border-radius:5px}button{margin-top:16px;padding:9px 16px}p{line-height:1.5;color:#c4c6d0}#status{color:#bacaff}</style>
+<link rel="stylesheet" href="pi.css">
 <h2>Choose brightness</h2><p>Turn to choose 1–100%; press to apply your configured color or native effect at that level. Preview starts at 50%, not the current lamp brightness.</p>
-<label><input type="checkbox" id="shared" style="width:auto"> Use shared connection for this key</label>
+<label class="inline"><input type="checkbox" id="shared"> Use shared connection for this key</label>
 <p id="scope"></p>
 <label for="python">Python executable</label><input id="python" placeholder="C:\KS-Light\.venv\Scripts\python.exe">
 <label for="repository">KS Light repository folder</label><input id="repository" placeholder="C:\KS-Light">
 <label for="config">Controller configuration file</label><input id="config" placeholder="C:\KS-Light\.hub-local\controller.json">
 <label for="action">Color or native-effect action name</label><input id="action" placeholder="purple-breathing">
-<label><input type="checkbox" id="continuous" style="width:auto"> Apply brightness while turning</label>
+<label class="inline"><input type="checkbox" id="continuous"> Apply brightness while turning</label>
 <p>Optional: combines rapid turns into the latest level, with one command at a time. Failure pauses automatic sending; check the hub, then press to deliberately send again. Dimming uses the configured action color/effect.</p>
-<button id="saveConnection">Save shared connection</button>
-<button id="save">Save key</button><p id="status" role="status"></p>
+<div class="actions"><button id="saveConnection">Save shared connection</button>
+<button id="save">Save key</button></div><p id="status" role="status"></p>
 <p>Credentials stay in your token file. Sent means the hub completed delivery; it does not confirm the lamp's physical state. Simulated means no lamp was changed.</p>
 <script src="settings.js"></script></html>

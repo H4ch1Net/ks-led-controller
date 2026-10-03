@@ -39,7 +39,8 @@
 | [Android build and signing](../apps/android/README.md) | Toolchain, tests, release builds |
 | [Release checklist](RELEASE_CHECKLIST.md) | Release steps and dependency verification |
 | [Source packaging](../release/README.md) | Reproducible source archive |
-| [Screenshots](images/README.md) | How the documentation images are generated |
+| [Design system](DESIGN.md) | Art direction, tokens, icons and motion |
+| [Screenshots and art](images/README.md) | How the documentation images are generated |
 
 ## Safety notes
 

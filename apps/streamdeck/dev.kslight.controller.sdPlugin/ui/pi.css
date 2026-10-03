@@ -1,0 +1,43 @@
+/* KS Light property inspectors. Same system as the hub dashboard (docs/DESIGN.md),
+   sitting on Stream Deck's own #2d2d2d panel: graphite wells, printed labels, one lime signal. */
+:root {
+  --well: #1b1f1e; --line: rgb(255 255 255 / .1); --line-strong: rgb(255 255 255 / .18);
+  --text: #eceeec; --muted: #a3aba7; --faint: #959e99; --accent: #d4efa3; --on-accent: #141a12; --danger: #ff8f80;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 14px 12px 18px; font: 12px/1.45 system-ui, "Segoe UI", sans-serif; color: var(--text); background: #2d2d2d; -webkit-font-smoothing: antialiased; }
+h2 { margin: 0 0 14px; font-size: 15px; font-weight: 600; letter-spacing: -.01em; display: flex; align-items: center; gap: 8px; }
+h2::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px -1px var(--accent); }
+label, summary { display: block; margin: 14px 0 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+label.inline { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 500; color: var(--text); }
+input, select, button { font: inherit; color: var(--text); background: var(--well); border: 1px solid var(--line-strong); border-radius: 8px; padding: 7px 9px; width: 100%; min-height: 32px; transition: border-color .12s; }
+input:hover, select:hover { border-color: rgb(255 255 255 / .28); }
+input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+input[type=checkbox] { width: 15px; height: 15px; min-height: 0; margin: 0; padding: 0; accent-color: var(--accent); }
+input[type=range] { padding: 0; min-height: 22px; border: 0; background: transparent; accent-color: var(--accent); }
+input[type=color] { width: 44px; min-width: 44px; height: 32px; padding: 3px; cursor: pointer; }
+#hex, input[placeholder] { font-family: var(--mono); font-size: 11.5px; }
+button { cursor: pointer; font-weight: 600; background: #3a3f3d; }
+button:hover { background: #454b49; }
+button.primary, #save { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+button.primary:hover, #save:hover { background: #e2f6bf; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row input[type=text], .row select { flex: 1; min-width: 0; }
+.row button { width: 34px; padding: 0; flex: none; font-size: 15px; }
+.actions { display: grid; gap: 8px; margin-top: 16px; }
+p { margin: 8px 0; color: var(--muted); line-height: 1.5; }
+.muted { color: var(--muted); font-size: 11px; }
+output { float: right; font-family: var(--mono); color: var(--text); letter-spacing: 0; font-weight: 500; }
+#status { min-height: 18px; margin: 12px 0 6px; color: var(--accent); font-weight: 600; }
+#status:empty { display: none; }
+details { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 4px; }
+summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; }
+summary::after { content: "+"; color: var(--accent); font-size: 13px; }
+details[open] summary::after { content: "–"; }
+summary::-webkit-details-marker { display: none; }
+#swatches { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+#swatches button { width: 22px; height: 22px; min-height: 0; padding: 0; border-radius: 50%; border: 0; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .3); transition: transform .12s; }
+#swatches button:hover { transform: scale(1.12); }
+[hidden] { display: none !important; }

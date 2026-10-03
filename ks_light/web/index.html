@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#111514">
   <meta name="referrer" content="no-referrer">
   <title>KS Light Hub</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -11,61 +12,106 @@
   <script type="module" src="app.js"></script>
 </head>
 <body>
+  <!-- Icon set: 24px grid, 1.75 stroke, round caps. Same line language as the app icon. -->
+  <svg width="0" height="0" class="sprite" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9.5 17.5h5M10.5 20.5h3M12 3.5a5.75 5.75 0 0 0-3.4 10.4c.6.45.9 1.1.9 1.85v.25h5v-.25c0-.75.3-1.4.9-1.85A5.75 5.75 0 0 0 12 3.5z"/></symbol>
+      <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3.5v7.5M6.6 7a7.5 7.5 0 1 0 10.8 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.75"/><path d="M12 3v1.75M12 19.25V21M3 12h1.75M19.25 12H21M5.6 5.6l1.25 1.25M17.15 17.15l1.25 1.25M5.6 18.4l1.25-1.25M17.15 6.85l1.25-1.25"/></symbol>
+      <symbol id="i-color" viewBox="0 0 24 24"><circle cx="9" cy="9.5" r="5"/><circle cx="15" cy="9.5" r="5"/><circle cx="12" cy="14.75" r="5"/></symbol>
+      <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2.5 12c2.4-5.5 4.35-5.5 6.35 0s3.95 5.5 6.3 0 3.95-5.5 6.35 0"/></symbol>
+      <symbol id="i-scene" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="13" height="10" rx="2.5"/><path d="M7.5 18.5h10a3 3 0 0 0 3-3v-7"/></symbol>
+      <symbol id="i-group" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="12" r="2.5"/><circle cx="12" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/></symbol>
+      <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M2.5 12.5h4l2.25-6 4.5 11 2.25-5h6"/></symbol>
+      <symbol id="i-exit" viewBox="0 0 24 24"><path d="M14 4.5H7A2.5 2.5 0 0 0 4.5 7v10A2.5 2.5 0 0 0 7 19.5h7M10.5 12h9M16.5 8.5 20 12l-3.5 3.5"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></symbol>
+      <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9.5 3.5h5M10.5 3.5v5.25L5.2 17.6a2 2 0 0 0 1.7 2.9h10.2a2 2 0 0 0 1.7-2.9l-5.3-8.85V3.5M7.75 14.5h8.5"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 9v4.25M12 16.75v.01M10.3 4.4 3.1 17a2 2 0 0 0 1.7 3h14.4a2 2 0 0 0 1.7-3L13.7 4.4a2 2 0 0 0-3.4 0z"/></symbol>
+      <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 8.5-8.5M16.5 6.5l2.5 2.5M14 9l2 2"/></symbol>
+      <!-- Articulated desk lamp line drawing, used for sign-in and empty states. -->
+      <symbol id="ill-lamp" viewBox="0 0 160 120"><path d="M90 112h52M116 112V106M116 106 86 62M86 62 60 40M64 27 78 41 62 70 34 52Z"/><circle cx="86" cy="62" r="3.5"/><circle cx="116" cy="106" r="3.5"/><circle cx="60" cy="40" r="3"/></symbol>
+    </defs>
+  </svg>
+
   <a class="skip" href="#main">Skip to controls</a>
 
   <section id="signin" class="signin" hidden aria-labelledby="signin-title">
     <form id="signin-form" class="signin-card" novalidate>
-      <img src="icon.svg" alt="" width="56" height="56">
-      <h1 id="signin-title">Connect to this hub</h1>
-      <p class="muted">Enter the hub token. It is the <code>KS_LIGHT_TOKEN</code> value, the contents of the service <code>token_file</code>, or a scoped controller credential.</p>
+      <div class="signin-art" aria-hidden="true">
+        <svg class="ill" viewBox="0 0 160 120">
+          <defs>
+            <linearGradient id="beam-fade" x1="48" y1="61" x2="10" y2="112" gradientUnits="userSpaceOnUse">
+              <stop offset="0" class="beam-stop"/>
+              <stop offset="1" class="beam-stop end"/>
+            </linearGradient>
+          </defs>
+          <polygon class="beam" points="34,52 62,70 32,112 -18,112"/>
+          <ellipse class="pool" cx="8" cy="112" rx="34" ry="3"/>
+          <use href="#ill-lamp"/>
+        </svg>
+      </div>
+      <div class="signin-copy">
+        <span class="label">KS Light · Hub</span>
+        <h1 id="signin-title">Connect to this hub</h1>
+        <p class="muted">Enter the <code>KS_LIGHT_TOKEN</code> value, the contents of the service <code>token_file</code>, or a scoped controller credential.</p>
+      </div>
       <label class="field">
-        <span>Token</span>
-        <input id="token" type="password" autocomplete="current-password" spellcheck="false" required minlength="32">
+        <span class="label">Token</span>
+        <span class="input-icon">
+          <svg class="icon" aria-hidden="true"><use href="#i-key"/></svg>
+          <input id="token" type="password" autocomplete="current-password" spellcheck="false" required minlength="32" placeholder="At least 32 characters">
+        </span>
       </label>
       <label class="check">
         <input id="remember" type="checkbox">
         <span>Remember on this device</span>
       </label>
       <p id="signin-error" class="error" role="alert" hidden></p>
-      <button class="button primary" type="submit" id="signin-submit">Connect</button>
+      <button class="button primary" type="submit" id="signin-submit"><span class="led" aria-hidden="true"></span><span class="text">Connect</span></button>
     </form>
   </section>
 
   <div id="app" hidden>
     <header class="topbar">
       <div class="brand">
-        <img src="icon.svg" alt="" width="32" height="32">
-        <span>KS Light <span class="muted">Hub</span></span>
+        <img src="icon.svg" alt="" width="30" height="30">
+        <span class="wordmark">KS Light</span>
+        <span class="tag">Hub</span>
       </div>
       <div class="status" id="status" role="status" aria-live="polite"></div>
       <div class="topbar-actions">
         <div class="accents" role="radiogroup" aria-label="Accent color" id="accents"></div>
-        <button class="button ghost" type="button" id="signout">Sign out</button>
+        <button class="button ghost icon-button" type="button" id="signout" title="Sign out" aria-label="Sign out">
+          <svg class="icon" aria-hidden="true"><use href="#i-exit"/></svg>
+        </button>
       </div>
     </header>
 
-    <div id="banner" class="banner" role="alert" hidden></div>
+    <div id="banner" class="banner" role="alert" hidden>
+      <svg class="icon" aria-hidden="true"><use href="#i-flask"/></svg>
+      <span class="text"></span>
+    </div>
 
     <main id="main" class="layout">
       <section aria-labelledby="lights-title" class="lights">
         <div class="section-head">
-          <h2 id="lights-title">Lights</h2>
-          <span class="muted small" id="lights-note">State shows the last command sent, not a reading from the light.</span>
+          <h2 id="lights-title"><svg class="icon" aria-hidden="true"><use href="#i-bulb"/></svg>Lights <span class="count" id="lights-count"></span></h2>
+          <span class="label note">Shows the last command sent, not a reading from the lamp</span>
         </div>
-        <div id="lights" class="light-grid"></div>
+        <div id="lights" class="light-grid" aria-busy="true"></div>
       </section>
 
       <aside class="side">
         <section aria-labelledby="scenes-title" class="panel">
-          <h2 id="scenes-title">Scenes</h2>
-          <ul id="scenes" class="list"></ul>
+          <h2 id="scenes-title"><svg class="icon" aria-hidden="true"><use href="#i-scene"/></svg>Scenes</h2>
+          <ul id="scenes" class="scene-grid"></ul>
         </section>
         <section aria-labelledby="groups-title" class="panel">
-          <h2 id="groups-title">Groups</h2>
+          <h2 id="groups-title"><svg class="icon" aria-hidden="true"><use href="#i-group"/></svg>Groups</h2>
           <ul id="groups" class="list"></ul>
         </section>
         <section aria-labelledby="activity-title" class="panel">
-          <h2 id="activity-title">Activity</h2>
+          <h2 id="activity-title"><svg class="icon" aria-hidden="true"><use href="#i-pulse"/></svg>Activity</h2>
           <ol id="activity" class="activity" aria-live="off"></ol>
         </section>
       </aside>
@@ -77,43 +123,43 @@
   <template id="light-template">
     <article class="card light">
       <header class="light-head">
-        <span class="swatch" aria-hidden="true"></span>
-        <div class="light-title">
-          <h3></h3>
-          <span class="meta"></span>
-        </div>
-        <div class="segmented" role="group">
+        <span class="lens" aria-hidden="true"><span class="diffuser"></span></span>
+        <div class="rocker" role="group">
           <button type="button" data-power="on">On</button>
           <button type="button" data-power="off">Off</button>
         </div>
+        <div class="light-title">
+          <h3></h3>
+          <span class="label meta"></span>
+        </div>
       </header>
       <div class="light-body">
-        <label class="range" data-cap="brightness">
-          <span>Brightness <output></output></span>
+        <label class="fader" data-cap="brightness">
+          <span class="fader-head"><span class="label"><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg>Brightness</span><output></output></span>
           <input type="range" min="1" max="100" step="1">
         </label>
         <div class="colors" data-cap="rgb">
-          <span class="label">Color</span>
+          <span class="label"><svg class="icon" aria-hidden="true"><use href="#i-color"/></svg>Color</span>
           <div class="chips" role="group"></div>
         </div>
         <details class="effects" data-cap="native_effects">
-          <summary>Built-in effects</summary>
+          <summary><span class="label"><svg class="icon" aria-hidden="true"><use href="#i-wave"/></svg>Built-in effects</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
           <div class="effects-body">
             <label class="field compact">
-              <span>Effect</span>
+              <span class="label">Effect</span>
               <select></select>
             </label>
-            <label class="range">
-              <span>Speed <output></output></span>
+            <label class="fader">
+              <span class="fader-head"><span class="label">Speed</span><output></output></span>
               <input type="range" min="0" max="100" step="1" value="35" data-role="speed">
             </label>
-            <button type="button" class="button" data-role="start">Start effect</button>
+            <button type="button" class="button" data-role="start"><svg class="icon" aria-hidden="true"><use href="#i-wave"/></svg>Start effect</button>
           </div>
         </details>
       </div>
       <footer class="light-foot">
-        <span class="last"></span>
-        <span class="pending" hidden>Sending</span>
+        <span class="last"><span class="led" aria-hidden="true"></span><span class="text"></span></span>
+        <span class="pending label" hidden>Sending</span>
       </footer>
     </article>
   </template>

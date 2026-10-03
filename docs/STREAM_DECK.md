@@ -4,6 +4,10 @@ The KS Light plugin (`apps/streamdeck`, version 0.6.1) controls hub lights from 
 
 Requirements: Windows 10 or newer, Stream Deck 7.1 or newer, a KS Light checkout with its Python virtual environment, a running hub, and a [controller configuration](CONTROLLER_ACTIONS.md) with its token file. The plugin bundles its JavaScript dependencies and uses Stream Deck's Node 20 runtime. It is not published on the Elgato Marketplace.
 
+![KS Light keys on a Stream Deck](images/streamdeck-keys.png)
+
+Key images follow the [design system](DESIGN.md): graphite keys, lime glyphs on the same 24 px icon grid as the dashboard, and a lens for saved colors. Action-list icons are white and monochrome, as Elgato's guidelines require.
+
 ## Install
 
 1. Get `dev.kslight.controller.streamDeckPlugin` from a GitHub release, or build it (below).

@@ -1,7 +1,5 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><title>KS Light</title>
-<style>
-*{box-sizing:border-box}body{margin:0;padding:12px;font:12px system-ui;color:#eee;background:#2d2d2d}h2{font-size:16px;margin:0 0 12px}label{display:block;margin:10px 0 5px;color:#ccc}input,select,button{font:inherit;color:#eee;background:#202127;border:1px solid #555;border-radius:6px;padding:7px;width:100%}button{cursor:pointer}input[type=range]{padding:0;accent-color:#b9baff}input[type=color]{padding:2px;width:48px;height:35px;cursor:pointer}.row{display:flex;gap:8px;align-items:center}.row input[type=text]{flex:1;min-width:0}.row button{width:auto}.muted{color:#aaa;font-size:11px;line-height:1.5}#status{min-height:16px;color:#c6c9ff;margin:10px 0}details{border-top:1px solid #555;margin-top:14px;padding-top:10px}summary{cursor:pointer;color:#bbb}#swatches{display:flex;gap:6px;margin-top:8px}#swatches button{border-radius:50%;width:23px;height:23px;padding:0;border:2px solid #aaa}output{float:right;color:#eee}[hidden]{display:none!important}
-</style>
+<link rel="stylesheet" href="pi.css">
 <h2 id="heading">KS Light</h2>
 <label id="targetLabel" for="target">Light</label><div class="row"><select id="target"><option value="">Loading…</option></select><button id="refresh" title="Refresh available lights">↻</button></div>
 <section id="powerSection" hidden><label for="power">Button behavior</label><select id="power"><option value="toggle">Toggle on / off</option><option value="on">Turn on</option><option value="off">Turn off</option></select><p class="muted">Toggle uses the hub's last-sent power. If unknown, use On or Off once.</p></section>
@@ -11,5 +9,5 @@
 <p id="brightnessHint" class="muted" hidden>Applies to the last color or effect and turns the light on.</p>
 <p id="status" role="status"></p>
 <p class="muted">Changes save automatically. Press the physical key to apply.</p>
-<details id="setup"><summary>Shared hub connection</summary><p class="muted">Set up once for all Power, Color, Effect, Brightness and Scene keys.</p><label for="python">Python executable</label><input id="python"><label for="repository">KS Light folder</label><input id="repository"><label for="config">Controller configuration</label><input id="config"><button id="saveConnection" style="margin-top:10px">Save shared connection</button></details>
+<details id="setup"><summary>Shared hub connection</summary><p class="muted">Set up once for all Power, Color, Effect, Brightness and Scene keys.</p><label for="python">Python executable</label><input id="python"><label for="repository">KS Light folder</label><input id="repository"><label for="config">Controller configuration</label><input id="config"><div class="actions"><button id="saveConnection" class="primary">Save shared connection</button></div></details>
 <script src="direct.js"></script></html>

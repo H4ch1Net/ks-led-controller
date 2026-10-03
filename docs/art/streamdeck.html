@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>KS Light Stream Deck keys</title>
+<!-- Source for docs/images/streamdeck-keys.png, built from the plugin's real key images. -->
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 100%; height: 100%; display: grid; place-items: center; background: #111514;
+    background-image: radial-gradient(rgb(255 255 255 / .05) 1.2px, transparent 1.4px); background-size: 22px 22px;
+    font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif; }
+  .deck { padding: 34px; border-radius: 36px; background: linear-gradient(#1d2220, #151917); box-shadow: inset 0 1px 0 rgb(255 255 255 / .06), 0 0 0 1px rgb(255 255 255 / .05), 0 40px 80px -30px #000; }
+  .keys { display: grid; grid-template-columns: repeat(5, 112px); gap: 20px; }
+  .key { position: relative; width: 112px; height: 112px; border-radius: 16px; overflow: hidden; background: #000; box-shadow: 0 0 0 3px #0a0c0b, 0 3px 0 3px #050606; }
+  .key img { width: 100%; height: 100%; display: block; }
+  .key b { position: absolute; left: 0; right: 0; bottom: 9px; text-align: center; color: #fff; font-size: 13px; font-weight: 600; text-shadow: 0 1px 2px #000; }
+  .key.blank { background: #0b0d0c; }
+</style>
+</head>
+<body>
+  <div class="deck"><div class="keys" id="keys"></div></div>
+  <script>
+    const img = (n) => `../../apps/streamdeck/dev.kslight.controller.sdPlugin/imgs/${n}.svg`;
+    const lens = (c) => "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144"><defs><radialGradient id="l" cx="50%" cy="38%" r="60%"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset=".45" stop-color="#ffffff" stop-opacity="0"/></radialGradient></defs><rect width="144" height="144" fill="#111514"/><circle cx="72" cy="50" r="38" fill="${c}" fill-opacity=".14"/><circle cx="72" cy="50" r="28" fill="${c}"/><circle cx="72" cy="50" r="28" fill="url(#l)"/><circle cx="72" cy="50" r="28" fill="none" stroke="#000000" stroke-opacity=".25" stroke-width="2"/></svg>`);
+    const keys = [
+      [img("power-on"), "Desk"], [img("power"), "Shelf"], [lens("#ffaa5a"), "Warm"], [lens("#b25cff"), "Purple"], [lens("#2850ff"), "Blue"],
+      [img("effect"), "Breathe"], [img("level"), "50%"], [img("scene"), "Evening"], [img("scene"), "Focus"], [img("key"), "Reading"],
+      [img("color"), "Color"], [img("power"), "All off"], [null, ""], [null, ""], [img("key"), "Night"],
+    ];
+    document.getElementById("keys").innerHTML = keys.map(([src, title]) =>
+      src ? `<div class="key"><img src="${src}" alt=""><b>${title}</b></div>` : `<div class="key blank"></div>`).join("");
+  </script>
+</body>
+</html>

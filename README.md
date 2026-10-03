@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/images/app-icon.png" width="88" height="88" alt="KS Light icon">
+<img src="docs/images/banner.png" alt="KS Light: local control for KS Bluetooth lights. Four lamp lenses show warm white at 40 percent, purple breathing, blue and off.">
 
-# KS Light
+<h1>KS Light</h1>
 
 Local control for KS Bluetooth lights. An Android app for direct control, and an optional hub that shares one Bluetooth connection with a browser dashboard, Home Assistant, Stream Deck and DIY controllers. No cloud account.
 
@@ -10,7 +10,7 @@ Local control for KS Bluetooth lights. An Android app for direct control, and an
 [![Android](https://github.com/H4ch1Net/ks-led-controller/actions/workflows/android.yml/badge.svg)](https://github.com/H4ch1Net/ks-led-controller/actions/workflows/android.yml)
 [![Stream Deck](https://github.com/H4ch1Net/ks-led-controller/actions/workflows/streamdeck.yml/badge.svg)](https://github.com/H4ch1Net/ks-led-controller/actions/workflows/streamdeck.yml)
 [![Release](https://img.shields.io/github/v/release/H4ch1Net/ks-led-controller?include_prereleases&label=android%20apk)](https://github.com/H4ch1Net/ks-led-controller/releases)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-d4efa3.svg?labelColor=111514)](LICENSE)
 
 [Download the APK](https://github.com/H4ch1Net/ks-led-controller/releases) · [Documentation](docs/README.md) · [Hub API](docs/HUB_API.md)
 
@@ -31,17 +31,20 @@ Only one Bluetooth owner should control a lamp at a time. If you run the hub, po
 
 ## Screenshots
 
+<img src="docs/images/hub-dashboard.png" alt="Hub dashboard in a desktop browser: three light cards with lenses showing each lamp's last-sent color, scenes, groups and activity">
+<p align="center"><sub>Hub dashboard in simulation mode. Each lens shows the lamp's last-sent color, brightness and effect.</sub></p>
+
 <table>
 <tr>
-<td><img src="docs/images/controls.png" width="230" alt="Light controls with power, brightness and saved colors"></td>
-<td><img src="docs/images/effects.png" width="230" alt="Built-in effect animation and color"></td>
-<td><img src="docs/images/scenes.png" width="230" alt="Rooms and lighting scenes"></td>
+<td><img src="docs/images/controls.png" width="230" alt="Android light controls with power, brightness and saved colors"></td>
+<td><img src="docs/images/effects.png" width="230" alt="Android built-in effect animation and color"></td>
+<td><img src="docs/images/scenes.png" width="230" alt="Android rooms and lighting scenes"></td>
 </tr>
-<tr><td align="center">Android: light controls</td><td align="center">Android: built-in effects</td><td align="center">Android: rooms and scenes</td></tr>
+<tr><td align="center"><sub>Android · light controls</sub></td><td align="center"><sub>Android · built-in effects</sub></td><td align="center"><sub>Android · rooms and scenes</sub></td></tr>
 </table>
 
-<img src="docs/images/hub-dashboard.png" alt="Hub dashboard in a desktop browser with three lights, scenes, groups and activity">
-<p align="center"><sub>Hub dashboard (simulation mode)</sub></p>
+<img src="docs/images/streamdeck-keys.png" alt="Stream Deck with KS Light keys: power, color lenses, effect, brightness and scene keys">
+<p align="center"><sub>Stream Deck key set, drawn from the same icon geometry as the dashboard</sub></p>
 
 <details>
 <summary>More screenshots</summary>
@@ -51,12 +54,16 @@ Only one Bluetooth owner should control a lamp at a time. If you run the hub, po
 <td><img src="docs/images/colors.png" width="230" alt="Saved colors and color picker"></td>
 <td><img src="docs/images/lights.png" width="230" alt="Saved lights list"></td>
 <td><img src="docs/images/appearance.png" width="230" alt="Appearance themes"></td>
-<td><img src="docs/images/hub-dashboard-mobile.png" width="230" alt="Hub dashboard on a phone-sized screen"></td>
 </tr>
-<tr><td align="center">Saved colors</td><td align="center">Your lights</td><td align="center">Appearance</td><td align="center">Dashboard, narrow screen</td></tr>
+<tr><td align="center"><sub>Saved colors</sub></td><td align="center"><sub>Your lights</sub></td><td align="center"><sub>Appearance</sub></td></tr>
+<tr>
+<td><img src="docs/images/hub-dashboard-mobile.png" width="230" alt="Hub dashboard on a phone-sized screen"></td>
+<td colspan="2"><img src="docs/images/hub-signin.png" width="470" alt="Hub dashboard sign-in with the desk lamp illustration"></td>
+</tr>
+<tr><td align="center"><sub>Dashboard, narrow screen</sub></td><td align="center" colspan="2"><sub>Dashboard sign-in</sub></td></tr>
 </table>
 
-How these are captured: [docs/images/README.md](docs/images/README.md).
+How these are captured: [docs/images/README.md](docs/images/README.md). Visual language: [docs/DESIGN.md](docs/DESIGN.md).
 
 </details>
 
@@ -152,7 +159,7 @@ led_control.py     Direct Bluetooth CLI
 led_menu.py        Interactive terminal menu
 examples/          Light catalogs, libraries and controller configurations
 deploy/            Service files and Windows helpers
-docs/              Guides and reference
+docs/              Guides, reference and design system (docs/art holds art sources)
 release/           Source packaging inventory and toolchain pins
 ```
 

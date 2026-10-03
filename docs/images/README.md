@@ -23,4 +23,8 @@ Review the PNGs after regenerating. Never replace them with unreviewed phone scr
 
 ## Hub dashboard
 
-`hub-dashboard.png` (1360 x 860 viewport, 1.5x scale) and `hub-dashboard-mobile.png` (390 x 844 viewport) are captured with Playwright and Chromium from `python -m ks_light.hub` in simulation mode, after applying the Evening scene and a Blue color to the ceiling demo light. No real lights or tokens appear.
+`hub-dashboard.png` (1360 x 900 viewport, 1.5x), `hub-dashboard-mobile.png` (390 x 844, 2x) and `hub-signin.png` (1280 x 800, 1.5x) are captured with Playwright and Chromium from `python -m ks_light.hub` in simulation mode, after applying the Evening scene and a Blue color to the ceiling demo light. No real lights or tokens appear.
+
+## Brand art
+
+`banner.png` (README header), `social-preview.png` (1280 x 640, for the GitHub social preview setting) and `streamdeck-keys.png` are rendered from the HTML sources in [`docs/art`](../art) with `node docs/art/render.mjs`. The same script renders the Stream Deck `plugin.png` and `plugin@2x.png` from `app-icon.svg`. The Stream Deck preview uses the plugin's real key images. See [DESIGN.md](../DESIGN.md) for the visual rules.

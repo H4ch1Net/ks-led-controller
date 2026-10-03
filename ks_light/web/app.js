@@ -66,12 +66,34 @@ async function api(path, { method = "GET", body, signal } = {}) {
   return data;
 }
 
+function svgUse(id, className = "icon") {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", className);
+  svg.setAttribute("aria-hidden", "true");
+  const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+  use.setAttribute("href", "#" + id);
+  svg.append(use);
+  return svg;
+}
+
+function led(tone) {
+  const node = document.createElement("span");
+  node.className = "led" + (tone ? " " + tone : "");
+  node.setAttribute("aria-hidden", "true");
+  return node;
+}
+
 function toast(text, bad = false) {
   const node = document.createElement("div");
   node.className = "toast" + (bad ? " bad" : "");
-  node.textContent = text;
+  const label = document.createElement("span");
+  label.textContent = text;
+  node.append(led(bad ? "bad" : "ok"), label);
   $("#toasts").append(node);
-  setTimeout(() => node.remove(), bad ? 6000 : 3200);
+  setTimeout(() => {
+    node.classList.add("leaving");
+    setTimeout(() => node.remove(), 170);
+  }, bad ? 6000 : 3200);
 }
 
 // ---------- accent ----------
@@ -115,11 +137,41 @@ function signOut(reason) {
   showSignIn(reason);
 }
 
-async function connect(token, remember) {
+function showSkeleton() {
+  $("#signin").hidden = true;
+  $("#app").hidden = false;
+  const grid = $("#lights");
+  if (grid.children.length) return;
+  for (let i = 0; i < 3; i++) {
+    const card = document.createElement("div");
+    card.className = "card skeleton";
+    card.setAttribute("aria-hidden", "true");
+    const head = document.createElement("div");
+    head.className = "sk-head";
+    const lens = document.createElement("i");
+    lens.className = "sk-lens";
+    const title = document.createElement("i");
+    title.className = "sk-line";
+    title.style.width = "45%";
+    head.append(lens, title);
+    card.append(head);
+    for (const width of ["100%", "70%", "85%"]) {
+      const line = document.createElement("i");
+      line.className = "sk-line";
+      line.style.width = width;
+      card.append(line);
+    }
+    grid.append(card);
+  }
+}
+
+async function connect(token, remember, automatic = false) {
   state.token = token;
   const button = $("#signin-submit");
   button.disabled = true;
-  button.textContent = "Connecting";
+  button.classList.add("loading");
+  $(".text", button).textContent = "Connecting";
+  if (automatic) showSkeleton();
   try {
     await refreshAll();
   } catch (error) {
@@ -128,7 +180,8 @@ async function connect(token, remember) {
     return;
   } finally {
     button.disabled = false;
-    button.textContent = "Connect";
+    button.classList.remove("loading");
+    $(".text", button).textContent = "Connect";
   }
   writeStore(remember ? localStorage : sessionStorage, TOKEN_KEY, token);
   $("#signin").hidden = true;
@@ -151,6 +204,7 @@ async function refreshLight(id) {
   try {
     state.lights.set(id, await api(`/lights/${encodeURIComponent(id)}`));
     renderLight(id);
+    updateCount();
   } catch { /* the next event or resync fixes it */ }
 }
 
@@ -270,17 +324,23 @@ function startEffect(light, effect, speed) {
 }
 
 // ---------- rendering ----------
+// Colors the lamp firmware uses for each built-in breathing effect; 130/131 cycle hues.
+const EFFECT_COLORS = { 132: "#ff3b3b", 133: "#38e070", 134: "#3d6bff", 135: "#ffd23d", 136: "#3de0ff", 137: "#b25cff", 138: "#f2f4ff" };
+
 function setBanner(text, bad = false) {
   const node = $("#banner");
   node.hidden = !text;
-  node.textContent = text || "";
+  $(".text", node).textContent = text || "";
+  $("use", node).setAttribute("href", bad ? "#i-alert" : "#i-flask");
   node.classList.toggle("bad", bad);
 }
 
-function pill(text, tone) {
+function indicator(label, value, tone) {
   const node = document.createElement("span");
-  node.className = "pill " + tone;
-  node.textContent = text;
+  node.className = "indicator";
+  const strong = document.createElement("b");
+  strong.textContent = value;
+  node.append(led(tone), label + " ", strong);
   return node;
 }
 
@@ -290,11 +350,11 @@ function renderStatus() {
   status.replaceChildren();
   if (!health) return;
   const simulated = health.mode === "simulation";
-  status.append(pill(simulated ? "Simulation" : "Bluetooth", simulated ? "warn" : "ok"));
-  status.append(pill(health.status === "ok" ? "Healthy" : "Degraded", health.status === "ok" ? "ok" : "bad"));
-  if (health.mqtt.state !== "disabled") status.append(pill(`MQTT ${health.mqtt.state}`, health.mqtt.state === "online" ? "ok" : "bad"));
-  if (health.persistence.enabled) status.append(pill(health.persistence.status === "ok" ? "State saved" : "State not saved", health.persistence.status === "ok" ? "ok" : "bad"));
-  setBanner(simulated ? "Simulation mode: commands are not sent to real lights." : null);
+  status.append(indicator("Mode", simulated ? "Simulation" : "Bluetooth", simulated ? "warn" : "ok"));
+  status.append(indicator("Hub", health.status === "ok" ? "Healthy" : "Degraded", health.status === "ok" ? "ok" : "bad"));
+  if (health.mqtt.state !== "disabled") status.append(indicator("MQTT", health.mqtt.state, health.mqtt.state === "online" ? "ok" : "bad"));
+  if (health.persistence.enabled) status.append(indicator("State", health.persistence.status === "ok" ? "Saved" : "Not saved", health.persistence.status === "ok" ? "ok" : "bad"));
+  setBanner(simulated ? "Simulation mode. Commands are not sent to real lights." : null);
 }
 
 function describeLast(light) {
@@ -306,17 +366,23 @@ function describeLast(light) {
   return last.power ? "On" : "Unknown";
 }
 
+function syncFader(input) {
+  const min = Number(input.min), max = Number(input.max);
+  input.closest(".fader").style.setProperty("--pct", `${((Number(input.value) - min) / (max - min)) * 100}%`);
+  input.closest(".fader").querySelector("output").textContent = input.value + "%";
+}
+
 function buildLight(light) {
   const card = $("#light-template").content.firstElementChild.cloneNode(true);
   card.dataset.light = light.id;
   $("h3", card).textContent = light.name;
-  $(".segmented", card).setAttribute("aria-label", `${light.name} power`);
+  $(".rocker", card).setAttribute("aria-label", `${light.name} power`);
   for (const button of card.querySelectorAll("[data-power]")) {
     button.addEventListener("click", () => setPower(state.lights.get(light.id), button.dataset.power === "on"));
   }
   const slider = $("[data-cap=brightness] input", card);
   slider.setAttribute("aria-label", `${light.name} brightness`);
-  slider.addEventListener("input", () => { $("[data-cap=brightness] output", card).textContent = slider.value + "%"; });
+  slider.addEventListener("input", () => syncFader(slider));
   slider.addEventListener("change", () => setBrightness(state.lights.get(light.id), Number(slider.value)));
 
   const chips = $(".chips", card);
@@ -346,9 +412,9 @@ function buildLight(light) {
   for (const effect of state.caps.native_effects || []) select.add(new Option(effect.name, effect.id));
   select.value = "137";
   const speed = $("[data-role=speed]", card);
-  const speedOut = speed.closest("label").querySelector("output");
-  speedOut.textContent = speed.value;
-  speed.addEventListener("input", () => { speedOut.textContent = speed.value; });
+  speed.setAttribute("aria-label", `${light.name} effect speed`);
+  syncFader(speed);
+  speed.addEventListener("input", () => syncFader(speed));
   $("[data-role=start]", card).addEventListener("click", () => startEffect(state.lights.get(light.id), Number(select.value), Number(speed.value)));
   return card;
 }
@@ -364,43 +430,83 @@ function renderLight(id) {
   for (const section of card.querySelectorAll("[data-cap]")) section.hidden = !caps[section.dataset.cap];
   $(".meta", card).textContent = light.prefix + (light.restored ? " · restored" : "");
   const last = light.last_sent || {};
-  const on = last.power === true || (last.power === undefined && (last.rgb || last.native_effect !== undefined));
+  const effect = last.native_effect;
   const off = last.power === false;
+  const lit = !off && (last.power === true || Boolean(last.rgb) || effect !== undefined);
   for (const button of card.querySelectorAll("[data-power]")) {
-    button.setAttribute("aria-pressed", String(button.dataset.power === "on" ? Boolean(on) && !off : off));
+    button.setAttribute("aria-pressed", String(button.dataset.power === "on" ? lit : off));
   }
-  const swatch = $(".swatch", card);
-  swatch.classList.toggle("effect", !off && last.native_effect !== undefined);
-  swatch.classList.toggle("lit", Boolean(on) && !off);
-  const color = !off && last.rgb ? hex(last.rgb) : "";
-  swatch.style.setProperty("--swatch", color || "var(--panel-2)");
-  card.style.setProperty("--glow", color || (on && !off && last.native_effect !== undefined ? "#c99bff" : "transparent"));
-  for (const chip of card.querySelectorAll(".chip[data-rgb]")) chip.setAttribute("aria-pressed", String(chip.dataset.rgb === color));
-  if (caps.brightness && document.activeElement !== $("[data-cap=brightness] input", card)) {
-    const value = last.brightness || 100;
-    $("[data-cap=brightness] input", card).value = value;
-    $("[data-cap=brightness] output", card).textContent = value + "%";
+
+  // The lens and light pool show the last-sent light: color, brightness and effect motion.
+  const lens = $(".lens", card);
+  const color = lit ? (last.rgb ? hex(last.rgb) : EFFECT_COLORS[effect] || "#ff4d4d") : "";
+  const level = caps.brightness ? (last.brightness ?? 100) / 100 : 1;
+  const speed = last.speed ?? 35;
+  lens.classList.toggle("lit", lit);
+  lens.classList.toggle("breathing", lit && effect >= 132);
+  lens.classList.toggle("fading", lit && (effect === 130 || effect === 131));
+  for (const node of [lens, card]) {
+    node.style.setProperty("--c", color || "transparent");
+    node.style.setProperty("--b", level.toFixed(2));
   }
-  if (last.native_effect !== undefined) $(".effects select", card).value = String(last.native_effect);
-  $(".last", card).textContent = describeLast(light);
+  card.style.setProperty("--lit", lit ? "1" : "0");
+  lens.style.setProperty("--period", `${(1.2 + ((100 - speed) / 100) * 4.8) * (effect < 132 ? 2 : 1)}s`);
+
+  const chosen = !off && last.rgb ? hex(last.rgb) : "";
+  for (const chip of card.querySelectorAll(".chip[data-rgb]")) chip.setAttribute("aria-pressed", String(chip.dataset.rgb === chosen));
+  const slider = $("[data-cap=brightness] input", card);
+  if (caps.brightness && document.activeElement !== slider) {
+    slider.value = last.brightness || 100;
+    syncFader(slider);
+  }
+  if (effect !== undefined) $(".effects select", card).value = String(effect);
+  const footer = $(".last", card);
+  footer.replaceChildren(led(lit ? "ok" : off ? "" : "warn"));
+  const text = document.createElement("span");
+  text.className = "text";
+  text.textContent = describeLast(light);
+  footer.append(text);
 }
 
-function dotsFor(bodies) {
-  const dots = document.createElement("span");
-  dots.className = "dots";
-  dots.setAttribute("aria-hidden", "true");
-  for (const { type, body } of bodies.slice(0, 6)) {
-    const dot = document.createElement("i");
-    if (type === "native") dot.className = "effect";
-    else if (body.power === false) dot.className = "off";
-    else if (body.rgb) dot.style.setProperty("--dot", hex(body.rgb));
-    else dot.style.setProperty("--dot", "#e8e8e8");
-    dots.append(dot);
+function segmentsFor(actions) {
+  const strip = document.createElement("span");
+  strip.className = "strip";
+  strip.setAttribute("aria-hidden", "true");
+  for (const { type, body } of actions.slice(0, 8)) {
+    const segment = document.createElement("i");
+    if (type === "native") {
+      if (EFFECT_COLORS[body.effect]) segment.style.setProperty("--seg", EFFECT_COLORS[body.effect]);
+      else segment.className = "effect";
+    } else if (body.power === false) segment.className = "off";
+    else segment.style.setProperty("--seg", body.rgb ? hex(body.rgb) : "#e9ece6");
+    strip.append(segment);
   }
-  return dots;
+  return strip;
 }
 
-function row(title, detail, dots, actions) {
+function sceneTile(scene) {
+  const item = document.createElement("li");
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "scene";
+  const count = new Set(scene.actions.map((a) => a.light)).size;
+  button.setAttribute("aria-label", `Apply scene ${scene.name}, ${count} light${count === 1 ? "" : "s"}`);
+  const name = document.createElement("strong");
+  name.textContent = scene.name;
+  const foot = document.createElement("span");
+  foot.className = "apply";
+  const lights = document.createElement("span");
+  lights.textContent = `${count} light${count === 1 ? "" : "s"}`;
+  const apply = document.createElement("span");
+  apply.textContent = "Apply";
+  foot.append(lights, apply);
+  button.append(segmentsFor(scene.actions), name, foot);
+  button.addEventListener("click", () => send(`/scenes/${encodeURIComponent(scene.id)}/apply`, {}, `Scene ${scene.name}`, scene.actions.map((a) => a.light)));
+  item.append(button);
+  return item;
+}
+
+function row(title, detail, actions) {
   const item = document.createElement("li");
   item.className = "row";
   const name = document.createElement("div");
@@ -412,6 +518,8 @@ function row(title, detail, dots, actions) {
   name.append(strong, span);
   const buttons = document.createElement("div");
   buttons.className = "actions";
+  buttons.setAttribute("role", "group");
+  buttons.setAttribute("aria-label", `${title} power`);
   for (const [text, label, handler] of actions) {
     const button = document.createElement("button");
     button.type = "button";
@@ -421,39 +529,35 @@ function row(title, detail, dots, actions) {
     button.addEventListener("click", handler);
     buttons.append(button);
   }
-  item.append(...(dots ? [dots] : []), name, buttons);
+  item.append(name, buttons);
   return item;
 }
 
 function empty(list, text) {
   const item = document.createElement("li");
   item.className = "empty";
-  item.textContent = text;
+  const caption = document.createElement("span");
+  caption.textContent = text;
+  item.append(svgUse("ill-lamp", "ill"), caption);
   list.append(item);
 }
 
 function renderLibrary() {
   const scenes = $("#scenes");
-  scenes.replaceChildren();
-  for (const scene of state.scenes) {
-    const count = new Set(scene.actions.map((a) => a.light)).size;
-    scenes.append(row(scene.name, `${count} light${count === 1 ? "" : "s"}`, dotsFor(scene.actions.map((a) => ({ type: a.type, body: a.body }))), [
-      ["Apply", `Apply scene ${scene.name}`, () => send(`/scenes/${encodeURIComponent(scene.id)}/apply`, {}, `Scene ${scene.name}`, scene.actions.map((a) => a.light))],
-    ]));
-  }
-  if (!state.scenes.length) empty(scenes, "No scenes configured. Define them in the hub library file.");
+  scenes.replaceChildren(...state.scenes.map(sceneTile));
+  if (!state.scenes.length) empty(scenes, "No scenes yet. Add them to the hub library file.");
 
   const groups = $("#groups");
   groups.replaceChildren();
   for (const group of state.groups) {
     const names = group.members.map((id) => state.lights.get(id)?.name || id).join(", ");
     const path = `/groups/${encodeURIComponent(group.id)}/state`;
-    groups.append(row(group.name, names, null, [
+    groups.append(row(group.name, names, [
       ["On", `Turn ${group.name} on`, () => send(path, { power: true }, `${group.name} on`, group.members)],
       ["Off", `Turn ${group.name} off`, () => send(path, { power: false }, `${group.name} off`, group.members)],
     ]));
   }
-  if (!state.groups.length) empty(groups, "No groups configured.");
+  if (!state.groups.length) empty(groups, "No groups yet.");
 }
 
 function renderActivity() {
@@ -463,27 +567,38 @@ function renderActivity() {
   for (const op of ops) {
     const item = document.createElement("li");
     item.className = op.status;
-    const icon = document.createElement("span");
-    icon.className = "icon";
-    icon.textContent = op.status === "succeeded" ? "✓" : TERMINAL.has(op.status) ? "!" : "…";
-    icon.setAttribute("aria-label", op.status);
+    const done = TERMINAL.has(op.status);
+    const dot = done ? led(op.status === "succeeded" ? "ok" : "bad") : led("blink");
+    dot.removeAttribute("aria-hidden");
+    dot.setAttribute("role", "img");
+    dot.setAttribute("aria-label", op.status);
     const text = document.createElement("span");
+    text.className = "text";
     text.textContent = op.label || `${describeTarget(op)} updated`;
-    if (TERMINAL.has(op.status) && op.status !== "succeeded") text.textContent += ` (${op.error || op.status})`;
+    if (done && op.status !== "succeeded") text.textContent += ` (${op.error || op.status})`;
     const time = document.createElement("time");
     time.dateTime = op.at.toISOString();
     time.textContent = op.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    item.append(icon, text, time);
+    item.append(dot, text, time);
     list.append(item);
   }
   if (!ops.length) empty(list, "Commands from this page and other clients appear here.");
 }
 
+function updateCount() {
+  const lit = [...state.lights.values()].filter((l) => l.last_sent && l.last_sent.power !== false).length;
+  $("#lights-count").textContent = `${state.lights.size} · ${lit} on`;
+}
+
 function render() {
   renderStatus();
+  const grid = $("#lights");
+  for (const node of grid.querySelectorAll(".skeleton")) node.remove();
+  grid.removeAttribute("aria-busy");
   const known = new Set(state.lights.keys());
-  for (const card of document.querySelectorAll("[data-light]")) if (!known.has(card.dataset.light)) card.remove();
+  for (const card of grid.querySelectorAll("[data-light]")) if (!known.has(card.dataset.light)) card.remove();
   for (const id of state.lights.keys()) renderLight(id);
+  updateCount();
   renderLibrary();
   renderActivity();
 }
@@ -498,5 +613,5 @@ $("#signin-form").addEventListener("submit", (event) => {
 });
 $("#signout").addEventListener("click", () => signOut());
 const saved = readStore(sessionStorage, TOKEN_KEY) || readStore(localStorage, TOKEN_KEY);
-if (saved) connect(saved, readStore(localStorage, TOKEN_KEY) === saved);
+if (saved) connect(saved, readStore(localStorage, TOKEN_KEY) === saved, true);
 else showSignIn();

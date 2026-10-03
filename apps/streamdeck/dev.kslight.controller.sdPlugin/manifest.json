@@ -5,7 +5,7 @@
       "UUID": "dev.kslight.controller.power",
       "Name": "Power",
       "Tooltip": "Power for a chosen hub light or scene. Shared connection setup.",
-      "Icon": "imgs/power",
+      "Icon": "imgs/list/power",
       "Controllers": [
         "Keypad"
       ],
@@ -29,7 +29,7 @@
       "UUID": "dev.kslight.controller.color",
       "Name": "Set Color",
       "Tooltip": "Set Color for a chosen hub light or scene. Shared connection setup.",
-      "Icon": "imgs/color",
+      "Icon": "imgs/list/color",
       "Controllers": [
         "Keypad"
       ],
@@ -48,7 +48,7 @@
       "UUID": "dev.kslight.controller.effect",
       "Name": "Effect",
       "Tooltip": "Effect for a chosen hub light or scene. Shared connection setup.",
-      "Icon": "imgs/effect",
+      "Icon": "imgs/list/effect",
       "Controllers": [
         "Keypad"
       ],
@@ -67,7 +67,7 @@
       "UUID": "dev.kslight.controller.level",
       "Name": "Brightness",
       "Tooltip": "Brightness for a chosen hub light or scene. Shared connection setup.",
-      "Icon": "imgs/level",
+      "Icon": "imgs/list/level",
       "Controllers": [
         "Keypad"
       ],
@@ -86,7 +86,7 @@
       "UUID": "dev.kslight.controller.scene",
       "Name": "Scene",
       "Tooltip": "Scene for a chosen hub light or scene. Shared connection setup.",
-      "Icon": "imgs/scene",
+      "Icon": "imgs/list/scene",
       "Controllers": [
         "Keypad"
       ],
@@ -105,7 +105,7 @@
       "UUID": "dev.kslight.controller.run",
       "Name": "Run light action",
       "Tooltip": "Run a named KS Light hub action and show delivery feedback.",
-      "Icon": "imgs/light",
+      "Icon": "imgs/list/light",
       "Controllers": [
         "Keypad"
       ],
@@ -125,7 +125,7 @@
       "UUID": "dev.kslight.controller.dial",
       "Name": "Choose light action",
       "Tooltip": "Turn to choose an action; press to run it.",
-      "Icon": "imgs/light",
+      "Icon": "imgs/list/light",
       "Controllers": [
         "Encoder"
       ],
@@ -150,7 +150,7 @@
       "UUID": "dev.kslight.controller.brightness",
       "Name": "Choose brightness",
       "Tooltip": "Turn to choose brightness; press to apply a configured color or effect.",
-      "Icon": "imgs/light",
+      "Icon": "imgs/list/light",
       "Controllers": [
         "Encoder"
       ],

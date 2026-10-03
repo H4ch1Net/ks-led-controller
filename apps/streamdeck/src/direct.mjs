@@ -65,7 +65,8 @@ export class DirectController {
     if(local.kind==="power")s.onState=state=>key.setState(state.status==="online"&&state.powers?.[local.light]===true?1:0);
     await this.controller.ready(key,s);
     if(local.kind==="color"&&/^#[0-9a-f]{6}$/i.test(local.color||"")) {
-      const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144"><rect width="144" height="144" rx="24" fill="#1e2232"/><circle cx="72" cy="40" r="23" fill="${local.color}" stroke="#ffffff" stroke-width="3"/></svg>`;
+      // Same "lens" as the hub dashboard: the saved color seen through a lamp diffuser.
+      const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144"><defs><radialGradient id="l" cx="50%" cy="38%" r="60%"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset=".45" stop-color="#ffffff" stop-opacity="0"/></radialGradient></defs><rect width="144" height="144" fill="#111514"/><circle cx="72" cy="50" r="38" fill="${local.color}" fill-opacity=".14"/><circle cx="72" cy="50" r="28" fill="${local.color}"/><circle cx="72" cy="50" r="28" fill="url(#l)"/><circle cx="72" cy="50" r="28" fill="none" stroke="#000000" stroke-opacity=".25" stroke-width="2"/></svg>`;
       await key.setImage(`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`);
     }
   }
