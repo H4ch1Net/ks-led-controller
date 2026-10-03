@@ -17,10 +17,6 @@ ZIP entries have fixed ordering, timestamps and permissions. Text uses UTF-8 wit
 
 To review/update the inventory, compare `git ls-files --cached --others --exclude-standard` with the JSON list and add only intended public source files. Generated archives belong in ignored `dist/` or an external output directory. A list edit cannot bypass the private-path, size and linked-file checks. Files added through the normal Git working tree cannot be silently dropped from the archive.
 
-Source reproducibility is separate from application build reproducibility. This ZIP contains no current APK, Stream Deck installer, configured ESP32 binary or release signing key. Rebuild those candidates from a chosen source identity using `docs/v2/RELEASE_CHECKLIST.md`, record their hashes and validation, and complete hardware/signing gates before distribution.
+Source reproducibility is separate from application build reproducibility. This ZIP contains no current APK, Stream Deck installer, configured ESP32 binary or release signing key. Build those from a chosen source identity using [the release checklist](../docs/RELEASE_CHECKLIST.md).
 
 `android-toolchain.json` records the reviewed Gradle wrapper/distribution hashes and official-repository provenance for platform-specific dependency artifacts. `python -m ks_light.build_toolchain` checks these local pins before Gradle executes. Gradle's own verification metadata covers the resolved plugin/library artifacts. Review both files when intentionally changing toolchain versions.
-
-## GitHub handoff
-
-See [the release plan](../docs/v2/GITHUB_RELEASE_PLAN.md), [draft PR body](PR_DRAFT.md), and [draft release notes](RELEASE_NOTES_DRAFT.md). These are prepared text, not evidence of a published PR or release.

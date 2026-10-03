@@ -1,4 +1,4 @@
-# App screenshots
+# Screenshots
 
 `app-icon.svg` is the editable KS Light launcher artwork; `app-icon.png` is its README preview. Android includes matching legacy PNGs at five densities, adaptive layers for Android 8+, and a monochrome layer for Android 13+ themed icons. The lime bulb matches the default app accent on charcoal and replaces the Flutter template logo.
 
@@ -20,3 +20,7 @@ flutter --no-version-check test tool/capture_screenshots.dart --dart-define=KS_S
 ```
 
 Review the PNGs after regenerating. Never replace them with unreviewed phone screenshots containing notifications, device addresses, hub URLs or personal names. The harness uses in-memory settings and DemoBackend; it does not read or change phone data.
+
+## Hub dashboard
+
+`hub-dashboard.png` (1360 x 860 viewport, 1.5x scale) and `hub-dashboard-mobile.png` (390 x 844 viewport) are captured with Playwright and Chromium from `python -m ks_light.hub` in simulation mode, after applying the Evening scene and a Blue color to the ceiling demo light. No real lights or tokens appear.
