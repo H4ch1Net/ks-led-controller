@@ -872,8 +872,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           ],
                         ),
                         Text(
-                          '${entry.value.members.length} lights',
-                          style: const TextStyle(color: Color(0xffadb8ae)),
+                          '${entry.value.members.length} ${entry.value.members.length == 1 ? 'light' : 'lights'}',
+                          style: const TextStyle(color: textMuted),
                         ),
                         const SizedBox(height: 16),
                         Wrap(
@@ -954,43 +954,34 @@ class _LibraryScreenState extends State<LibraryScreen> {
                             ),
                           ],
                         ),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final target in entry.value.entries)
-                              Tooltip(
-                                message: name(target.key),
-                                child: Container(
-                                  width: 26,
-                                  height: 26,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white24),
-                                    color: !target.value.power
-                                        ? Theme.of(context).colorScheme.surface
-                                        : target.value.rgb == null
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Color.fromARGB(
-                                            255,
-                                            target.value.rgb![0],
-                                            target.value.rgb![1],
-                                            target.value.rgb![2],
-                                          ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
+                        const SizedBox(height: 10),
+                        SceneStrip([
+                          for (final target in entry.value.entries)
+                            StripSegment(
+                              // Name and state, so color is never the only signal.
+                              '${name(target.key)}: ${!target.value.power
+                                  ? 'off'
+                                  : target.value.rgb == null
+                                  ? 'on'
+                                  : '#${target.value.rgb!.map((v) => v.toRadixString(16).padLeft(2, '0')).join().toUpperCase()}'}',
+                              off: !target.value.power,
+                              color: target.value.rgb == null
+                                  ? null
+                                  : Color.fromARGB(
+                                      255,
+                                      target.value.rgb![0],
+                                      target.value.rgb![1],
+                                      target.value.rgb![2],
+                                    ),
+                            ),
+                        ]),
                         const SizedBox(height: 16),
                         Row(
                           children: [
                             Expanded(
                               child: Text(
-                                '${entry.value.length} lights',
-                                style: const TextStyle(
-                                  color: Color(0xffadb8ae),
-                                ),
+                                '${entry.value.length} ${entry.value.length == 1 ? 'light' : 'lights'}',
+                                style: const TextStyle(color: textMuted),
                               ),
                             ),
                             FilledButton.icon(

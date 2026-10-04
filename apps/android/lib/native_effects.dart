@@ -336,6 +336,41 @@ class _NativeEffectsScreenState extends State<NativeEffectsScreen>
             if (!status.startsWith('Choose') &&
                 !status.startsWith('Saved choices loaded'))
               StatusNotice(status, busy: busy),
+            // Preview lens: mirrors the chosen effect at the chosen speed. Not a lamp reading.
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  children: [
+                    Lens(
+                      size: 64,
+                      color: breathingColors[effect] ?? Colors.red,
+                      level: brightness / 100,
+                      motion: effect >= 0x84
+                          ? LensMotion.breathing
+                          : LensMotion.fading,
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            nativeEffects[effect] ?? 'Effect',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Preview. The lamp runs the effect itself.',
+                            style: TextStyle(fontSize: 12, color: textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SectionHeading('Animation'),
             Wrap(
               spacing: 8,

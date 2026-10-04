@@ -224,24 +224,15 @@ class SavedColors extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 18, bottom: 12),
-          child: Wrap(
-            spacing: 12,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                'Saved colors',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              TextButton.icon(
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Save current'),
-                onPressed: available && prefs.colors.length < 30
-                    ? () => add(context, prefs)
-                    : null,
-              ),
-            ],
+        SectionHeading(
+          'Saved colors',
+          icon: Icons.bookmark_outline,
+          trailing: TextButton.icon(
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Save current'),
+            onPressed: available && prefs.colors.length < 30
+                ? () => add(context, prefs)
+                : null,
           ),
         ),
         if (prefs.error != null) StatusNotice(prefs.error!),

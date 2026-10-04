@@ -104,7 +104,7 @@ class _LightColorPickerState extends State<LightColorPicker> {
                 height: height,
                 width: width,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(16),
                   child: Stack(
                     children: [
                       Positioned.fill(
@@ -159,7 +159,7 @@ class _LightColorPickerState extends State<LightColorPicker> {
       const SizedBox(height: 10),
       DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(14),
           gradient: const LinearGradient(
             colors: [
               Colors.red,
@@ -172,16 +172,21 @@ class _LightColorPickerState extends State<LightColorPicker> {
             ],
           ),
         ),
-        child: Slider(
-          key: const ValueKey('hue'),
-          value: hsv.hue,
-          min: 0,
-          max: 360,
-          activeColor: Colors.transparent,
-          inactiveColor: Colors.transparent,
-          thumbColor: Colors.white,
-          semanticFormatterCallback: (v) => 'Hue ${v.round()} degrees',
-          onChanged: widget.enabled ? (v) => choose(hsv.withHue(v)) : null,
+        child: SliderTheme(
+          // The hue bar is its own track: no fader ticks under the gradient.
+          data: SliderTheme.of(context)
+              .copyWith(trackShape: const RoundedRectSliderTrackShape()),
+          child: Slider(
+            key: const ValueKey('hue'),
+            value: hsv.hue,
+            min: 0,
+            max: 360,
+            activeColor: Colors.transparent,
+            inactiveColor: Colors.transparent,
+            thumbColor: Colors.white,
+            semanticFormatterCallback: (v) => 'Hue ${v.round()} degrees',
+            onChanged: widget.enabled ? (v) => choose(hsv.withHue(v)) : null,
+          ),
         ),
       ),
       const SizedBox(height: 12),

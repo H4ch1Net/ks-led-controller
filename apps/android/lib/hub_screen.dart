@@ -434,11 +434,7 @@ class _HubScreenState extends State<HubScreen> {
                 }).toList(),
               ),
             if (groups.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                'Hub groups',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              SectionHeading('Hub groups', icon: Icons.workspaces_outline),
               ...groups.map(
                 (group) => Card(
                   child: Padding(
@@ -488,11 +484,7 @@ class _HubScreenState extends State<HubScreen> {
               ),
             ],
             if (scenes.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                'Hub scenes',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              SectionHeading('Hub scenes', icon: Icons.auto_awesome_outlined),
               ...scenes.map(
                 (scene) => Card(
                   child: ListTile(

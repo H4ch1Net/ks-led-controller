@@ -1,1 +1,2 @@
-<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#408DA6FF"><item><shape android:shape="rectangle"><solid android:color="#2C3142"/><corners android:radius="16dp"/></shape></item></ripple>
+<!-- Raised control with lime press feedback. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#40D4EFA3"><item><shape android:shape="rectangle"><solid android:color="#202624"/><corners android:radius="12dp"/><stroke android:width="1dp" android:color="#21FFFFFF"/></shape></item></ripple>

@@ -47,9 +47,18 @@ Spacing follows a 4 px grid (4, 8, 12, 16, 20, 24, 32). Radii: 20 px panels, 12 
 
 Icons sit on a 24 px grid with a 1.75 stroke, round caps and joins, and no fills. The same geometry drives the dashboard sprite (`ks_light/web/index.html`), the Stream Deck key images (scaled 3x on a 144 px key) and the white Stream Deck action-list icons. The articulated desk lamp line drawing is used for sign-in and empty states.
 
+## Where it applies
+
+| Surface | Implementation |
+| --- | --- |
+| Android app | `apps/android/lib/app_style.dart`: theme tokens per accent, `Lens`, `Led`, `StatePill`, `SectionHeading`, `SceneStrip`, fader slider shapes and the lamp illustration. Home-screen widget and tile resources use the same graphite, hairline and lime values. |
+| Hub dashboard | `ks_light/web/` (CSS custom properties, inline icon sprite). |
+| Stream Deck | Key images and inspector styles in `apps/streamdeck/dev.kslight.controller.sdPlugin/`. |
+| Repository art | `docs/art/`. |
+
 ## Motion
 
-Controls respond in 120 ms with an ease-out curve. Light changes fade over 450 ms, like a lamp. Toasts rise 8 px. Effects animate only to mirror what the lamp is doing. `prefers-reduced-motion` stops all animation.
+Controls respond in 120 ms with an ease-out curve. Light changes fade over 450 ms, like a lamp. Toasts rise 8 px. On the dashboard, effect lenses animate only to mirror what the lamp is doing, and `prefers-reduced-motion` stops all animation. The Android app draws effects as still marks instead (rings for breathing, a hue sweep for fades), so it never runs an endless animation of its own.
 
 ## Accessibility
 

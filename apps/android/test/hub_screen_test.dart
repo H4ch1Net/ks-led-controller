@@ -20,8 +20,8 @@ void main() {
       );
       await tester.tap(find.text('Connect to hub'));
       await tester.pumpAndSettle();
-      expect(find.text('Hub groups'), findsOneWidget);
-      expect(find.text('Hub scenes'), findsOneWidget);
+      expect(find.text('HUB GROUPS'), findsOneWidget);
+      expect(find.text('HUB SCENES'), findsOneWidget);
       expect(hub.calls, isEmpty);
       expect(find.text('Hub color balance: R100%  G30%  B75%'), findsOneWidget);
       hub.gate = Completer<void>();

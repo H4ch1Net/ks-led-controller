@@ -183,7 +183,7 @@ void main() {
         find.byKey(const Key('apply-color')).hitTestable(),
         findsOneWidget,
       );
-      expect(find.text('Brightness'), findsOneWidget);
+      expect(find.text('BRIGHTNESS'), findsOneWidget);
       await tester.ensureVisible(find.byTooltip('Pink'));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Pink'));

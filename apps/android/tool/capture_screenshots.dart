@@ -25,16 +25,21 @@ void main() {
       );
     }
     await tester.runAsync(() async {
-      for (final entry in {
-        'Roboto': 'roboto-regular.ttf',
-        'MaterialIcons': 'materialicons-regular.otf',
-      }.entries) {
-        final loader = FontLoader(entry.key)
-          ..addFont(
-            File('$fontDir/${entry.value}')
-                .readAsBytes()
-                .then((bytes) => ByteData.sublistView(bytes)),
+      // Match file names case-insensitively; load every Roboto weight so
+      // semibold headings render as they do on Android.
+      final files = Directory(fontDir).listSync().whereType<File>().toList();
+      for (final (family, pattern) in [
+        ('Roboto', RegExp(r'^roboto-(regular|medium|bold)\.ttf$')),
+        ('MaterialIcons', RegExp(r'^materialicons-regular\.otf$')),
+      ]) {
+        final loader = FontLoader(family);
+        for (final file in files.where(
+          (f) => pattern.hasMatch(f.uri.pathSegments.last.toLowerCase()),
+        )) {
+          loader.addFont(
+            file.readAsBytes().then((bytes) => ByteData.sublistView(bytes)),
           );
+        }
         await loader.load();
       }
     });
@@ -161,7 +166,7 @@ void main() {
     await tester.tap(find.text('On'));
     await tester.pumpAndSettle();
     await capture('controls');
-    await tester.ensureVisible(find.text('Saved colors'));
+    await tester.ensureVisible(find.text('SAVED COLORS'));
     await tester.pumpAndSettle();
     await tester.drag(
       find.byType(SingleChildScrollView).first,
@@ -177,7 +182,7 @@ void main() {
         .onSelected!(true);
     await tester.pumpAndSettle();
     await capture('appearance');
-    Navigator.of(tester.element(find.text('Appearance'))).pop();
+    Navigator.of(tester.element(find.text('APPEARANCE'))).pop();
     await tester.pumpAndSettle();
     // Open the actual library route, populated with synthetic rooms and scenes.
     await tester.tap(find.text('Scenes'));

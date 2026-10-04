@@ -105,7 +105,7 @@ void main() {
     await tester.tap(find.text('Violet'));
     await tester.pumpAndSettle();
     expect(
-      Theme.of(tester.element(find.text('Saved colors'))).colorScheme.primary,
+      Theme.of(tester.element(find.text('SAVED COLORS'))).colorScheme.primary,
       AppAppearance.violet.accent,
     );
     final reopened = AppPreferences();

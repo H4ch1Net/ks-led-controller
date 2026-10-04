@@ -13,7 +13,7 @@ The screenshot harness loads Roboto and Material Icons from the pinned Flutter S
 - `scenes.png`: synthetic room and scenes.
 - `appearance.png`: Violet selected in Settings, with all five themes available.
 
-From `apps/android`, replace the two absolute directory placeholders for your machine:
+From `apps/android`, replace the two absolute directory placeholders for your machine. Font file names are matched case-insensitively, so this works on Linux, macOS and Windows:
 
 ```sh
 flutter --no-version-check test tool/capture_screenshots.dart --dart-define=KS_SCREENSHOT_FONT_DIR=/absolute/flutter/bin/cache/artifacts/material_fonts --dart-define=KS_SCREENSHOT_DIR=/absolute/ks-led-controller/docs/images

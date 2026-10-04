@@ -585,7 +585,7 @@ class _LightScreenState extends State<LightScreen> {
               padding: EdgeInsets.all(20),
               child: Text(
                 'Status reflects the last command sent. Changes from other controllers may not appear.',
-                style: TextStyle(color: Color(0xffadb8ae), fontSize: 13),
+                style: TextStyle(color: textMuted, fontSize: 13),
               ),
             ),
           ],
@@ -633,6 +633,23 @@ class _LightScreenState extends State<LightScreen> {
     ],
   );
 
+  /// Lens for a saved light: its last-sent color, dark when off or unknown.
+  Widget lightLens(Light light, double size, {List<int>? color, int? level}) {
+    final saved = config(light);
+    final rgb = color ?? saved.lastColor;
+    final power = powerStates[light.id];
+    final floor = light.profile['color_type'] == 'floor';
+    return Lens(
+      size: size,
+      color: rgb == null
+          ? textFaint
+          : Color.fromARGB(255, rgb[0], rgb[1], rgb[2]),
+      lit: power == true && rgb != null,
+      standby: power == null && rgb != null,
+      level: floor ? (level ?? saved.lastBrightness) / 255 : 1,
+    );
+  }
+
   Widget deviceCard(Light light) => Card(
     clipBehavior: Clip.antiAlias,
     child: InkWell(
@@ -641,20 +658,7 @@ class _LightScreenState extends State<LightScreen> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Container(
-              width: 54,
-              height: 62,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary
-                    .withValues(alpha: .1),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Icon(
-                Icons.lightbulb_outline,
-                size: 30,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
+            lightLens(light, 48),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -669,10 +673,7 @@ class _LightScreenState extends State<LightScreen> {
                     defaultLightId == light.id
                         ? 'Default light'
                         : 'Bluetooth light',
-                    style: const TextStyle(
-                      color: Color(0xffaab7ac),
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: textMuted, fontSize: 13),
                   ),
                 ],
               ),
@@ -691,7 +692,7 @@ class _LightScreenState extends State<LightScreen> {
                   : null,
               onPressed: busy ? null : () => setDefaultDevice(light),
             ),
-            const Icon(Icons.chevron_right, size: 20),
+            const Icon(Icons.chevron_right, size: 20, color: textFaint),
           ],
         ),
       ),
@@ -771,6 +772,7 @@ class _LightScreenState extends State<LightScreen> {
                   ),
                 ),
               ),
+            const Divider(height: 1),
             NavigationBar(
               selectedIndex: 0,
               onDestinationSelected: busy
@@ -833,10 +835,11 @@ class _LightScreenState extends State<LightScreen> {
                       StatePill(
                         demo ? 'Demo mode' : 'Bluetooth',
                         icon: demo ? Icons.science_outlined : Icons.bluetooth,
+                        tone: demo ? PillTone.warn : PillTone.ok,
                       ),
                       Text(
                         '${lights.length} saved',
-                        style: const TextStyle(color: Color(0xffaab7ac)),
+                        style: const TextStyle(color: textMuted),
                       ),
                     ],
                   ),
@@ -870,47 +873,51 @@ class _LightScreenState extends State<LightScreen> {
                       StatePill(
                         demo ? 'Demo mode' : 'Bluetooth',
                         icon: demo ? Icons.science_outlined : Icons.bluetooth,
+                        tone: demo ? PillTone.warn : PillTone.ok,
                       ),
                       if (defaultLightId == selected!.id)
                         const StatePill('Default', icon: Icons.star_rounded),
                     ],
                   ),
                   const SizedBox(height: 18),
+                  // Power panel: the lens previews the chosen light; a soft pool of
+                  // that color falls on the panel only while the light is on.
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(26),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color.lerp(
-                            Theme.of(context).colorScheme.surfaceContainer,
-                            preview,
-                            .22,
-                          )!,
-                          Theme.of(context).colorScheme.surfaceContainer,
-                        ],
-                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.surfaceContainer,
+                      border: Border.all(color: hairline),
+                      gradient: power == true && colorType != null
+                          ? RadialGradient(
+                              center: const Alignment(-1.1, -1.3),
+                              radius: 1.25,
+                              colors: [
+                                Color.lerp(
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainer,
+                                  preview,
+                                  colorType == 'floor'
+                                      ? .1 + .16 * brightness / 255
+                                      : .22,
+                                )!,
+                                Theme.of(context).colorScheme.surfaceContainer,
+                              ],
+                            )
+                          : null,
                     ),
                     child: Column(
                       children: [
                         Row(
                           children: [
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: preview.withValues(alpha: .15),
-                              ),
-                              child: Icon(
-                                Icons.lightbulb_outline,
-                                color: preview,
-                                size: 29,
-                              ),
+                            lightLens(
+                              selected!,
+                              56,
+                              color: colorType == null ? null : rgb,
+                              level: brightness,
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -921,14 +928,33 @@ class _LightScreenState extends State<LightScreen> {
                                         .textTheme
                                         .titleLarge,
                                   ),
-                                  Text(
-                                    power == null
-                                        ? 'Power: unknown'
-                                        : 'Last sent: ${power ? 'On' : 'Off'}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xffc6cdc7),
-                                    ),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    children: [
+                                      Led(
+                                        color: power == true
+                                            ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                            : power == false
+                                            ? textFaint
+                                            : warnColor,
+                                        glow: power != false,
+                                        size: 6,
+                                      ),
+                                      const SizedBox(width: 7),
+                                      Flexible(
+                                        child: Text(
+                                          power == null
+                                              ? 'Power: unknown'
+                                              : 'Last sent: ${power ? 'On' : 'Off'}',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: textMuted,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -978,10 +1004,13 @@ class _LightScreenState extends State<LightScreen> {
                   if (colorType == 'floor') ...[
                     SectionHeading(
                       'Brightness',
+                      icon: Icons.light_mode_outlined,
                       trailing: Text(
                         '${(brightness * 100 / 255).round()}%',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),
@@ -1009,19 +1038,29 @@ class _LightScreenState extends State<LightScreen> {
                       onSelected: (saved) => setState(() {
                         rgb = List.of(saved.rgb);
                         // Saved colors are shared; ceiling profiles only accept full brightness.
-                        brightness = colorType == 'floor' ? saved.brightness : 255;
+                        brightness = colorType == 'floor'
+                            ? saved.brightness
+                            : 255;
                         colorPending = true;
                         colorValid = true;
                       }),
                     ),
                     SectionHeading(
                       'Color',
-                      trailing: Text(
-                        colorPending ? 'Preview' : 'Sent',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xffaab7ac),
-                        ),
+                      icon: Icons.palette_outlined,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Led(color: colorPending ? warnColor : null, size: 6),
+                          const SizedBox(width: 6),
+                          Text(
+                            colorPending ? 'Preview' : 'Sent',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     LightColorPicker(
